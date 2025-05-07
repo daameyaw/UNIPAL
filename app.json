@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "UniPAL",
+    "slug": "UniPAL",
+    "version": "1.0.0",
+    "sdkVersion": "53.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/Splash-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "white"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Splash.png"
+      },
+      "package": "com.lhegacy.UniPAL"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-font"]
+  }
+}
