@@ -12,7 +12,12 @@ import LoginScreen from "./src/screens/LoginScreen";
 import CompleteSignUpScreen from "./src/screens/CompleteSignUpScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import AuthContextProvider, { AuthContext } from "./Store/AuthContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SplashScreen from "expo-splash-screen";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
 
@@ -76,23 +81,67 @@ function Navigation() {
   );
 }
 
+function Root() {
+  const [isTryingLogin, setIsTryingLogin] = useState(true);
+  const authCtx = useContext(AuthContext);
+
+  useEffect(() => {
+    async function fetchToken() {
+      try {
+        const storedToken = await AsyncStorage.getItem("token");
+
+        if (storedToken) {
+          authCtx.authenticate(storedToken);
+        }
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setIsTryingLogin(false);
+      }
+    }
+    fetchToken();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (!isTryingLogin) {
+      await SplashScreen.hideAsync();
+    }
+  }, [isTryingLogin]);
+
+  if (isTryingLogin) {
+    return null;
+  }
+
+  return (
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <Navigation />
+    </View>
+  );
+}
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
     "OpenSans-Regular": require("./assets/fonts/OpenSans-Regular.ttf"),
   });
 
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
   if (!fontsLoaded) {
-    return null; // or a spinner/loading screen
+    return null;
   }
 
   return (
-    <>
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <StatusBar style="dark" />
       <AuthContextProvider>
-        <Navigation />
+        <Root />
       </AuthContextProvider>
-    </>
+    </View>
   );
 }
 const styles = StyleSheet.create({
