@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -9,17 +9,16 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "../../firebase";
+import { AuthContext } from "../../Store/AuthContext";
 
 const HomeScreen = ({ navigation }) => {
+  const authCtx = useContext(AuthContext);
+
   const auth = getAuth(app);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      navigation.navigate("StartScreen");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+  const handleSignOut = () => {
+    authCtx.logout();
+    console.log("logged-out");
   };
 
   return (
