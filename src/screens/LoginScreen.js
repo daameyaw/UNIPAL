@@ -41,7 +41,7 @@ const LoginScreen = () => {
 
       authCtx.authenticate(token);
 
-      navigation.navigate("Home");
+      // navigation.navigate("Home");
     } catch (err) {
       Alert.alert(
         "Login Failed",
