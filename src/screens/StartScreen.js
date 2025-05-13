@@ -40,7 +40,7 @@ const StartScreen = () => {
           </Text>
         </View>
       </LinearGradient> */}
-      <Wave />
+      {/* <Wave /> */}
 
       {/* Tagline */}
       <View style={styles.textContainer}>
