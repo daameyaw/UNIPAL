@@ -18,7 +18,7 @@ const HomeScreen = ({ navigation }) => {
 
   const handleSignOut = () => {
     authCtx.logout();
-    console.log("logged-out");
+    // console.log("logged-out");
   };
 
   return (
