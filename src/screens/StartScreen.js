@@ -1,136 +1,149 @@
 import React from "react";
 import {
-  View,
-  Text,
   StyleSheet,
-  Image,
+  Text,
+  View,
+  ImageBackground,
   TouchableOpacity,
-  StatusBar,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import Wave from "../components/Wave";
-import { useNavigation } from "@react-navigation/native";
 
-const StartScreen = () => {
-  const navigation = useNavigation();
-
+export default function WelcomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
-
-      {/* Background Circle with Gradient */}
-      {/* <LinearGradient
-        colors={["#e0e0e0", "#f5f5f5"]}
-        style={styles.backgroundCircle}
-        start={{ x: 0.5, y: 0.5 }}
-        end={{ x: 0.5, y: 1 }}
-      >
-        //Logo
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Image
-              source={require("../../assets/icon.png")} // Replace with your actual logo path
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.appName}>
-            UNI
-            <Text style={styles.appNameBold}>PAL</Text>
-          </Text>
+    <ImageBackground
+      source={require("../../assets/Splash3.png")} // Updated image path
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.topHalf}>
+          <Text style={styles.appName}>UNIPAL</Text>
+          {/* <Text style={styles.tagline}>Academy</Text> */}
         </View>
-      </LinearGradient> */}
-      {/* <Wave /> */}
+        <View style={styles.bottomHalf}>
+          <View style={styles.textContainer}>
+            <Text style={styles.headerText}>One App.</Text>
+            <Text style={styles.headerText}> Every Answer</Text>
 
-      {/* Tagline */}
-      <View style={styles.textContainer}>
-        <Text style={styles.tagline}>
-          <Text className="font-heading" style={styles.italicText}></Text>
-        </Text>
-        <Text style={styles.tagline}>Navigate Uni Like a Pro.</Text>
+            <Text style={styles.subText}>
+              Find everything you need to thrive at university — academics,
+              directions, advice, and updates in one place.
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.getStartedButton}
+            onPress={() => navigation.navigate("OnBoarding")}
+          >
+            <Text style={styles.getStartedText}>Get Started</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.signInText}>
+              Already have an account?{" "}
+              <Text style={styles.signInLink}>Sign In</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      {/* Button */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("OnBoarding")}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Get Started Today</Text>
-      </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    alignItems: "center",
-    justifyContent: "space-around",
-    paddingVertical: 40,
-  },
-  backgroundCircle: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 40,
   },
-  logoContainer: {
-    alignItems: "center",
-  },
-  logoCircle: {
-    width: 100,
-    height: 100,
-    backgroundColor: "#ffffff",
-    borderRadius: 50,
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.18)",
+    paddingHorizontal: 32,
+    paddingVertical: 60,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 4, // subtle shadow for Android
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 }, // iOS shadow
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    width: "100%",
   },
-  logo: {
-    width: 50,
-    height: 50,
+  topHalf: {
+    flex: 1,
+    // backgroundColor: "yellow",
+
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  bottomHalf: {
+    flex: 1,
+    // backgroundColor: "green",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    paddingBottom: 90,
   },
   appName: {
-    fontSize: 28,
-    color: "#000",
-    fontWeight: "300",
-    marginTop: 10,
-  },
-  appNameBold: {
+    fontSize: 70,
     fontWeight: "bold",
-  },
-  textContainer: {
-    marginBottom: 80,
-    alignItems: "center",
+    color: "#fff",
+    marginTop: 0,
+    textAlign: "center",
+    fontFamily: "Roboto-Bold",
   },
   tagline: {
-    fontSize: 30,
+    fontSize: 26,
+    color: "#B6D8F5",
+    marginBottom: 32,
     fontWeight: "400",
-    color: "#000",
     textAlign: "center",
   },
-  italicText: {
-    // fontStyle: "italic",
+  textContainer: {
+    marginVertical: 24,
   },
-  button: {
-    backgroundColor: "#9B0E10",
-    paddingVertical: 25,
-    paddingHorizontal: 60,
-    borderRadius: 30,
-    marginBottom: 60,
-  },
-  buttonText: {
+  headerText: {
+    fontSize: 28,
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
+    lineHeight: 32,
+    textAlign: "center",
+    fontFamily: "Roboto-Bold",
+  },
+  subText: {
+    color: "#B6D8F5",
+    fontSize: 18,
+    marginTop: 18,
+    lineHeight: 22,
+    textAlign: "center",
+    fontWeight: "400",
+  },
+  getStartedButton: {
+    backgroundColor: "#C80D10",
+    paddingVertical: 18,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 24,
+    width: "80%",
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  getStartedText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+    fontFamily: "Roboto-Bold",
+  },
+  signInText: {
+    color: "#ccc",
+    textAlign: "center",
+    fontSize: 15,
+    marginTop: 0,
+  },
+  signInLink: {
+    color: "#4B0405",
+    fontWeight: "bold",
+    fontFamily: "Roboto-Bold",
   },
 });
-
-export default StartScreen;

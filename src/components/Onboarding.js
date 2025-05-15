@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import * as React from "react";
 import {
@@ -19,7 +20,7 @@ const { width, height } = Dimensions.get("screen");
 // inspiration: https://dribbble.com/shots/11164698-Onboarding-screens-animation
 // https://twitter.com/mironcatalin/status/1321180191935373312
 
-const bgs = ["#FFC5C6", "#DDBEFE", "#FF6466", "#B98EFF"];
+const bgs = ["#881416", "#ED1518", "#9B0E10", "#B98EFF"];
 const DATA = [
   {
     key: "3571572",
@@ -130,7 +131,7 @@ const Square = ({ scrollX }) => {
         backgroundColor: "#fff",
         borderRadius: 86,
         position: "absolute",
-        top: -height * 0.62,
+        top: -height * 0.69,
         left: -height * 0.35,
         transform: [
           {
@@ -150,6 +151,7 @@ export default function Onboarding() {
   const scrollX = React.useRef(new Animated.Value(0)).current;
   const flatListRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  // const navigation = useNavigation()
 
   const viewableItemsChanged = React.useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -167,7 +169,7 @@ export default function Onboarding() {
     } else {
       // Last screen - could navigate
       console.log("Finished Onboarding!");
-      navigation.navigate("SignupSigninScreen"); // Uncomment this if you have a 'Home' screen
+      navigation.navigate("SignUp"); // Uncomment this if you have a 'Home' screen
     }
   };
 
@@ -178,7 +180,9 @@ export default function Onboarding() {
   };
 
   const skipToEnd = () => {
-    flatListRef.current.scrollToIndex({ index: DATA.length - 1 });
+    navigation.navigate("SignUp"); // Uncomment this if you have a 'Home' screen
+
+    // flatListRef.current.scrollToIndex({ index: DATA.length - 1 });
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -189,19 +193,25 @@ export default function Onboarding() {
       <TouchableOpacity
         style={{
           position: "absolute",
-          top: 70,
-          right: 20,
-          backgroundColor: "#EAE7E7",
+          top: 50,
+          right: 30,
+          backgroundColor:
+            currentIndex === DATA.length - 1 ? "#ccc" : "#EAE7E7",
           paddingHorizontal: 15,
-          paddingVertical: 8,
-          borderRadius: 20,
+          paddingVertical: 15,
+          borderRadius: 13,
           zIndex: 10,
+          opacity: currentIndex === DATA.length - 1 ? 0.6 : 1,
         }}
         onPress={skipToEnd}
+        disabled={currentIndex === DATA.length - 1}
       >
         <Text
           className="shadow-md"
-          style={{ color: "#000", fontWeight: "bold" }}
+          style={{
+            color: currentIndex === DATA.length - 1 ? "#BDBDBD" : "#000",
+            fontWeight: "bold",
+          }}
         >
           Skip
         </Text>
@@ -241,7 +251,7 @@ export default function Onboarding() {
                     width: width / 1.4,
                     height: width / 1.4,
                     resizeMode: "contain",
-                    // marginBottom: 20,
+                    marginTop: 20,
                   }}
                 />
               </View>
@@ -292,27 +302,53 @@ export default function Onboarding() {
           onPress={scrollToPrev}
           disabled={currentIndex === 0}
           style={{
-            backgroundColor: currentIndex === 0 ? "gray" : "#fff",
-            padding: 20,
-            borderRadius: 30,
+            backgroundColor: currentIndex === 0 ? "#BDBDBD" : "#fff",
+            padding: 22,
+            paddingHorizontal: 18,
+            borderRadius: 20,
             width: 120,
             alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Text style={{ fontWeight: "bold", color: "#000" }}>Previous</Text>
+          <Text
+            style={{
+              color: currentIndex === 0 ? "#777" : "#000",
+              fontWeight: "bold",
+              color: "#000",
+              alignItems: "center",
+              fontSize: 16,
+            }}
+          >
+            Previous
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={scrollToNext}
+          onPress={async () => {
+            if (currentIndex === DATA.length - 1) {
+              try {
+                await AsyncStorage.setItem("@onboarding_complete", "true");
+                // goToHome(); // or navigate to your home screen
+                navigation.navigate("SignUp"); // Uncomment this if you have a 'Home' screen
+              } catch (e) {
+                console.error("Failed to save onboarding status:", e);
+              }
+            } else {
+              scrollToNext();
+            }
+          }}
           style={{
             backgroundColor: "#fff",
-            padding: 20,
-            borderRadius: 30,
+            padding: 22,
+            paddingHorizontal: 18,
+            borderRadius: 20,
             width: 120,
             alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Text style={{ fontWeight: "bold", color: "#000" }}>
+          <Text style={{ fontWeight: "bold", color: "#000", fontSize: 16 }}>
             {currentIndex === DATA.length - 1 ? "Done" : "Next"}
           </Text>
         </TouchableOpacity>
