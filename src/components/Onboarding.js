@@ -20,7 +20,7 @@ const { width, height } = Dimensions.get("screen");
 // inspiration: https://dribbble.com/shots/11164698-Onboarding-screens-animation
 // https://twitter.com/mironcatalin/status/1321180191935373312
 
-const bgs = ["#881416", "#ED1518", "#9B0E10", "#B98EFF"];
+const bgs = ["#ED1518", "#9B0E10", "#881416", "#B98EFF"];
 const DATA = [
   {
     key: "3571572",
@@ -53,7 +53,15 @@ const DATA = [
 
 const Indicator = ({ scrollX }) => {
   return (
-    <View style={{ position: "absolute", bottom: 60, flexDirection: "row" }}>
+    <View
+      style={{
+        // position: "absolute",
+        bottom: 60,
+        // paddingHorizontal: 20,
+        flexDirection: "row",
+        marginHorizontal: 10,
+      }}
+    >
       {DATA.map((_, i) => {
         const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
         const scale = scrollX.interpolate({
@@ -74,6 +82,7 @@ const Indicator = ({ scrollX }) => {
             style={{
               height: 10,
               width: 10,
+              // paddingHorizontal: 10,
               borderRadius: 5,
               backgroundColor: "#fff",
               margin: 10,
@@ -226,7 +235,7 @@ export default function Onboarding() {
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
           { useNativeDriver: false }
         )}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 200 }}
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         renderItem={({ item }) => {
@@ -236,7 +245,7 @@ export default function Onboarding() {
                 width,
                 alignItems: "center",
                 padding: 20,
-                paddingTop: 45,
+                paddingTop: 20,
               }}
             >
               <View
@@ -273,6 +282,7 @@ export default function Onboarding() {
                     fontWeight: "300",
                     fontSize: 18,
                     textAlign: "left",
+                    // marginBottom: 45,
                   }}
                   className="font-body "
                 >
@@ -292,10 +302,11 @@ export default function Onboarding() {
         style={{
           flexDirection: "row",
           position: "absolute",
-          bottom: 140,
+          bottom: 90,
           width: "100%",
           justifyContent: "space-between",
           paddingHorizontal: 50,
+          marginTop: 10,
         }}
       >
         <TouchableOpacity
