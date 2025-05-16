@@ -52,6 +52,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+
   const auth = getAuth();
 
   const navigation = useNavigation();
@@ -229,7 +230,7 @@ export default function SignUp() {
                 { text: "Cancel", style: "cancel" },
                 {
                   text: "Log In",
-                  onPress: () => navigation.navigate("LoginScreen"),
+                  onPress: () => navigation.navigate("Login"),
                 },
               ]
             );
@@ -274,7 +275,11 @@ export default function SignUp() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Background header */}
           <ImageBackground
             source={require("../../assets/Splash3.png")} // Updated image path
@@ -340,7 +345,7 @@ export default function SignUp() {
                     <Ionicons
                       name={showPassword ? "eye" : "eye-off"}
                       size={22}
-                      color="gray"
+                      color="#9B0E10"
                     />
                   </TouchableOpacity>
                 </View>
@@ -364,7 +369,7 @@ export default function SignUp() {
                     <Ionicons
                       name={showConfirmPassword ? "eye" : "eye-off"}
                       size={24}
-                      color="gray"
+                      color="#9B0E10"
                     />
                   </TouchableOpacity>
                 </View>
@@ -441,7 +446,7 @@ export default function SignUp() {
                   <LinearGradient
                     colors={
                       isFormValid && !loading
-                        ? ["#FF3437", "#ED1518"]
+                        ? ["#9B0E10", "#C80D10"]
                         : ["#cccccc", "#aaaaaa"]
                     }
                     start={{ x: 0, y: 0 }}
@@ -480,6 +485,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     // padding: 20,
     // paddingTop: 50,
+    // paddingBottom: 20,
   },
   buttonDisabledWrapper: {
     opacity: 0.6, // Makes the gradient appear dim when loading
@@ -536,7 +542,7 @@ const styles = StyleSheet.create({
     // position: "absolute",
     bottom: 0,
     width: "100%",
-    height: height * 0.7,
+    height: height * 0.78,
     backgroundColor: "#fff",
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
@@ -631,7 +637,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 15,
     fontSize: 14,
-    color: "#C80D10",
+    color: "#9B0E10",
   },
   loginLink: {
     fontWeight: "bold",

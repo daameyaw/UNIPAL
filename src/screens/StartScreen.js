@@ -21,8 +21,10 @@ export default function WelcomeScreen({ navigation }) {
         </View>
         <View style={styles.bottomHalf}>
           <View style={styles.textContainer}>
-            <Text style={styles.headerText}>One App.</Text>
-            <Text style={styles.headerText}> Every Answer</Text>
+            <View style={styles.mainText}>
+              <Text style={styles.headerText}>One App</Text>
+              <Text style={styles.headerText}> Every Answer</Text>
+            </View>
 
             <Text style={styles.subText}>
               Find everything you need to thrive at university — academics,
@@ -55,6 +57,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  mainText: {
+    // marginBottom: 10,
+  },
+  // contain: {
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  // },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.18)",
@@ -74,32 +83,37 @@ const styles = StyleSheet.create({
   },
   bottomHalf: {
     flex: 1,
+    flexDirection: "column",
+    // justifyContent: "space-evenly",
     // backgroundColor: "green",
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    paddingBottom: 90,
+    gap: 20,
+    // paddingBottom: 90,
   },
   appName: {
     fontSize: 70,
     fontWeight: "bold",
     color: "#fff",
-    marginTop: 0,
+    // marginBottom: 10,
     textAlign: "center",
     fontFamily: "Roboto-Bold",
   },
   tagline: {
     fontSize: 26,
     color: "#B6D8F5",
-    marginBottom: 32,
+    // marginBottom: 32,
     fontWeight: "400",
     textAlign: "center",
   },
   textContainer: {
-    marginVertical: 24,
+    flexDirection: "column",
+    gap: 20,
+    // marginVertical: 24,
   },
   headerText: {
-    fontSize: 28,
+    fontSize: 32,
     color: "#fff",
     fontWeight: "700",
     lineHeight: 32,
@@ -107,9 +121,9 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Bold",
   },
   subText: {
-    color: "#B6D8F5",
+    color: "#fff",
     fontSize: 18,
-    marginTop: 18,
+    // marginTop: 18,
     lineHeight: 22,
     textAlign: "center",
     fontWeight: "400",
@@ -119,7 +133,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: "center",
-    marginBottom: 24,
+    // marginBottom: 24,
     width: "80%",
     alignSelf: "center",
     shadowColor: "#000",
@@ -142,7 +156,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   signInLink: {
-    color: "#4B0405",
+    color: "#fff",
     fontWeight: "bold",
     fontFamily: "Roboto-Bold",
   },
