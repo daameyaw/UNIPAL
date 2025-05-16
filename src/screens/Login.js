@@ -132,7 +132,11 @@ export default function Login() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Background header */}
           <ImageBackground
             source={require("../../assets/Splash3.png")} // Updated image path
@@ -195,7 +199,7 @@ export default function Login() {
                       <Ionicons
                         name={showPassword ? "eye" : "eye-off"}
                         size={22}
-                        color="gray"
+                        color="#9B0E10"
                       />
                     </TouchableOpacity>
                   </View>
@@ -212,7 +216,7 @@ export default function Login() {
                     <LinearGradient
                       colors={
                         isFormValid && !loading
-                          ? ["#FF3437", "#ED1518"]
+                          ? ["#9B0E10", "#C80D10"]
                           : ["#cccccc", "#aaaaaa"]
                       }
                       start={{ x: 0, y: 0 }}
@@ -415,7 +419,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 15,
     fontSize: 14,
-    color: "#C80D10",
+    color: "#9B0E10",
   },
   loginLink: {
     fontWeight: "bold",
