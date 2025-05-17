@@ -302,11 +302,11 @@ export default function Onboarding() {
         style={{
           flexDirection: "row",
           position: "absolute",
-          bottom: 90,
+          bottom: 120,
           width: "100%",
           justifyContent: "space-between",
           paddingHorizontal: 50,
-          marginTop: 10,
+          // marginTop: 10,
         }}
       >
         <TouchableOpacity

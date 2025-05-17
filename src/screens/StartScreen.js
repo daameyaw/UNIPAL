@@ -6,6 +6,7 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
+import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 
 export default function WelcomeScreen({ navigation }) {
   return (
@@ -58,25 +59,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   mainText: {
-    // marginBottom: 10,
+    // No direct size, so leave as is for now
   },
-  // contain: {
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  // },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.18)",
-    paddingHorizontal: 32,
-    paddingVertical: 60,
+    paddingHorizontal: scale(32),
+    paddingVertical: verticalScale(60),
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
   },
   topHalf: {
     flex: 1,
-    // backgroundColor: "yellow",
-
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
@@ -84,47 +79,40 @@ const styles = StyleSheet.create({
   bottomHalf: {
     flex: 1,
     flexDirection: "column",
-    // justifyContent: "space-evenly",
-    // backgroundColor: "green",
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    gap: 20,
-    // paddingBottom: 90,
+    gap: verticalScale(20),
   },
   appName: {
-    fontSize: 70,
+    fontSize: moderateScale(50),
     fontWeight: "bold",
     color: "#fff",
-    // marginBottom: 10,
     textAlign: "center",
     fontFamily: "Roboto-Bold",
   },
   tagline: {
-    fontSize: 26,
+    fontSize: moderateScale(30),
     color: "#B6D8F5",
-    // marginBottom: 32,
     fontWeight: "400",
     textAlign: "center",
   },
   textContainer: {
     flexDirection: "column",
-    gap: 20,
-    // marginVertical: 24,
+    gap: verticalScale(20),
   },
   headerText: {
-    fontSize: 32,
+    fontSize: moderateScale(24),
     color: "#fff",
     fontWeight: "700",
-    lineHeight: 32,
+    lineHeight: verticalScale(32),
     textAlign: "center",
     fontFamily: "Roboto-Bold",
   },
   subText: {
     color: "#fff",
-    fontSize: 18,
-    // marginTop: 18,
-    lineHeight: 22,
+    fontSize: moderateScale(16),
+    lineHeight: verticalScale(22),
     textAlign: "center",
     fontWeight: "400",
   },
@@ -133,7 +121,6 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: "center",
-    // marginBottom: 24,
     width: "80%",
     alignSelf: "center",
     shadowColor: "#000",
@@ -144,16 +131,16 @@ const styles = StyleSheet.create({
   },
   getStartedText: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: "bold",
-    letterSpacing: 0.5,
+    letterSpacing: scale(0.5),
     fontFamily: "Roboto-Bold",
   },
   signInText: {
     color: "#ccc",
     textAlign: "center",
-    fontSize: 15,
-    marginTop: 0,
+    fontSize: moderateScale(14),
+    marginTop: verticalScale(0),
   },
   signInLink: {
     color: "#fff",
