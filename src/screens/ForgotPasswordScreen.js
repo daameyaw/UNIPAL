@@ -84,41 +84,45 @@ export default function ForgotPasswordScreen() {
         </TouchableOpacity>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.header}>Forget Password</Text>
-          <Text style={styles.subText}>
-            Enter your email account to reset your UniPAL account password
-          </Text>
+          <View style={styles.Viewcontainer}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.header}>Forget Password</Text>
+              <Text style={styles.subText}>
+                Enter your email account to reset your UniPAL account password
+              </Text>
+            </View>
 
-          <Image
-            source={require("../../assets/forgot.png")}
-            style={styles.image}
-            resizeMode="contain"
-          />
+            <Image
+              source={require("../../assets/forgot.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              (!isEmailValid || loading) && styles.buttonDisabled,
-            ]}
-            onPress={handlePasswordReset}
-            disabled={!isEmailValid || loading} // Disable when invalid or loading
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Reset</Text>
-            )}
-          </TouchableOpacity>
-          {message !== "" && <Text style={styles.success}>{message}</Text>}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (!isEmailValid || loading) && styles.buttonDisabled,
+              ]}
+              onPress={handlePasswordReset}
+              disabled={!isEmailValid || loading} // Disable when invalid or loading
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Reset</Text>
+              )}
+            </TouchableOpacity>
+            {message !== "" && <Text style={styles.success}>{message}</Text>}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -130,7 +134,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff", // or your desired background
-    paddingTop: 120,
+    // paddingTop: 120,
+  },
+  Viewcontainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    flexDirection: "column",
+    gap: 30,
+    // backgroundColor: "green",
+  },
+  titleContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    gap: 10,
+    // marginBottom: 20,
   },
 
   safeArea: {
@@ -138,6 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   scrollContainer: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
@@ -156,18 +176,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#8B0000",
     fontWeight: "bold",
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   subText: {
     fontSize: 14,
     color: "#333",
     textAlign: "center",
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   image: {
     width: 350,
     height: 300,
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   input: {
     width: "100%",
@@ -176,7 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     // paddingHorizontal: 24,
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   button: {
     backgroundColor: "#8B0000",
