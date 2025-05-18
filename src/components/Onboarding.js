@@ -15,6 +15,15 @@ import {
 } from "react-native";
 // import { TouchableOpacity } from "react-native-gesture-handler";
 const { width, height } = Dimensions.get("screen");
+// const width = scale(Dimensions.get("window").width);
+// const height = verticalScale(Dimensions.get("window").height);
+
+import {
+  scale,
+  verticalScale,
+  moderateScale,
+  moderateVerticalScale,
+} from "react-native-size-matters";
 
 // https://www.flaticon.com/packs/retro-wave
 // inspiration: https://dribbble.com/shots/11164698-Onboarding-screens-animation
@@ -206,9 +215,9 @@ export default function Onboarding() {
           right: 30,
           backgroundColor:
             currentIndex === DATA.length - 1 ? "#ccc" : "#EAE7E7",
-          paddingHorizontal: 15,
-          paddingVertical: 15,
-          borderRadius: 13,
+          paddingHorizontal: scale(15),
+          paddingVertical: verticalScale(15),
+          borderRadius: scale(13),
           zIndex: 10,
           opacity: currentIndex === DATA.length - 1 ? 0.6 : 1,
         }}
@@ -257,10 +266,10 @@ export default function Onboarding() {
                 <Image
                   source={item.image}
                   style={{
-                    width: width / 1.4,
-                    height: width / 1.4,
+                    width: scale(240), // or scale(width / 1.4),
+                    height: scale(240),
                     resizeMode: "contain",
-                    marginTop: 20,
+                    marginTop: verticalScale(20),
                   }}
                 />
               </View>
@@ -269,8 +278,8 @@ export default function Onboarding() {
                   style={{
                     color: "#fff",
                     fontWeight: "800",
-                    fontSize: 32,
-                    marginBottom: 10,
+                    fontSize: moderateScale(18, 0.8),
+                    marginBottom: verticalScale(10),
                   }}
                   className="font-heading"
                 >
@@ -280,7 +289,7 @@ export default function Onboarding() {
                   style={{
                     color: "#fff",
                     fontWeight: "300",
-                    fontSize: 18,
+                    fontSize: moderateScale(15, 0.8),
                     textAlign: "left",
                     // marginBottom: 45,
                   }}
@@ -302,11 +311,11 @@ export default function Onboarding() {
         style={{
           flexDirection: "row",
           position: "absolute",
-          bottom: 90,
+          bottom: 120,
           width: "100%",
           justifyContent: "space-between",
           paddingHorizontal: 50,
-          marginTop: 10,
+          // marginTop: 10,
         }}
       >
         <TouchableOpacity
@@ -314,8 +323,8 @@ export default function Onboarding() {
           disabled={currentIndex === 0}
           style={{
             backgroundColor: currentIndex === 0 ? "#BDBDBD" : "#fff",
-            padding: 22,
-            paddingHorizontal: 18,
+            paddingVertical: moderateVerticalScale(15),
+            paddingHorizontal: scale(16),
             borderRadius: 20,
             width: 120,
             alignItems: "center",
@@ -351,8 +360,8 @@ export default function Onboarding() {
           }}
           style={{
             backgroundColor: "#fff",
-            padding: 22,
-            paddingHorizontal: 18,
+            paddingVertical: scale(15),
+            paddingHorizontal: scale(16),
             borderRadius: 20,
             width: 120,
             alignItems: "center",
