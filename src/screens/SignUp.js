@@ -189,7 +189,7 @@ export default function SignUp() {
           );
 
           const token = await userCredential.user.getIdToken();
-          console.log(token);
+          // console.log(token);
 
           authCtx.authenticate(token);
 
@@ -217,7 +217,7 @@ export default function SignUp() {
           }
 
           // Navigate to home screen or wherever appropriate
-          Alert.alert("Success", "Your account has been created successfully!");
+          // Alert.alert("Success", "Your account has been created successfully!");
           // navigation.navigate("Home");
         } catch (error) {
           setError(error.message);
@@ -302,8 +302,7 @@ export default function SignUp() {
               <View style={styles.bottomSheet}>
                 <Text style={styles.title}>Sign up</Text>
                 <Text style={styles.description}>
-                  Complete the registration with the required information. By
-                  registering, you can enroll in the course of your choice.
+                  Complete the registration with the required information.
                 </Text>
                 <TextInput
                   style={styles.input}
