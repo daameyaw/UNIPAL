@@ -20,6 +20,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
 import { AuthContext } from "../../Store/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
+import BackButton from "../components/BackButton";
 
 const { height } = Dimensions.get("window");
 
@@ -147,17 +148,13 @@ export default function Login() {
               <View style={styles.overlay}>
                 <Text style={styles.logo}>UNIPAL</Text>
               </View>
-
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={styles.backButton}
-              >
-                <Ionicons name="chevron-back" size={28} color="white" />
-              </TouchableOpacity>
-
+              <BackButton color="white" />
               {/* Bottom Sheet */}
               <View style={styles.bottomSheet}>
-                <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                >
                   <Text style={styles.title}>Sign in</Text>
                   <Text style={styles.description}>
                     with the same email address and password you used to open
@@ -296,12 +293,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 40,
+    top: Platform.OS === "ios" ? 50 : 30,
     left: 20,
     zIndex: 20, // Ensure it's on top of everything
-    padding: 12,
+    padding: 6,
     backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
+    borderRadius: 12,
   },
   logo: {
     paddingTop: Platform.OS === "ios" ? 150 : 120, // Add padding for safe area
@@ -339,7 +336,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
@@ -352,9 +349,9 @@ const styles = StyleSheet.create({
     // width: "50%",
     textAlign: "center",
     color: "#666",
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 20,
-    paddingHorizontal: 50,
+    paddingHorizontal: 10,
   },
   input: {
     borderWidth: 1,
