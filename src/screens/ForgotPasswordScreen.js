@@ -11,12 +11,18 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase"; // Adjust path if needed
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import BackButton from "../components/BackButton";
+import {
+  moderateScale,
+  moderateVerticalScale,
+} from "react-native-size-matters";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -72,15 +78,16 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          style={[styles.backButton]}
         >
-          <Ionicons name="chevron-back" size={28} color="#9B0E10" />
+          <Ionicons name="chevron-back" size={20} color="#9B0E10" />
         </TouchableOpacity>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -128,28 +135,30 @@ export default function ForgotPasswordScreen() {
     </SafeAreaView>
   );
 }
+// Replace with the actual import path for your scaling functions
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff", // or your desired background
-    // paddingTop: 120,
+    backgroundColor: "#fff",
+    // paddingTop: moderateVerticalScale(120),
   },
   Viewcontainer: {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
     flexDirection: "column",
-    gap: 30,
+    gap: moderateVerticalScale(30),
     // backgroundColor: "green",
   },
   titleContainer: {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    gap: 10,
-    // marginBottom: 20,
+    gap: moderateVerticalScale(10),
+    // marginBottom: moderateVerticalScale(20),
   },
 
   safeArea: {
@@ -160,66 +169,71 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: moderateScale(20),
+    paddingVertical: moderateVerticalScale(10),
   },
   backButton: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 15,
-    left: 20,
-    zIndex: 20, // Ensure it's on top of everything
-    padding: 12,
+    top:
+      Platform.OS === "ios"
+        ? moderateVerticalScale(20)
+        : moderateVerticalScale(10),
+    left: moderateScale(20),
+    zIndex: 20,
+    padding: moderateScale(10),
     backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
+    borderRadius: moderateScale(12),
   },
 
   header: {
-    fontSize: 24,
+    fontSize: moderateScale(20),
     color: "#8B0000",
     fontWeight: "bold",
-    // marginBottom: 10,
+    // marginBottom: moderateVerticalScale(10),
   },
   subText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: "#333",
     textAlign: "center",
-    // marginBottom: 20,
+    paddingHorizontal: moderateScale(10),
+    // marginBottom: moderateVerticalScale(20),
   },
   image: {
-    width: 350,
-    height: 300,
-    // marginBottom: 20,
+    width: moderateScale(250),
+    height: moderateVerticalScale(300),
+    // marginBottom: moderateVerticalScale(20),
   },
   input: {
-    width: "100%",
-    borderColor: "#ccc",
+    width: "90%",
+    borderColor: "#9B0E10",
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 16,
-    // paddingHorizontal: 24,
-    // marginBottom: 20,
+    borderRadius: moderateScale(10),
+    padding: moderateScale(12),
+    // paddingHorizontal: moderateScale(24),
+    // marginBottom: moderateVerticalScale(20),
   },
   button: {
     backgroundColor: "#8B0000",
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    width: "100%",
+    paddingVertical: moderateVerticalScale(12),
+    paddingHorizontal: moderateScale(32),
+    borderRadius: moderateScale(12),
+    width: "90%",
     alignItems: "center",
-    marginTop: 25,
+    marginTop: moderateVerticalScale(25),
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: moderateVerticalScale(2) },
     shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowRadius: moderateScale(4),
     elevation: 2,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: "600",
   },
   success: {
     color: "green",
-    marginTop: 20,
+    marginTop: moderateVerticalScale(20),
     textAlign: "center",
   },
   buttonDisabled: {
