@@ -15,6 +15,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
+  Keyboard,
 } from "react-native";
 import { app, auth, db } from "../../firebase";
 import {
@@ -26,6 +27,7 @@ import { doc, setDoc, getFirestore } from "firebase/firestore";
 import { AuthContext } from "../../Store/AuthContext";
 import { Picker } from "@react-native-picker/picker";
 import { LinearGradient } from "expo-linear-gradient";
+import BackButton from "../components/BackButton";
 
 const { height } = Dimensions.get("window");
 
@@ -52,6 +54,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   const auth = getAuth();
 
@@ -165,6 +168,33 @@ export default function SignUp() {
     setSelectedCollege(""); // Reset college when university changes
   };
 
+  useEffect(() => {
+    // For iOS devices
+    const keyboardDidShowListener = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => {
+        setIsKeyboardOpen(true);
+      }
+    );
+
+    // For Android devices
+    const keyboardDidHideListener = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => {
+        setIsKeyboardOpen(false);
+      }
+    );
+
+    // Clean up listeners when component unmounts
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  // Now you can use the isKeyboardOpen state variable anywhere in your component
+  console.log("Is keyboard open?", isKeyboardOpen);
+
   const withTimeout = (promise, timeout = 30000) => {
     return Promise.race([
       promise,
@@ -175,6 +205,7 @@ export default function SignUp() {
       ),
     ]);
   };
+
   const handleSubmit = async () => {
     if (isFormValid) {
       // For applying students, college is optional
@@ -288,184 +319,198 @@ export default function SignUp() {
           >
             <View style={styles.wrap}>
               <View style={styles.overlay}>
-                <Text style={styles.logo}>UNIPAL</Text>
+                <Text
+                  style={[styles.logo, { opacity: isKeyboardOpen ? 0.3 : 1 }]}
+                >
+                  UNIPAL
+                </Text>
               </View>
 
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={styles.backButton}
-              >
-                <Ionicons name="chevron-back" size={28} color="white" />
-              </TouchableOpacity>
-
+              <BackButton color="white" />
               {/* Bottom Sheet */}
               <View style={styles.bottomSheet}>
-                <Text style={styles.title}>Sign up</Text>
-                <Text style={styles.description}>
-                  Complete the registration with the required information.
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Full Name"
-                  placeholderTextColor="#777"
-                  value={fullName}
-                  onChangeText={setFullName}
-                />
-                <TextInput
-                  style={[styles.input, emailError ? styles.inputError : null]}
-                  placeholder="Enter your email"
-                  value={email}
-                  onChangeText={handleEmailChange}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  placeholderTextColor="#777"
-                />
-                {emailError ? (
-                  <Text style={styles.errorText}>{emailError}</Text>
-                ) : null}
-                <View
-                  style={[
-                    styles.passwordContainer,
-                    passwordError ? styles.inputError : null,
-                  ]}
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 20 }}
                 >
+                  <Text style={styles.title}>Sign up</Text>
+                  <Text style={styles.description}>
+                    Complete the registration with the required information.
+                  </Text>
                   <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChangeText={handlePasswordChange}
-                    secureTextEntry={!showPassword}
+                    style={styles.input}
+                    placeholder="Full Name"
+                    placeholderTextColor="#777"
+                    value={fullName}
+                    onChangeText={setFullName}
+                  />
+                  <TextInput
+                    style={[
+                      styles.input,
+                      emailError ? styles.inputError : null,
+                    ]}
+                    placeholder="Enter your email"
+                    value={email}
+                    onChangeText={handleEmailChange}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
                     placeholderTextColor="#777"
                   />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    style={styles.eyeIcon}
+                  {emailError ? (
+                    <Text style={styles.errorText}>{emailError}</Text>
+                  ) : null}
+                  <View
+                    style={[
+                      styles.passwordContainer,
+                      passwordError ? styles.inputError : null,
+                    ]}
                   >
-                    <Ionicons
-                      name={showPassword ? "eye" : "eye-off"}
-                      size={22}
-                      color="#9B0E10"
+                    <TextInput
+                      style={styles.passwordInput}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChangeText={handlePasswordChange}
+                      secureTextEntry={!showPassword}
+                      placeholderTextColor="#777"
                     />
-                  </TouchableOpacity>
-                </View>
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      style={styles.eyeIcon}
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye" : "eye-off"}
+                        size={22}
+                        color="#9B0E10"
+                      />
+                    </TouchableOpacity>
+                  </View>
 
-                <View
-                  style={[
-                    styles.passwordContainer,
-                    passwordError ? styles.inputError : null,
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChangeText={handleConfirmPasswordChange}
-                    secureTextEntry={!showConfirmPassword}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  <View
+                    style={[
+                      styles.passwordContainer,
+                      passwordError ? styles.inputError : null,
+                    ]}
                   >
-                    <Ionicons
-                      name={showConfirmPassword ? "eye" : "eye-off"}
-                      size={24}
-                      color="#9B0E10"
+                    <TextInput
+                      style={styles.passwordInput}
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChangeText={handleConfirmPasswordChange}
+                      secureTextEntry={!showConfirmPassword}
                     />
-                  </TouchableOpacity>
-                </View>
-                {passwordError ? (
-                  <Text style={styles.errorText}>{passwordError}</Text>
-                ) : null}
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={selectedLevel}
-                    onValueChange={(itemValue) => setSelectedLevel(itemValue)}
-                  >
-                    <Picker.Item
-                      label="Select level..."
-                      value=""
-                      enable={false}
-                    />
-                    <Picker.Item label="Applying" value="Applying" />
-                    {["100", "200", "300", "400", "500", "600"].map((level) => (
-                      <Picker.Item
-                        key={level}
-                        label={`Level ${level}`}
-                        value={level}
+                    <TouchableOpacity
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      <Ionicons
+                        name={showConfirmPassword ? "eye" : "eye-off"}
+                        size={24}
+                        color="#9B0E10"
                       />
-                    ))}
-                  </Picker>
-                </View>
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={selectedUniversity}
-                    onValueChange={handleUniversityChange}
-                  >
-                    <Picker.Item
-                      label="Select university..."
-                      value=""
-                      enabled={false}
-                    />
-                    {Object.keys(universities).map((university) => (
+                    </TouchableOpacity>
+                  </View>
+                  {passwordError ? (
+                    <Text style={styles.errorText}>{passwordError}</Text>
+                  ) : null}
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={selectedLevel}
+                      onValueChange={(itemValue) => setSelectedLevel(itemValue)}
+                    >
                       <Picker.Item
-                        key={university}
-                        label={university}
-                        value={university}
+                        label="Select level..."
+                        value=""
+                        enable={false}
                       />
-                    ))}
-                  </Picker>
-                </View>
-                <View style={styles.pickerWrapper}>
-                  <Picker
-                    selectedValue={selectedCollege}
-                    onValueChange={(itemValue) => setSelectedCollege(itemValue)}
-                    enabled={!!selectedUniversity}
-                  >
-                    <Picker.Item label="Select college..." value="" />
-                    {selectedUniversity &&
-                      universities[selectedUniversity].colleges.map(
-                        (college, index) => (
+                      <Picker.Item label="Applying" value="Applying" />
+                      {["100", "200", "300", "400", "500", "600"].map(
+                        (level) => (
                           <Picker.Item
-                            key={index}
-                            label={college}
-                            value={college}
+                            key={level}
+                            label={`Level ${level}`}
+                            value={level}
                           />
                         )
                       )}
-                  </Picker>
-                </View>
-                <TouchableOpacity
-                  onPress={handleSubmit}
-                  disabled={loading || !isFormValid}
-                  style={
-                    !isFormValid || loading
-                      ? styles.buttonDisabledWrapper
-                      : null
-                  }
-                >
-                  <LinearGradient
-                    colors={
-                      isFormValid && !loading
-                        ? ["#9B0E10", "#C80D10"]
-                        : ["#cccccc", "#aaaaaa"]
+                    </Picker>
+                  </View>
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={selectedUniversity}
+                      onValueChange={handleUniversityChange}
+                    >
+                      <Picker.Item
+                        label="Select university..."
+                        value=""
+                        enabled={false}
+                      />
+                      {Object.keys(universities).map((university) => (
+                        <Picker.Item
+                          key={university}
+                          label={university}
+                          value={university}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                  <View style={styles.pickerWrapper}>
+                    <Picker
+                      selectedValue={selectedCollege}
+                      onValueChange={(itemValue) =>
+                        setSelectedCollege(itemValue)
+                      }
+                      enabled={!!selectedUniversity}
+                    >
+                      <Picker.Item label="Select college..." value="" />
+                      {selectedUniversity &&
+                        universities[selectedUniversity].colleges.map(
+                          (college, index) => (
+                            <Picker.Item
+                              key={index}
+                              label={college}
+                              value={college}
+                            />
+                          )
+                        )}
+                    </Picker>
+                  </View>
+                  <TouchableOpacity
+                    onPress={handleSubmit}
+                    disabled={loading || !isFormValid}
+                    style={
+                      !isFormValid || loading
+                        ? styles.buttonDisabledWrapper
+                        : null
                     }
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.button}
                   >
-                    {loading ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text style={styles.buttonText}>Create account</Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-                <Text
-                  onPress={() => navigation.navigate("Login")}
-                  style={styles.loginText}
-                >
-                  Log In{" "}
-                  <Text style={styles.loginLink}>if you have an account.</Text>
-                </Text>
+                    <LinearGradient
+                      colors={
+                        isFormValid && !loading
+                          ? ["#9B0E10", "#C80D10"]
+                          : ["#cccccc", "#aaaaaa"]
+                      }
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.button}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.buttonText}>Create account</Text>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                  <Text
+                    onPress={() => navigation.navigate("Login")}
+                    style={styles.loginText}
+                  >
+                    Log In{" "}
+                    <Text style={styles.loginLink}>
+                      if you have an account.
+                    </Text>
+                  </Text>
+                </ScrollView>
               </View>
             </View>
           </ImageBackground>
@@ -517,15 +562,6 @@ const styles = StyleSheet.create({
     alignItems: "center", // Keep items centered horizontally
     justifyContent: "flex-start", // Align items to the top
   },
-  backButton: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 40,
-    left: 20,
-    zIndex: 20, // Ensure it's on top of everything
-    padding: 12,
-    backgroundColor: "rgba(0,0,0,0.2)",
-    borderRadius: 20,
-  },
   logo: {
     fontSize: 56,
     color: "#fff",
@@ -538,15 +574,16 @@ const styles = StyleSheet.create({
   },
 
   bottomSheet: {
-    // position: "absolute",
+    position: "absolute",
     bottom: 0,
     width: "100%",
-    height: height * 0.78,
+    height: height * 0.7,
     backgroundColor: "#fff",
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     paddingHorizontal: 30,
     paddingTop: 20,
+    // marginTop: 40,
 
     // Shadow for iOS
     shadowColor: "#000",
