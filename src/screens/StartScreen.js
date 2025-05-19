@@ -5,50 +5,54 @@ import {
   View,
   ImageBackground,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 
 export default function WelcomeScreen({ navigation }) {
   return (
-    <ImageBackground
-      source={require("../../assets/Splash3.png")} // Updated image path
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <View style={styles.topHalf}>
-          <Text style={styles.appName}>UNIPAL</Text>
-          {/* <Text style={styles.tagline}>Academy</Text> */}
-        </View>
-        <View style={styles.bottomHalf}>
-          <View style={styles.textContainer}>
-            <View style={styles.mainText}>
-              <Text style={styles.headerText}>One App</Text>
-              <Text style={styles.headerText}> Every Answer</Text>
+    <>
+      <StatusBar hidden={true} />
+      <ImageBackground
+        source={require("../../assets/Splash3.png")} // Updated image path
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <View style={styles.topHalf}>
+            <Text style={styles.appName}>UNIPAL</Text>
+            {/* <Text style={styles.tagline}>Academy</Text> */}
+          </View>
+          <View style={styles.bottomHalf}>
+            <View style={styles.textContainer}>
+              <View style={styles.mainText}>
+                <Text style={styles.headerText}>One App</Text>
+                <Text style={styles.headerText}> Every Answer</Text>
+              </View>
+
+              <Text style={styles.subText}>
+                Find everything you need to thrive at university — academics,
+                directions, advice, and updates in one place.
+              </Text>
             </View>
 
-            <Text style={styles.subText}>
-              Find everything you need to thrive at university — academics,
-              directions, advice, and updates in one place.
-            </Text>
+            <TouchableOpacity
+              style={styles.getStartedButton}
+              onPress={() => navigation.navigate("OnBoarding")}
+            >
+              <Text style={styles.getStartedText}>Get Started</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              <Text style={styles.signInText}>
+                Already have an account?{" "}
+                <Text style={styles.signInLink}>Sign In</Text>
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={styles.getStartedButton}
-            onPress={() => navigation.navigate("OnBoarding")}
-          >
-            <Text style={styles.getStartedText}>Get Started</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.signInText}>
-              Already have an account?{" "}
-              <Text style={styles.signInLink}>Sign In</Text>
-            </Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </>
   );
 }
 
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
     gap: verticalScale(20),
   },
   appName: {
-    fontSize: moderateScale(50),
+    fontSize: moderateScale(50, 0.8),
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
@@ -111,7 +115,7 @@ const styles = StyleSheet.create({
   },
   subText: {
     color: "#fff",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(14, 0.8),
     lineHeight: verticalScale(22),
     textAlign: "center",
     fontWeight: "400",
