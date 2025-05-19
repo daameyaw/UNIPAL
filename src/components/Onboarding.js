@@ -211,13 +211,13 @@ export default function Onboarding() {
       <TouchableOpacity
         style={{
           position: "absolute",
-          top: 50,
-          right: 30,
+          top: moderateVerticalScale(30),
+          right: moderateScale(30),
           backgroundColor:
             currentIndex === DATA.length - 1 ? "#ccc" : "#EAE7E7",
-          paddingHorizontal: scale(15),
-          paddingVertical: verticalScale(15),
-          borderRadius: scale(13),
+          paddingHorizontal: moderateScale(20),
+          paddingVertical: moderateVerticalScale(10),
+          borderRadius: 15,
           zIndex: 10,
           opacity: currentIndex === DATA.length - 1 ? 0.6 : 1,
         }}
@@ -229,6 +229,7 @@ export default function Onboarding() {
           style={{
             color: currentIndex === DATA.length - 1 ? "#BDBDBD" : "#000",
             fontWeight: "bold",
+            fontSize: moderateScale(14),
           }}
         >
           Skip
@@ -254,12 +255,13 @@ export default function Onboarding() {
                 width,
                 alignItems: "center",
                 padding: 20,
-                paddingTop: 20,
+                paddingTop: 10,
               }}
             >
               <View
                 style={{
-                  flex: 0.7,
+                  flex: 0.8,
+                  // backgroundColor: "green",
                   //   justifyContent: "center",
                 }}
               >
@@ -269,15 +271,16 @@ export default function Onboarding() {
                     width: scale(240), // or scale(width / 1.4),
                     height: scale(240),
                     resizeMode: "contain",
-                    marginTop: verticalScale(20),
+                    marginTop: verticalScale(10),
                   }}
                 />
               </View>
-              <View style={{ flex: 0.3 }}>
+              <View style={{ flex: 0.2 }}>
                 <Text
                   style={{
                     color: "#fff",
                     fontWeight: "800",
+                    paddingTop: verticalScale(10),
                     fontSize: moderateScale(18, 0.8),
                     marginBottom: verticalScale(10),
                   }}
@@ -289,7 +292,7 @@ export default function Onboarding() {
                   style={{
                     color: "#fff",
                     fontWeight: "300",
-                    fontSize: moderateScale(15, 0.8),
+                    fontSize: moderateScale(14, 0.9),
                     textAlign: "left",
                     // marginBottom: 45,
                   }}
@@ -310,12 +313,12 @@ export default function Onboarding() {
       <View
         style={{
           flexDirection: "row",
-          position: "absolute",
-          bottom: 120,
+          // position: "absolute", // Uncomment if you need it
+          bottom: moderateVerticalScale(80),
           width: "100%",
-          justifyContent: "space-between",
-          paddingHorizontal: 50,
-          // marginTop: 10,
+          justifyContent: "space-around",
+          paddingHorizontal: moderateScale(20, 0.9),
+          // marginTop: moderateVerticalScale(10), // Uncomment if needed
         }}
       >
         <TouchableOpacity
@@ -323,9 +326,9 @@ export default function Onboarding() {
           disabled={currentIndex === 0}
           style={{
             backgroundColor: currentIndex === 0 ? "#BDBDBD" : "#fff",
-            paddingVertical: moderateVerticalScale(15),
-            paddingHorizontal: scale(16),
-            borderRadius: 20,
+            paddingVertical: moderateVerticalScale(12, 0.7),
+            paddingHorizontal: scale(14),
+            borderRadius: 12,
             width: 120,
             alignItems: "center",
             justifyContent: "center",
@@ -360,9 +363,9 @@ export default function Onboarding() {
           }}
           style={{
             backgroundColor: "#fff",
-            paddingVertical: scale(15),
+            paddingVertical: moderateVerticalScale(15, 0.4),
             paddingHorizontal: scale(16),
-            borderRadius: 20,
+            borderRadius: 12,
             width: 120,
             alignItems: "center",
             justifyContent: "center",
