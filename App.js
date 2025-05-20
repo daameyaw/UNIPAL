@@ -1,6 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { StyleSheet, Text, View } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
 import "./global.css";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -15,6 +17,10 @@ import Testing from "./src/screens/SignUp";
 import SignUp from "./src/screens/SignUp";
 import Login from "./src/screens/Login";
 import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
+import { Ionicons } from "@expo/vector-icons";
+import MapScreen from "./src/screens/MapScreen";
+import ExploreScreen from "./src/screens/ExploreScreen";
+import SettingsScreen from "./src/screens/SettingsScreen";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -75,15 +81,54 @@ function AuthStack() {
     </Stack.Navigator>
   );
 }
+const Tab = createBottomTabNavigator();
+
+function TabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: "#9B0E10", // active color
+        tabBarInactiveTintColor: "#888", // inactive color
+        tabBarStyle: {
+          backgroundColor: "#ffffff", // tab bar background
+          borderTopWidth: 1,
+          borderTopColor: "#881416",
+          height: 70,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          paddingBottom: 8,
+        },
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "Home") {
+            iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "Campus") {
+            iconName = focused ? "map" : "map-outline";
+          } else if (route.name === "Guides") {
+            iconName = focused ? "book" : "book-outline";
+          } else if (route.name === "Settings") {
+            iconName = focused ? "settings" : "settings-outline";
+          }
+
+          return <Ionicons name={iconName} size={20} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Campus" component={MapScreen} />
+      <Tab.Screen name="Guides" component={ExploreScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
+}
 
 function AuthenticatedStack() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ headerShown: false }}
-      />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainTabs" component={TabNavigator} />
     </Stack.Navigator>
   );
 }
