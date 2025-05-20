@@ -49,8 +49,8 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("");
-  const [selectedUniversity, setSelectedUniversity] = useState("");
-  const [selectedCollege, setSelectedCollege] = useState("");
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [selectedCollege, setSelectedCollege] = useState(null); // Initialize as null
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
@@ -132,33 +132,39 @@ export default function SignUp() {
 
   const universities = {
     Applying: {
-      colleges: ["Select after admission"],
+      colleges: [{ label: "Select after admission", value: "SAA" }],
     },
     KNUST: {
       colleges: [
-        "College of Agriculture and Natural Resources",
-        "College of Art and Built Environment (CABE)",
-        "College of Engineering",
-        "College of Health Sciences",
-        "College of Humanities and Social Sciences",
-        "College of Science",
+        {
+          label: "College of Agriculture and Natural Resources",
+          value: "CANR",
+        },
+        { label: "College of Art and Built Environment (CABE)", value: "CABE" },
+        { label: "College of Engineering", value: "COE" },
+        { label: "College of Health Sciences", value: "CHS" },
+        { label: "College of Humanities and Social Sciences", value: "CHSS" },
+        { label: "College of Science", value: "COS" },
       ],
     },
     UG: {
       colleges: [
-        "College of Basic and Applied Sciences",
-        "College of Education",
-        "College of Health Sciences",
-        "College of Humanities",
-        "College of Agriculture and Consumer Sciences",
+        { label: "College of Basic and Applied Sciences", value: "CBAS" },
+        { label: "College of Education", value: "COE" },
+        { label: "College of Health Sciences", value: "CHS" },
+        { label: "College of Humanities", value: "CHUM" },
+        {
+          label: "College of Agriculture and Consumer Sciences",
+          value: "CACS",
+        },
       ],
     },
     UCC: {
       colleges: [
-        "College of Agriculture and Natural Sciences",
-        "College of Education Studies",
-        "College of Humanities and Legal Studies",
-        "College of Health and Allied Sciences",
+        { label: "College of Agriculture and Natural Sciences", value: "CANS" },
+        { label: "College of Education Studies", value: "COES" },
+        { label: "College of Humanities and Legal Studies", value: "CHLS" },
+        { label: "College of Health and Allied Sciences", value: "CHAS" },
       ],
     },
   };
@@ -222,20 +228,26 @@ export default function SignUp() {
           const token = await userCredential.user.getIdToken();
           // console.log(token);
 
-          authCtx.authenticate(token);
+          // authCtx.authenticate(token);
 
           // Update user profile with display name
-          await updateProfile(userCredential.user, {
-            displayName: fullName,
-          });
+          // await updateProfile(userCredential.user, {
+          //   displayName: fullName,
+          // });
 
           // Create user document in Firestore
           const userDoc = {
             fullName,
             email,
             level: selectedLevel,
-            university: selectedUniversity,
-            college: selectedCollege,
+            university: {
+              label: selectedUniversity.label,
+              value: selectedUniversity.value,
+            },
+            college: {
+              label: selectedCollege.label,
+              value: selectedCollege.value,
+            },
             createdAt: new Date().toISOString(),
           };
           console.log(userDoc);
@@ -384,7 +396,6 @@ export default function SignUp() {
                       />
                     </TouchableOpacity>
                   </View>
-
                   <View
                     style={[
                       styles.passwordContainer,
@@ -437,39 +448,51 @@ export default function SignUp() {
                   </View>
                   <View style={styles.pickerWrapper}>
                     <Picker
-                      selectedValue={selectedUniversity}
-                      onValueChange={handleUniversityChange}
+                      selectedValue={selectedUniversity?.value || ""}
+                      onValueChange={(itemValue) => {
+                        const label = itemValue; // because university keys are used as both value and label
+                        setSelectedUniversity({ label, value: itemValue });
+                        setSelectedCollege(null); // Reset college when university changes
+                      }}
                     >
                       <Picker.Item
                         label="Select university..."
                         value=""
                         enabled={false}
                       />
-                      {Object.keys(universities).map((university) => (
+                      {Object.keys(universities).map((universityKey) => (
                         <Picker.Item
-                          key={university}
-                          label={university}
-                          value={university}
+                          key={universityKey}
+                          label={universityKey}
+                          value={universityKey}
                         />
                       ))}
                     </Picker>
                   </View>
+                  {/* //COLLEGE PICKER */}
                   <View style={styles.pickerWrapper}>
                     <Picker
-                      selectedValue={selectedCollege}
-                      onValueChange={(itemValue) =>
-                        setSelectedCollege(itemValue)
-                      }
+                      selectedValue={selectedCollege?.value || ""}
+                      onValueChange={(itemValue) => {
+                        const college = universities[
+                          selectedUniversity?.value
+                        ]?.colleges.find((c) => c.value === itemValue);
+                        if (college) setSelectedCollege(college);
+                      }}
                       enabled={!!selectedUniversity}
                     >
-                      <Picker.Item label="Select college..." value="" />
+                      <Picker.Item
+                        label="Select college..."
+                        value=""
+                        enabled={false}
+                      />
                       {selectedUniversity &&
-                        universities[selectedUniversity].colleges.map(
-                          (college, index) => (
+                        universities[selectedUniversity?.value].colleges?.map(
+                          (college) => (
                             <Picker.Item
-                              key={index}
-                              label={college}
-                              value={college}
+                              key={college.value}
+                              label={college.label}
+                              value={college.value}
                             />
                           )
                         )}
