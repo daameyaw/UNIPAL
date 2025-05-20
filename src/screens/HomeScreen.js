@@ -58,12 +58,14 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={styles.text2}> David Asante Ameyaw</Text>
               </View>
             </View>
-            <Ionicons
-              name="search"
-              size={20}
-              color="#fff"
-              style={styles.searchIcon}
-            />
+            <TouchableOpacity onPress={handleSignOut}>
+              <Ionicons
+                name="search"
+                size={20}
+                color="#fff"
+                style={styles.searchIcon}
+              />
+            </TouchableOpacity>
           </View>
         </ImageBackground>
 
@@ -140,11 +142,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#7e1d1d",
   },
   topBar: {
-    backgroundColor: "#7e1d1d",
+    // backgroundColor: "#7e1d1d",
     marginBottom: moderateVerticalScale(12, 0.8),
     borderBottomLeftRadius: moderateScale(50, 0.8),
     borderBottomRightRadius: moderateScale(50, 0.8),
     marginHorizontal: moderateScale(-16),
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: moderateVerticalScale(2),
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: moderateScale(6),
+
+    // Android shadow
+    elevation: 4,
   },
   topBarContent: {
     padding: moderateScale(20, 0.9),
@@ -187,15 +199,27 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   searchIcon: {
-    marginLeft: moderateScale(8),
+    marginRight: moderateScale(8),
     fontSize: moderateScale(20),
   },
   heroCard: {
-    height: moderateVerticalScale(150),
+    height: moderateVerticalScale(160, 0.8),
     backgroundColor: "#f0dcdc",
     borderRadius: moderateScale(20),
     marginBottom: moderateVerticalScale(20),
     overflow: "hidden",
+
+    // iOS shadow
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: moderateVerticalScale(2),
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: moderateScale(6),
+
+    // Android shadow
+    elevation: 4,
   },
   heroContent: {
     flex: 1,
@@ -214,7 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   sectionTitle: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(14, 0.9),
     fontWeight: "bold",
     marginBottom: moderateVerticalScale(8),
     marginTop: moderateVerticalScale(10),
@@ -225,11 +249,23 @@ const styles = StyleSheet.create({
     marginBottom: moderateVerticalScale(16),
   },
   locationItem: {
-    width: moderateScale(80),
-    height: moderateScale(70),
+    width: moderateScale(90),
+    height: moderateScale(80),
     backgroundColor: "#f0dcdc",
-    borderRadius: moderateScale(15),
+    borderRadius: moderateScale(12),
     marginRight: moderateScale(10),
+
+    // iOS shadow
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: moderateVerticalScale(2),
+    // },
+    // shadowOpacity: 0.08,
+    // shadowRadius: moderateScale(2),
+
+    // // Android shadow
+    // elevation: 1,
   },
   categoryItem: {
     width: "47%",
@@ -237,6 +273,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0dcdc",
     borderRadius: moderateScale(15),
     marginBottom: moderateVerticalScale(12),
+
+    // iOS shadow
+    shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: moderateVerticalScale(2),
+    // },
+    shadowOpacity: 0.15,
+    shadowRadius: moderateScale(6),
+
+    // Android shadow
+    elevation: 4,
   },
   categoryRow: {
     justifyContent: "space-between",
