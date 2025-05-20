@@ -3,13 +3,21 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  FlatList,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "../../firebase";
 import { AuthContext } from "../../Store/AuthContext";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  moderateScale,
+  moderateVerticalScale,
+} from "react-native-size-matters";
 
 const HomeScreen = ({ navigation }) => {
   const authCtx = useContext(AuthContext);
@@ -22,20 +30,96 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Welcome to UniPAL</Text>
-        <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#a00" />
-        </TouchableOpacity>
-      </View>
+    <>
+      {/* // <SafeAreaView style={styles.container}> */}
+      <View style={styles.statusBarBackground} />
+      <StatusBar style="light" />
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Top Profile Bar */}
+        <ImageBackground
+          source={require("../../assets/images/Hero1.png")}
+          style={styles.topBar}
+          imageStyle={{
+            borderBottomLeftRadius: 50,
+            borderBottomRightRadius: 50,
+          }}
+        >
+          <View style={styles.topBarContent}>
+            <View style={styles.avatar} />
+            <View style={styles.usernameBlock}>
+              <View style={styles.usernameLine}>
+                <Text style={styles.text1}>Good Morning,</Text>
+              </View>
+              <View style={styles.usernameLineShort}>
+                <Text style={styles.text2}> David Asante Ameyaw</Text>
+              </View>
+            </View>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#fff"
+              style={styles.searchIcon}
+            />
+          </View>
+        </ImageBackground>
 
-      <View style={styles.content}>
-        <Text style={styles.welcomeText}>
-          Your academic journey starts here!
-        </Text>
-      </View>
-    </SafeAreaView>
+        {/* Hero Card */}
+        <ImageBackground
+          source={require("../../assets/images/card1.png")}
+          style={styles.heroCard}
+          imageStyle={{ borderRadius: moderateScale(20) }}
+        >
+          <View style={styles.heroContent}>
+            {/* <Text style={styles.heroTitle}>Welcome to UniPAL</Text>
+            <Text style={styles.heroSubtitle}>Your University Companion</Text> */}
+          </View>
+        </ImageBackground>
+
+        {/* Locations */}
+        <Text style={styles.sectionTitle}>Locations</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScroll}
+        >
+          {[...Array(5)].map((_, i) => (
+            <View key={i} style={styles.locationItem} />
+          ))}
+        </ScrollView>
+
+        {/* Categories */}
+        <Text style={styles.sectionTitle}>Categories</Text>
+        <FlatList
+          data={[...Array(4)]}
+          numColumns={2}
+          renderItem={({ item, index }) => <View style={styles.categoryItem} />}
+          keyExtractor={(_, index) => index.toString()}
+          columnWrapperStyle={styles.categoryRow}
+        />
+
+        {/* Explore Section */}
+        <Text style={styles.sectionTitle}>Explore</Text>
+        <FlatList
+          data={[...Array(4)]}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity style={styles.exploreCard}>
+              <View>
+                <Text style={styles.exploreTitle}>STUFFFFFFFF</Text>
+                <Text style={styles.exploreText}>XXXXXXXXXXXXXXX</Text>
+              </View>
+              <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+            </TouchableOpacity>
+          )}
+          keyExtractor={(_, index) => index.toString()}
+          scrollEnabled={false}
+        />
+      </ScrollView>
+      {/* </SafeAreaView> */}
+    </>
   );
 };
 
@@ -44,32 +128,141 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  header: {
+  scrollContent: {
+    paddingHorizontal: moderateScale(16),
+  },
+  statusBarBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: StatusBar.currentHeight, // leave as-is, dynamic
+    backgroundColor: "#7e1d1d",
+  },
+  topBar: {
+    backgroundColor: "#7e1d1d",
+    marginBottom: moderateVerticalScale(12, 0.8),
+    borderBottomLeftRadius: moderateScale(50, 0.8),
+    borderBottomRightRadius: moderateScale(50, 0.8),
+    marginHorizontal: moderateScale(-16),
+  },
+  topBarContent: {
+    padding: moderateScale(20, 0.9),
+    paddingBottom: moderateVerticalScale(40, 0.7),
+    paddingTop: moderateVerticalScale(45, 0.9),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatar: {
+    width: moderateScale(65, 0.9),
+    height: moderateScale(65, 0.9),
+    borderRadius: moderateScale(100),
+    backgroundColor: "#eee",
+    marginRight: moderateScale(12),
+  },
+  usernameBlock: {
+    flex: 1,
+  },
+  usernameLine: {
+    color: "white",
+    marginBottom: moderateVerticalScale(4),
+    borderRadius: moderateScale(4),
+    fontSize: moderateScale(18),
+    fontWeight: "bold",
+  },
+  text1: {
+    color: "#fff",
+    fontSize: moderateScale(16),
+    fontWeight: "bold",
+  },
+  text2: {
+    color: "#fff",
+    fontSize: moderateScale(14),
+    fontWeight: "600",
+  },
+  usernameLineShort: {
+    borderRadius: moderateScale(4),
+    fontSize: moderateScale(16),
+    fontWeight: "600",
+  },
+  searchIcon: {
+    marginLeft: moderateScale(8),
+    fontSize: moderateScale(20),
+  },
+  heroCard: {
+    height: moderateVerticalScale(150),
+    backgroundColor: "#f0dcdc",
+    borderRadius: moderateScale(20),
+    marginBottom: moderateVerticalScale(20),
+    overflow: "hidden",
+  },
+  heroContent: {
+    flex: 1,
+    padding: moderateScale(20),
+    justifyContent: "center",
+  },
+  heroTitle: {
+    color: "#fff",
+    fontSize: moderateScale(24),
+    fontWeight: "bold",
+    marginBottom: moderateVerticalScale(8),
+  },
+  heroSubtitle: {
+    color: "#fff",
+    fontSize: moderateScale(16),
+    fontWeight: "500",
+  },
+  sectionTitle: {
+    fontSize: moderateScale(14),
+    fontWeight: "bold",
+    marginBottom: moderateVerticalScale(8),
+    marginTop: moderateVerticalScale(10),
+    color: "#9B0E10",
+  },
+  horizontalScroll: {
+    flexDirection: "row",
+    marginBottom: moderateVerticalScale(16),
+  },
+  locationItem: {
+    width: moderateScale(80),
+    height: moderateScale(70),
+    backgroundColor: "#f0dcdc",
+    borderRadius: moderateScale(15),
+    marginRight: moderateScale(10),
+  },
+  categoryItem: {
+    width: "47%",
+    height: moderateVerticalScale(110),
+    backgroundColor: "#f0dcdc",
+    borderRadius: moderateScale(15),
+    marginBottom: moderateVerticalScale(12),
+  },
+  categoryRow: {
+    justifyContent: "space-between",
+  },
+  exploreCard: {
+    backgroundColor: "#fff",
+    borderRadius: moderateScale(10),
+    padding: moderateScale(16),
+    height: moderateVerticalScale(90),
+    marginBottom: moderateVerticalScale(12),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: moderateScale(5),
+    elevation: 2,
   },
-  title: {
-    fontSize: 20,
+  exploreTitle: {
     fontWeight: "bold",
-    color: "#333",
+    fontSize: moderateScale(14),
+    color: "#000",
   },
-  signOutButton: {
-    padding: 8,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  welcomeText: {
-    fontSize: 18,
-    color: "#666",
-    textAlign: "center",
+  exploreText: {
+    fontSize: moderateScale(12),
+    color: "#555",
   },
 });
 
