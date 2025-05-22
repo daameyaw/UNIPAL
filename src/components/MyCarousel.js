@@ -98,7 +98,7 @@ export default function MyCarousel() {
         containerStyle={{
           gap: 5,
           //   backgroundColor: "green",
-          marginTop: 1,
+          marginTop: 13,
           flexDirection: "row",
           justifyContent: "center",
         }}

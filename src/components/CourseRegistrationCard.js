@@ -64,8 +64,9 @@ const CourseRegistrationCard = ({ title, subTitle, startDate, endDate }) => (
         stepCount={2}
         labels={[`Start Date: ${startDate}`, `End Date: ${endDate}`]}
       />
-      <TouchableOpacity>
+      <TouchableOpacity style={styles.readMoreButton}>
         <Text style={styles.readMore}>Read More</Text>
+        <Ionicons name="chevron-forward" size={16} color="#a52828" />
       </TouchableOpacity>
     </View>
   </ImageBackground>
@@ -147,11 +148,21 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#222",
   },
+  readMoreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(165, 40, 40, 0.1)",
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6),
+    borderRadius: moderateScale(8),
+    alignSelf: "flex-start",
+    marginTop: moderateScale(10),
+  },
   readMore: {
     color: "#a52828",
     fontWeight: "500",
     fontSize: moderateScale(16),
-    marginTop: moderateScale(10),
+    marginRight: moderateScale(4),
   },
 });
 
