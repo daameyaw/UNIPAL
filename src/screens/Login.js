@@ -13,6 +13,11 @@ import {
   ScrollView,
   ImageBackground,
 } from "react-native";
+import {
+  moderateScale,
+  moderateVerticalScale,
+} from "react-native-size-matters";
+
 import React, { useContext, useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -336,7 +341,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: moderateScale(24, 0.8),
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,

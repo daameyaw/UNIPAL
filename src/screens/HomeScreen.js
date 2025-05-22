@@ -18,6 +18,8 @@ import {
   moderateScale,
   moderateVerticalScale,
 } from "react-native-size-matters";
+import CourseRegistrationCard from "../components/CourseRegistrationCard";
+import MyCarousel from "../components/MyCarousel";
 
 const HomeScreen = ({ navigation }) => {
   const authCtx = useContext(AuthContext);
@@ -44,8 +46,8 @@ const HomeScreen = ({ navigation }) => {
           source={require("../../assets/images/Hero1.png")}
           style={styles.topBar}
           imageStyle={{
-            borderBottomLeftRadius: 50,
-            borderBottomRightRadius: 50,
+            borderBottomLeftRadius: moderateScale(55),
+            borderBottomRightRadius: moderateScale(55),
           }}
         >
           <View style={styles.topBarContent}>
@@ -69,17 +71,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </ImageBackground>
 
-        {/* Hero Card */}
-        <ImageBackground
-          source={require("../../assets/images/card1.png")}
-          style={styles.heroCard}
-          imageStyle={{ borderRadius: moderateScale(20) }}
-        >
-          <View style={styles.heroContent}>
-            {/* <Text style={styles.heroTitle}>Welcome to UniPAL</Text>
-            <Text style={styles.heroSubtitle}>Your University Companion</Text> */}
-          </View>
-        </ImageBackground>
+        <MyCarousel />
 
         {/* Locations */}
         <Text style={styles.sectionTitle}>Locations</Text>
@@ -144,8 +136,8 @@ const styles = StyleSheet.create({
   topBar: {
     // backgroundColor: "#7e1d1d",
     marginBottom: moderateVerticalScale(12, 0.8),
-    borderBottomLeftRadius: moderateScale(50, 0.8),
-    borderBottomRightRadius: moderateScale(50, 0.8),
+    borderBottomLeftRadius: moderateScale(60, 0.8),
+    borderBottomRightRadius: moderateScale(60, 0.8),
     marginHorizontal: moderateScale(-16),
     shadowColor: "#000",
     shadowOffset: {
@@ -160,18 +152,18 @@ const styles = StyleSheet.create({
   },
   topBarContent: {
     padding: moderateScale(20, 0.9),
-    paddingBottom: moderateVerticalScale(40, 0.7),
+    paddingBottom: moderateVerticalScale(35, 0.7),
     paddingTop: moderateVerticalScale(45, 0.9),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
   avatar: {
-    width: moderateScale(65, 0.9),
-    height: moderateScale(65, 0.9),
+    width: moderateScale(75, 0.9),
+    height: moderateScale(75, 0.9),
     borderRadius: moderateScale(100),
     backgroundColor: "#eee",
-    marginRight: moderateScale(12),
+    marginRight: moderateScale(7),
   },
   usernameBlock: {
     flex: 1,
@@ -185,12 +177,12 @@ const styles = StyleSheet.create({
   },
   text1: {
     color: "#fff",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(16, 0.8),
     fontWeight: "bold",
   },
   text2: {
     color: "#fff",
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(14, 0.8),
     fontWeight: "600",
   },
   usernameLineShort: {
@@ -219,7 +211,7 @@ const styles = StyleSheet.create({
     shadowRadius: moderateScale(6),
 
     // Android shadow
-    elevation: 4,
+    elevation: 0.8,
   },
   heroContent: {
     flex: 1,
@@ -249,10 +241,10 @@ const styles = StyleSheet.create({
     marginBottom: moderateVerticalScale(16),
   },
   locationItem: {
-    width: moderateScale(90),
-    height: moderateScale(80),
+    width: moderateScale(115),
+    height: moderateScale(90),
     backgroundColor: "#f0dcdc",
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(15),
     marginRight: moderateScale(10),
 
     // iOS shadow
@@ -268,10 +260,10 @@ const styles = StyleSheet.create({
     // elevation: 1,
   },
   categoryItem: {
-    width: "47%",
-    height: moderateVerticalScale(110),
+    width: "48%",
+    height: moderateVerticalScale(125, 0.8),
     backgroundColor: "#f0dcdc",
-    borderRadius: moderateScale(15),
+    borderRadius: moderateScale(28),
     marginBottom: moderateVerticalScale(12),
 
     // iOS shadow
@@ -284,7 +276,7 @@ const styles = StyleSheet.create({
     shadowRadius: moderateScale(6),
 
     // Android shadow
-    elevation: 4,
+    elevation: 1.5,
   },
   categoryRow: {
     justifyContent: "space-between",

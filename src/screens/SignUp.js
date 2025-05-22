@@ -17,6 +17,11 @@ import {
   Alert,
   Keyboard,
 } from "react-native";
+import {
+  moderateScale,
+  moderateVerticalScale,
+} from "react-native-size-matters";
+
 import { app, auth, db } from "../../firebase";
 import {
   createUserWithEmailAndPassword,
@@ -228,7 +233,7 @@ export default function SignUp() {
           const token = await userCredential.user.getIdToken();
           // console.log(token);
 
-          // authCtx.authenticate(token);
+          authCtx.authenticate(token);
 
           // Update user profile with display name
           // await updateProfile(userCredential.user, {
@@ -621,7 +626,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: moderateScale(24, 0.8),
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
