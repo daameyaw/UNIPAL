@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MapScreen from "./src/screens/MapScreen";
 import ExploreScreen from "./src/screens/ExploreScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -84,6 +84,7 @@ function AuthStack() {
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
+  const insets = useSafeAreaInsets(); // 👈 get dynamic bottom inses
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -94,7 +95,8 @@ function TabNavigator() {
           backgroundColor: "#ffffff", // tab bar background
           borderTopWidth: 1,
           borderTopColor: "#881416",
-          height: 70,
+          height: 50 + insets.bottom, // 👈 dynamically adjust height
+          paddingBottom: insets.bottom, // 👈 ensure tab items lift up
         },
         tabBarLabelStyle: {
           fontSize: 12,
