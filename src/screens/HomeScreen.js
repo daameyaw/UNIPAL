@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,10 +18,12 @@ import {
   moderateScale,
   moderateVerticalScale,
 } from "react-native-size-matters";
-import CourseRegistrationCard from "../components/CourseRegistrationCard";
 import MyCarousel from "../components/MyCarousel";
+import { getMotivation } from "../services/apiMotivation";
+import { useMotivation } from "../hooks/useMotivation";
 
 const HomeScreen = ({ navigation }) => {
+  const { isLoading, quote, author, date, error } = useMotivation();
   const authCtx = useContext(AuthContext);
 
   const auth = getAuth(app);
@@ -30,6 +32,14 @@ const HomeScreen = ({ navigation }) => {
     authCtx.logout();
     // console.log("logged-out");
   };
+
+  // useEffect(() => {
+  //   async function fetchMotivation() {
+  //     const motivation = await getMotivation();
+  //     console.log(motivation);
+  //   }
+  //   fetchMotivation();
+  // }, []);
 
   return (
     <>

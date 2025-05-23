@@ -11,40 +11,46 @@ import {
   moderateScale,
   moderateVerticalScale,
 } from "react-native-size-matters";
+import { useFavorites } from "../hooks/useFavorites";
 
-const QuoteCard = ({ quote, author, onShare, onFavorite }) => (
-  <ImageBackground
-    source={require("../../assets/images/card1.png")}
-    resizeMode="cover"
-    style={[styles.cardContainer, { width: "100%" }]}
-    imageStyle={{ borderRadius: moderateScale(20) }}
-  >
-    <View style={styles.contentWrapper}>
-      <Text style={styles.quoteText}>{quote}</Text>
-      <Text style={styles.authorText}>
-        — <Text style={{ fontStyle: "italic" }}>{author}</Text>
-      </Text>
-      <View style={styles.iconRow}>
-        <TouchableOpacity onPress={onShare}>
-          <Ionicons
-            name="share-outline"
-            size={28}
-            color="#a52828"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onFavorite}>
-          <MaterialIcons
-            name="favorite-border"
-            size={28}
-            color="#a52828"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
+const QuoteCard = ({ quote, author, onShare }) => {
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const favorite = isFavorite(quote, author);
+
+  return (
+    <ImageBackground
+      source={require("../../assets/images/card1.png")}
+      resizeMode="cover"
+      style={[styles.cardContainer, { width: "100%" }]}
+      imageStyle={{ borderRadius: moderateScale(20) }}
+    >
+      <View style={styles.contentWrapper}>
+        <Text style={styles.quoteText}>{quote}</Text>
+        <Text style={styles.authorText}>
+          — <Text style={{ fontStyle: "italic" }}>{author}</Text>
+        </Text>
+        <View style={styles.iconRow}>
+          {/* <TouchableOpacity onPress={onShare}>
+            <Ionicons
+              name="share-outline"
+              size={28}
+              color="#a52828"
+              style={styles.icon}
+            />
+          </TouchableOpacity> */}
+          <TouchableOpacity onPress={() => toggleFavorite(quote, author)}>
+            <MaterialIcons
+              name={favorite ? "favorite" : "favorite-border"}
+              size={28}
+              color="#a52828"
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  </ImageBackground>
-);
+    </ImageBackground>
+  );
+};
 
 const styles = StyleSheet.create({
   cardContainer: {
