@@ -22,10 +22,13 @@ import MapScreen from "./src/screens/MapScreen";
 import ExploreScreen from "./src/screens/ExploreScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
+
+const queryClient = new QueryClient();
 
 function AuthStack() {
   const [isLoading, setIsLoading] = useState(true);
@@ -201,12 +204,14 @@ export default function App() {
   }
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <StatusBar style="dark" />
-      <AuthContextProvider>
-        <Root />
-      </AuthContextProvider>
-    </View>
+    <QueryClientProvider client={queryClient}>
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <StatusBar style="dark" />
+        <AuthContextProvider>
+          <Root />
+        </AuthContextProvider>
+      </View>
+    </QueryClientProvider>
   );
 }
 const styles = StyleSheet.create({
