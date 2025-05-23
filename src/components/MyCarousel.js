@@ -1,15 +1,29 @@
-import React, { useRef } from "react";
-import { Dimensions, View, Text, Image, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  Dimensions,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  ImageBackground,
+} from "react-native";
 import Carousel, { Pagination } from "react-native-reanimated-carousel";
 import CourseRegistrationCard from "./CourseRegistrationCard";
 import { useSharedValue } from "react-native-reanimated";
 import QuoteCard from "./QuoteCard";
 import NoticeCard from "./NoticeCard";
+import { useMotivation } from "../hooks/useMotivation";
+import {
+  moderateScale,
+  moderateVerticalScale,
+} from "react-native-size-matters";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
 // Ref for carousel instance
-const data = [
+const staticData = [
   {
     type: "card",
     title: "Course Registration",
@@ -18,37 +32,98 @@ const data = [
     endDate: "20th May, 2025",
   },
   {
-    type: "mov",
-    quote:
-      "Success is not final, failure is not fatal: It is the courage to continue that counts.",
-    author: "Winston Churchill",
-  },
-  {
     type: "not",
     title: "Notice",
     message:
       "You have exactly 3 days more to begin your second semester for the KNUST 2024/2025 Academic Year..",
   },
-  {
-    type: "image",
-    title: "Lake View",
-    image: "https://picsum.photos/id/1016/600/400",
-  },
 ];
 
-export default function MyCarousel() {
-  const ref = useRef(null);
+const LoadingQuoteCard = () => (
+  <ImageBackground
+    source={require("../../assets/images/card1.png")}
+    resizeMode="cover"
+    style={[styles.cardContainer, { width: "100%" }]}
+    imageStyle={{ borderRadius: moderateScale(20) }}
+  >
+    <View style={styles.contentWrapper}>
+      <ActivityIndicator size="large" color="#a52828" />
+      <Text style={styles.quoteText}>Loading your daily motivation...</Text>
+    </View>
+  </ImageBackground>
+);
 
-  // Use shared value from reanimated to track progress (current index)
+const ErrorQuoteCard = () => (
+  <ImageBackground
+    source={require("../../assets/images/card1.png")}
+    resizeMode="cover"
+    style={[styles.cardContainer, { width: "100%" }]}
+    imageStyle={{ borderRadius: moderateScale(20) }}
+  >
+    <View style={styles.contentWrapper}>
+      <Text style={styles.quoteText}>😔 Oops! Something went wrong</Text>
+      <Text style={styles.authorText}>Couldn't load your daily motivation</Text>
+    </View>
+  </ImageBackground>
+);
+
+export default function MyCarousel() {
+  const { isLoading, quote, author, error } = useMotivation();
+
+  const viewAsyncStorage = async () => {
+    const keys = await AsyncStorage.getAllKeys();
+    const items = await AsyncStorage.multiGet(keys);
+    console.log("🔍 AsyncStorage Contents:");
+    items.forEach(([key, value]) => {
+      console.log(`${key}: ${value}`);
+    });
+  };
+  const ref = useRef(null);
   const progress = useSharedValue(0);
+
+  const data = [
+    ...staticData.slice(0, 1),
+    {
+      type: "mov",
+      quote,
+      author,
+    },
+    ...staticData.slice(1),
+  ];
+  // useEffect(() => {
+  //   viewAsyncStorage();
+  // }, []);
 
   const onPressPagination = (index) => {
     if (ref.current) {
       ref.current.scrollTo({
-        count: index - progress.value, // Scroll by difference
+        count: index - progress.value,
         animated: true,
       });
-      progress.value = index; // Update progress to new index
+      progress.value = index;
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    switch (item.type) {
+      case "card":
+        return (
+          <CourseRegistrationCard
+            title={item.title}
+            subTitle={item.subTitle}
+            startDate={item.startDate}
+            endDate={item.endDate}
+          />
+        );
+      case "mov":
+        if (isLoading) return <LoadingQuoteCard />;
+        if (error) return <ErrorQuoteCard />;
+        return <QuoteCard quote={item.quote} author={item.author} />;
+      case "not":
+        return <NoticeCard title={item.title} message={item.message} />;
+
+      default:
+        return null;
     }
   };
 
@@ -62,31 +137,7 @@ export default function MyCarousel() {
         autoPlay={false}
         autoPlayInterval={5000}
         scrollAnimationDuration={1000}
-        renderItem={({ item }) => {
-          if (item.type === "card") {
-            return (
-              <CourseRegistrationCard
-                title={item.title}
-                subTitle={item.subTitle}
-                startDate={item.startDate}
-                endDate={item.endDate}
-              />
-            );
-          }
-          if (item.type === "mov") {
-            return <QuoteCard quote={item.quote} author={item.author} />;
-          }
-          if (item.type === "not") {
-            return <NoticeCard title={item.title} message={item.message} />;
-          }
-
-          return (
-            <View style={styles.card}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <Text style={styles.title}>{item.title}</Text>
-            </View>
-          );
-        }}
+        renderItem={renderItem}
         onProgressChange={(_, absoluteProgress) => {
           progress.value = absoluteProgress;
         }}
@@ -97,7 +148,6 @@ export default function MyCarousel() {
         dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
         containerStyle={{
           gap: 5,
-          //   backgroundColor: "green",
           marginTop: 13,
           flexDirection: "row",
           justifyContent: "center",
@@ -110,7 +160,6 @@ export default function MyCarousel() {
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: 50,
     alignItems: "center",
     marginHorizontal: 10,
   },
@@ -134,5 +183,39 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  cardContainer: {
+    borderRadius: moderateScale(20),
+    margin: moderateScale(16),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    minHeight: moderateVerticalScale(230, 0.2),
+    width: "100%",
+    alignSelf: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  contentWrapper: {
+    padding: moderateScale(20),
+    flex: 1,
+    justifyContent: "center",
+    gap: moderateScale(10),
+  },
+  quoteText: {
+    fontSize: moderateScale(18, 0.6),
+    color: "#222",
+    fontWeight: "500",
+    textAlign: "center",
+    lineHeight: moderateScale(24),
+  },
+  authorText: {
+    fontSize: moderateScale(14),
+    color: "#222",
+    textAlign: "center",
+    marginBottom: moderateScale(6),
+    fontStyle: "italic",
   },
 });
