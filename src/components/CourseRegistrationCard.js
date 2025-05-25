@@ -39,7 +39,13 @@ const customStyles = {
   stepIndicatorVerticalPadding: 30, // Only works in some versions!
 };
 
-const CourseRegistrationCard = ({ title, subTitle, startDate, endDate }) => (
+const CourseRegistrationCard = ({
+  title,
+  subTitle,
+  startDate,
+  endDate,
+  iconName,
+}) => (
   <ImageBackground
     source={require("../../assets/images/card1.png")}
     resizeMode="cover"
@@ -48,15 +54,19 @@ const CourseRegistrationCard = ({ title, subTitle, startDate, endDate }) => (
   >
     <View style={styles.contentWrapper}>
       <View style={styles.headerRow}>
-        <Ionicons
-          name="school-outline"
-          size={28}
-          color="#a52828"
-          style={styles.icon}
-        />
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.iconContainer}>
+          <Ionicons
+            name={iconName}
+            size={28}
+            color="#a52828"
+            style={styles.icon}
+          />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subTitle}</Text>
+        </View>
       </View>
-      <Text style={styles.subtitle}>{subTitle}</Text>
       <StepIndicator
         direction="vertical"
         customStyles={customStyles}
@@ -74,17 +84,14 @@ const CourseRegistrationCard = ({ title, subTitle, startDate, endDate }) => (
 
 const styles = StyleSheet.create({
   cardContainer: {
-    // backgroundColor: "",
     borderRadius: moderateScale(20),
-    // paddingVertical: moderateScale(10),
-    margin: moderateScale(16),
+    // margin: moderateScale(8),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 5,
     height: moderateVerticalScale(230, 0.2),
-    // width: "50%",
     alignSelf: "center",
   },
   contentWrapper: {
@@ -96,20 +103,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: moderateScale(6),
   },
-  icon: {
+  iconContainer: {
+    justifyContent: "center",
     marginRight: moderateScale(8),
   },
+  icon: {
+    // Remove marginTop since we're using flexbox centering
+  },
+  textContainer: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+  },
   title: {
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(18),
     fontWeight: "700",
     color: "#222",
+    marginBottom: moderateScale(4),
   },
   subtitle: {
     fontSize: moderateScale(15),
     color: "#222",
     fontWeight: "400",
     marginBottom: moderateScale(0),
-    marginLeft: moderateScale(30), // aligns with text after icon
   },
   timelineContainer: {
     flexDirection: "row",
