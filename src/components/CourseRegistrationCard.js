@@ -76,7 +76,7 @@ const CourseRegistrationCard = ({
       />
       <TouchableOpacity style={styles.readMoreButton}>
         <Text style={styles.readMore}>Read More</Text>
-        <Ionicons name="chevron-forward" size={16} color="#a52828" />
+        <Ionicons name="chevron-forward" size={20} color="#a52828" />
       </TouchableOpacity>
     </View>
   </ImageBackground>
