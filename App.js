@@ -2,6 +2,8 @@ import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Provider } from "react-redux";
+import { store } from "./src/store/store";
 
 import "./global.css";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -23,6 +25,9 @@ import ExploreScreen from "./src/screens/ExploreScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
+import { setUserInfo } from "./src/store/features/userSlice";
+// import { setUserInfo } from "./src/store/userSlice";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -98,8 +103,8 @@ function TabNavigator() {
           backgroundColor: "#ffffff", // tab bar background
           borderTopWidth: 1,
           borderTopColor: "#881416",
-          height: 50 + insets.bottom, // 👈 dynamically adjust height
-          paddingBottom: insets.bottom, // 👈 ensure tab items lift up
+          height: 60 + insets.bottom, // 👈 dynamically adjust height
+          paddingBottom: 10 + insets.bottom, // 👈 ensure tab items lift up
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -152,22 +157,32 @@ function Navigation() {
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
   const authCtx = useContext(AuthContext);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    async function fetchToken() {
+    async function initializeApp() {
       try {
         const storedToken = await AsyncStorage.getItem("token");
+        const storedUserData = await AsyncStorage.getItem("user");
 
         if (storedToken) {
           authCtx.authenticate(storedToken);
+
+          // Rehydrate Redux from AsyncStorage
+          if (storedUserData) {
+            const userData = JSON.parse(storedUserData);
+            dispatch(setUserInfo(userData));
+            console.log("✅ Redux rehydrated from AsyncStorage:", userData);
+          }
         }
       } catch (e) {
-        console.warn(e);
+        console.warn("Error initializing app:", e);
       } finally {
         setIsTryingLogin(false);
       }
     }
-    fetchToken();
+
+    initializeApp();
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
@@ -204,14 +219,16 @@ export default function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <StatusBar style="dark" />
-        <AuthContextProvider>
-          <Root />
-        </AuthContextProvider>
-      </View>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+          <StatusBar style="dark" />
+          <AuthContextProvider>
+            <Root />
+          </AuthContextProvider>
+        </View>
+      </QueryClientProvider>
+    </Provider>
   );
 }
 const styles = StyleSheet.create({
