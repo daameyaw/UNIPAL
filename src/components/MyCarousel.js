@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import {
   Dimensions,
   View,
@@ -19,18 +19,12 @@ import {
   moderateVerticalScale,
 } from "react-native-size-matters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAcademicEvents } from "../hooks/useAcademicEvents";
 
 const { width } = Dimensions.get("window");
 
 // Ref for carousel instance
 const staticData = [
-  {
-    type: "card",
-    title: "Course Registration",
-    subTitle: "Register your courses for the upcoming semester",
-    startDate: "19th May, 2025",
-    endDate: "20th May, 2025",
-  },
   {
     type: "not",
     title: "Notice",
@@ -67,32 +61,66 @@ const ErrorQuoteCard = () => (
   </ImageBackground>
 );
 
-export default function MyCarousel() {
-  const { isLoading, quote, author, error } = useMotivation();
+const LoadingEventCard = () => (
+  <ImageBackground
+    source={require("../../assets/images/card1.png")}
+    resizeMode="cover"
+    style={[styles.cardContainer, { width: "100%" }]}
+    imageStyle={{ borderRadius: moderateScale(20) }}
+  >
+    <View style={styles.contentWrapper}>
+      <ActivityIndicator size="large" color="#a52828" />
+      <Text style={styles.quoteText}>Loading academic events...</Text>
+    </View>
+  </ImageBackground>
+);
 
-  const viewAsyncStorage = async () => {
-    const keys = await AsyncStorage.getAllKeys();
-    const items = await AsyncStorage.multiGet(keys);
-    console.log("🔍 AsyncStorage Contents:");
-    items.forEach(([key, value]) => {
-      console.log(`${key}: ${value}`);
-    });
-  };
+export default function MyCarousel() {
+  const {
+    isLoading: isLoadingMotivation,
+    quote,
+    author,
+    error: motivationError,
+  } = useMotivation();
+  const {
+    isLoading: isLoadingEvents,
+    data: events,
+    error: eventsError,
+  } = useAcademicEvents();
+
   const ref = useRef(null);
   const progress = useSharedValue(0);
 
-  const data = [
-    ...staticData.slice(0, 1),
-    {
-      type: "mov",
-      quote,
-      author,
-    },
-    ...staticData.slice(1),
-  ];
-  // useEffect(() => {
-  //   viewAsyncStorage();
-  // }, []);
+  // Memoize the data transformation to prevent unnecessary recalculations
+  const data = useMemo(() => {
+    const eventCards =
+      events?.map((event) => ({
+        type: "card",
+        title: event.title,
+        subTitle: event.description,
+        iconName: event.iconName,
+        startDate: new Date(event.startDate).toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        endDate: new Date(event.endDate).toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      })) || [];
+
+    return [
+      ...eventCards,
+      {
+        type: "mov",
+        quote,
+        author,
+      },
+      ...staticData,
+    ];
+  }, [events, quote, author]);
 
   const onPressPagination = (index) => {
     if (ref.current) {
@@ -107,25 +135,36 @@ export default function MyCarousel() {
   const renderItem = ({ item }) => {
     switch (item.type) {
       case "card":
+        if (isLoadingEvents) return <LoadingEventCard />;
+        if (eventsError) return <ErrorQuoteCard />;
         return (
           <CourseRegistrationCard
             title={item.title}
             subTitle={item.subTitle}
             startDate={item.startDate}
             endDate={item.endDate}
+            iconName={item.iconName}
           />
         );
       case "mov":
-        if (isLoading) return <LoadingQuoteCard />;
-        if (error) return <ErrorQuoteCard />;
+        if (isLoadingMotivation) return <LoadingQuoteCard />;
+        if (motivationError) return <ErrorQuoteCard />;
         return <QuoteCard quote={item.quote} author={item.author} />;
       case "not":
         return <NoticeCard title={item.title} message={item.message} />;
-
       default:
         return null;
     }
   };
+
+  // Show loading state if both data sources are loading
+  if (isLoadingEvents && isLoadingMotivation) {
+    return (
+      <View style={styles.container}>
+        <LoadingEventCard />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -141,6 +180,11 @@ export default function MyCarousel() {
         onProgressChange={(_, absoluteProgress) => {
           progress.value = absoluteProgress;
         }}
+        mode="parallax"
+        modeConfig={{
+          parallaxScrollingScale: 0.9,
+          parallaxScrollingOffset: 30,
+        }}
       />
       <Pagination.Basic
         progress={progress}
@@ -148,7 +192,7 @@ export default function MyCarousel() {
         dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
         containerStyle={{
           gap: 5,
-          marginTop: 13,
+          marginTop: moderateScale(-25, 0.02),
           flexDirection: "row",
           justifyContent: "center",
         }}
@@ -162,6 +206,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     marginHorizontal: 10,
+    paddingVertical: 3,
   },
   card: {
     backgroundColor: "#fff",
