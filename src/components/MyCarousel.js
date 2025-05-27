@@ -170,7 +170,7 @@ export default function MyCarousel() {
     <View style={styles.container}>
       <Carousel
         ref={ref}
-        width={width * 0.9}
+        width={width * 1}
         height={280}
         data={data}
         autoPlay={false}
