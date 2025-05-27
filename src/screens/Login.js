@@ -26,11 +26,18 @@ import { auth } from "../../firebase";
 import { AuthContext } from "../../Store/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "../components/BackButton";
+import { useDispatch } from "react-redux";
+import { setUserInfo } from "../store/features/userSlice";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height } = Dimensions.get("window");
 
 export default function Login() {
   const authCtx = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState("davidameyaw607@gmail.com");
   const [password, setPassword] = useState("Lhegacy");
@@ -40,7 +47,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigation = useNavigation();
   const [passwordError, setPasswordError] = useState("");
 
   const withTimeout = (promise, timeout = 30000) => {
@@ -57,41 +63,74 @@ export default function Login() {
     setLoading(true);
     setError("");
     try {
+      // Step 1: Sign in with Firebase Auth
       const userCredential = await withTimeout(
         signInWithEmailAndPassword(auth, email, password)
       );
       const token = await userCredential.user.getIdToken();
-      console.log(token);
+      const uid = userCredential.user.uid;
 
+      // Step 2: Fetch user data from Firestore
+      const userDoc = await getDoc(doc(db, "users", uid));
+
+      if (!userDoc.exists()) {
+        Alert.alert("Error", "User profile not found. Please contact support.");
+        return;
+      }
+
+      const userInfo = userDoc.data();
+      console.log("✅ User data fetched from Firestore:", userInfo);
+
+      // Step 3: Prepare user data for storage
+      const userDataToStore = {
+        fullName: userInfo.fullName,
+        level: userInfo.level,
+        university: userInfo.university.value,
+        selectedCollege: userInfo.college.value,
+      };
+
+      // Step 4: Store in AsyncStorage
+      await AsyncStorage.setItem("user", JSON.stringify(userDataToStore));
+      console.log("✅ User data stored in AsyncStorage");
+
+      // Step 5: Store in Redux
+      dispatch(setUserInfo(userDataToStore));
+      console.log("✅ User data dispatched to Redux");
+
+      // Step 6: Authenticate user
       authCtx.authenticate(token);
-
-      // navigation.navigate("Home");
+      console.log("✅ User authenticated");
     } catch (error) {
-      console.log(error.code);
+      console.error("Login error:", error);
+
       if (error.code === "auth/invalid-credential") {
         Alert.alert(
           "Login Failed",
           "Email or password is incorrect. Please try again.",
           [{ text: "OK" }]
         );
-      }
-      if (error.code === "auth/network-request-failed") {
+      } else if (error.code === "auth/network-request-failed") {
         Alert.alert(
           "Network Error",
-          "Unable to complete the signup process due to a network issue. Please check your internet connection and try again.",
+          "Unable to complete the login process due to a network issue. Please check your internet connection and try again.",
           [{ text: "OK" }]
         );
         setError(
           "Network request failed. Please ensure you're connected to the internet."
         );
-      }
-      if (error.message === "timeout-error") {
+      } else if (error.message === "timeout-error") {
         Alert.alert(
           "Timeout",
-          "The signup process is taking too long. Please check your connection and try again.",
+          "The login process is taking too long. Please check your connection and try again.",
           [{ text: "OK" }]
         );
-        setError("Signup timed out. Please try again.");
+        setError("Login timed out. Please try again.");
+      } else {
+        Alert.alert(
+          "Login Error",
+          "An unexpected error occurred. Please try again.",
+          [{ text: "OK" }]
+        );
       }
     } finally {
       setLoading(false);

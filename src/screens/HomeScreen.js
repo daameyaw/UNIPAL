@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   ImageBackground,
   FlatList,
+  Image,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,17 +22,48 @@ import {
 import MyCarousel from "../components/MyCarousel";
 import { getMotivation } from "../services/apiMotivation";
 import { useMotivation } from "../hooks/useMotivation";
+import { useSelector } from "react-redux";
+import { selectFullName } from "../store/features/userSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "Good Morning";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good Afternoon";
+  } else if (hour >= 17 && hour < 21) {
+    return "Good Evening";
+  } else {
+    return "Good Night";
+  }
+};
 
 const HomeScreen = ({ navigation }) => {
   const { isLoading, quote, author, date, error } = useMotivation();
   const authCtx = useContext(AuthContext);
+  const fullName = useSelector(selectFullName);
+  const [greeting, setGreeting] = useState(getGreeting());
 
   const auth = getAuth(app);
 
-  const handleSignOut = () => {
+  console.log("Name", fullName);
+
+  const handleSignOut = async () => {
     authCtx.logout();
     // console.log("logged-out");
   };
+
+  // Update greeting every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreeting(getGreeting());
+      console.log(greeting);
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // useEffect(() => {
   //   async function fetchMotivation() {
@@ -61,20 +93,30 @@ const HomeScreen = ({ navigation }) => {
           }}
         >
           <View style={styles.topBarContent}>
-            <View style={styles.avatar} />
+            <TouchableOpacity onPress={() => console.log("clicked")}>
+              <Image
+                source={{ uri: "https://i.pravatar.cc/100" }}
+                style={styles.avatar}
+              />
+
+              {/* <View style={styles.avatar} /> */}
+            </TouchableOpacity>
             <View style={styles.usernameBlock}>
               <View style={styles.usernameLine}>
-                <Text style={styles.text1}>Good Morning,</Text>
+                <Text style={styles.text1}>{greeting}</Text>
               </View>
               <View style={styles.usernameLineShort}>
-                <Text style={styles.text2}> David Asante Ameyaw</Text>
+                <Text style={styles.text2}>Ameyaw David Asante</Text>
               </View>
             </View>
-            <TouchableOpacity onPress={handleSignOut}>
+            <TouchableOpacity
+              onPress={handleSignOut}
+              style={styles.searchIconContainer}
+            >
               <Ionicons
                 name="search"
                 size={20}
-                color="#fff"
+                color="#9B0E10"
                 style={styles.searchIcon}
               />
             </TouchableOpacity>
@@ -169,8 +211,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatar: {
-    width: moderateScale(75, 0.9),
-    height: moderateScale(75, 0.9),
+    width: moderateScale(60, 0.9),
+    height: moderateScale(60, 0.9),
     borderRadius: moderateScale(100),
     backgroundColor: "#eee",
     marginRight: moderateScale(7),
@@ -187,12 +229,12 @@ const styles = StyleSheet.create({
   },
   text1: {
     color: "#fff",
-    fontSize: moderateScale(16, 0.8),
+    fontSize: moderateScale(14, 0.8),
     fontWeight: "bold",
   },
   text2: {
     color: "#fff",
-    fontSize: moderateScale(14, 0.8),
+    fontSize: moderateScale(18, 0.8),
     fontWeight: "600",
   },
   usernameLineShort: {
@@ -200,9 +242,14 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     fontWeight: "600",
   },
-  searchIcon: {
+  searchIconContainer: {
+    backgroundColor: "#FFFFFF",
+    padding: moderateScale(8),
+    borderRadius: moderateScale(100),
     marginRight: moderateScale(8),
-    fontSize: moderateScale(20),
+  },
+  searchIcon: {
+    fontSize: moderateScale(20, 0.8),
   },
   heroCard: {
     height: moderateVerticalScale(160, 0.8),

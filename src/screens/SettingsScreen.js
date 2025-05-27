@@ -10,15 +10,25 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   moderateScale,
   moderateVerticalScale,
 } from "react-native-size-matters";
+import { useSelector } from "react-redux";
+import { selectUser } from "../store/features/userSlice";
+import BackButton from "../components/BackButton";
+import { useNavigation } from "@react-navigation/native";
 // import { StatusBar } from "expo-status-bar";
 
 const SettingsScreen = () => {
+  const userState = useSelector(selectUser);
+  const navigation = useNavigation();
+
+  console.log("User State", userState);
+
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleDarkMode = () => setIsDarkMode((previousState) => !previousState);
@@ -28,11 +38,12 @@ const SettingsScreen = () => {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
+          {/* <BackButton/> */}
           <TouchableOpacity>
-            <Ionicons name="arrow-back" size={24} color="black" />
+            <Ionicons name="arrow-back" size={24} color="#9B0E10" />
           </TouchableOpacity>
           <Text style={styles.headerText}>Settings</Text>
-          <View style={{ width: 24 }} /> {/* Placeholder for alignment */}
+          <View style={{ width: 24 }} />
         </View>
 
         {/* Profile Section */}
@@ -45,42 +56,83 @@ const SettingsScreen = () => {
             <Text style={styles.name}>Alfred Daniel</Text>
             <Text style={styles.role}>Product/UI Designer</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          <Ionicons name="chevron-forward" size={20} color="#9B0E10" />
         </TouchableOpacity>
 
         {/* Other Settings */}
         <Text style={styles.sectionTitle}>Other settings</Text>
 
         <View style={styles.card}>
-          <SettingItem icon="person-outline" label="Profile details" />
-          <SettingItem icon="lock-closed-outline" label="Password" />
-          <SettingItem icon="notifications-outline" label="Notifications" />
-          <View style={styles.settingRow}>
+          <SettingItem
+            icon="person-outline"
+            label="Profile details"
+            screenName="ProfileDetails"
+            navigation={navigation}
+          />
+          <View style={[styles.settingRow, styles.darkModeRow]}>
             <View style={styles.settingLeft}>
-              <Ionicons name="moon-outline" size={22} color="#333" />
+              <Ionicons name="moon-outline" size={22} color="#9B0E10" />
               <Text style={styles.settingLabel}>Dark mode</Text>
             </View>
             <Switch
               value={isDarkMode}
               onValueChange={toggleDarkMode}
-              thumbColor={isDarkMode ? "#222" : "#f4f3f4"}
+              thumbColor={isDarkMode ? "#9B0E10" : "#f4f3f4"}
               trackColor={{ false: "#ccc", true: "#767577" }}
             />
           </View>
+          <SettingItem
+            icon="gift-outline"
+            label="Our Referral System"
+            screenName="ReferralSystem"
+            navigation={navigation}
+          />
         </View>
 
         {/* Additional Section */}
         <View style={styles.card}>
           <SettingItem
+            icon="help-circle-outline"
+            label="Help/FAQ"
+            screenName="HelpFAQ"
+            navigation={navigation}
+          />
+          <SettingItem
+            icon="warning-outline"
+            label="Report a problem"
+            screenName="ReportProblem"
+            navigation={navigation}
+          />
+          <SettingItem
+            icon="headset-outline"
+            label="Contact Support"
+            screenName="ContactSupport"
+            navigation={navigation}
+          />
+        </View>
+
+        {/* Contact & Legal Section */}
+        <View style={styles.card}>
+          <SettingItem
             icon="information-circle-outline"
             label="About application"
+            screenName="AboutApplication"
+            navigation={navigation}
           />
-          <SettingItem icon="chatbubble-ellipses-outline" label="Help/FAQ" />
+
           <SettingItem
-            icon="trash-outline"
-            label="Deactivate my account"
+            icon="star-outline"
+            label="Rate the App"
+            screenName="RateApp"
+            navigation={navigation}
+          />
+          <SettingItem
+            icon="log-out-outline"
+            label="Log out"
             labelStyle={{ color: "red" }}
             iconColor="red"
+            screenName="Logout"
+            navigation={navigation}
           />
         </View>
       </ScrollView>
@@ -88,27 +140,64 @@ const SettingsScreen = () => {
   );
 };
 
-const SettingItem = ({ icon, label, labelStyle, iconColor = "#333" }) => (
-  <TouchableOpacity style={styles.settingRow}>
-    <View style={styles.settingLeft}>
-      <Ionicons name={icon} size={22} color={iconColor} />
-      <Text style={[styles.settingLabel, labelStyle]}>{label}</Text>
-    </View>
-    <Ionicons name="chevron-forward" size={20} color="#ccc" />
-  </TouchableOpacity>
-);
+const SettingItem = ({
+  icon,
+  label,
+  labelStyle,
+  iconColor = "#9B0E10",
+  screenName,
+  navigation,
+}) => {
+  const handlePress = () => {
+    if (screenName === "Logout") {
+      Alert.alert(
+        "Logout",
+        "Are you sure you want to logout?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Logout",
+            style: "destructive",
+            onPress: () => {
+              // Add your logout logic here
+              console.log("User logged out");
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    } else {
+      navigation.navigate(screenName);
+    }
+  };
+
+  return (
+    <TouchableOpacity style={styles.settingRow} onPress={handlePress}>
+      <View style={styles.settingLeft}>
+        <Ionicons name={icon} size={20} color={iconColor} />
+        <Text style={[styles.settingLabel, labelStyle]}>{label}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#9B0E10" />
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#f8f8f8",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    // paddingVertical: moderateVerticalScale(50),
   },
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
     paddingHorizontal: moderateScale(16),
-    paddingTop: moderateVerticalScale(30),
+    paddingVertical: moderateVerticalScale(20),
+    paddingBottom: moderateVerticalScale(30),
   },
   header: {
     flexDirection: "row",
@@ -165,6 +254,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(14),
     borderBottomColor: "#eee",
     borderBottomWidth: 1,
+  },
+  darkModeRow: {
+    paddingVertical: moderateVerticalScale(4),
   },
   settingLeft: {
     flexDirection: "row",

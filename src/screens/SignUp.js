@@ -21,6 +21,15 @@ import {
   moderateScale,
   moderateVerticalScale,
 } from "react-native-size-matters";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setFullName,
+  setLevel,
+  setUniversity,
+  setSelectedCollege,
+  setUserInfo,
+  selectUser,
+} from "../store/features/userSlice";
 
 import { app, auth, db } from "../../firebase";
 import {
@@ -28,11 +37,12 @@ import {
   updateProfile,
   getAuth,
 } from "firebase/auth";
-import { doc, setDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getFirestore, getDoc } from "firebase/firestore";
 import { AuthContext } from "../../Store/AuthContext";
 import { Picker } from "@react-native-picker/picker";
 import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "../components/BackButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height } = Dimensions.get("window");
 
@@ -44,6 +54,8 @@ const validateEmail = (email) => {
 export default function SignUp() {
   const authCtx = useContext(AuthContext);
   const route = useRoute();
+  const dispatch = useDispatch();
+  const userState = useSelector(selectUser);
 
   const [fullName, setFullName] = useState("dav");
   const [email, setEmail] = useState("davidameyaw607@gmail.com");
@@ -55,9 +67,9 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedUniversity, setSelectedUniversity] = useState(null);
-  const [selectedCollege, setSelectedCollege] = useState(null); // Initialize as null
+  const [selectedCollege, setSelectedCollege] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
@@ -219,11 +231,10 @@ export default function SignUp() {
 
   const handleSubmit = async () => {
     if (isFormValid) {
-      // For applying students, college is optional
       if (selectedUniversity === "Applying" || selectedCollege) {
         try {
           setLoading(true);
-          setError("");
+          setErrorMessage("");
 
           // Create user with email and password
           const userCredential = await withTimeout(
@@ -231,18 +242,10 @@ export default function SignUp() {
           );
 
           const token = await userCredential.user.getIdToken();
-          // console.log(token);
-
-          authCtx.authenticate(token);
-
-          // Update user profile with display name
-          // await updateProfile(userCredential.user, {
-          //   displayName: fullName,
-          // });
 
           // Create user document in Firestore
           const userDoc = {
-            fullName,
+            fullName: fullName,
             email,
             level: selectedLevel,
             university: {
@@ -255,21 +258,54 @@ export default function SignUp() {
             },
             createdAt: new Date().toISOString(),
           };
-          console.log(userDoc);
 
           try {
+            // Step 1: Write user doc to Firestore
             await setDoc(doc(db, "users", userCredential.user.uid), userDoc);
-            console.log("User doc written");
+            console.log("✅ User document written to Firestore.");
+
+            // Step 2: Fetch the created document to verify
+            const userRef = doc(db, "users", userCredential.user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+              throw new Error("User document does not exist after creation");
+            }
+
+            const userData = userSnap.data();
+            console.log("✅ User data fetched from Firestore:", userData);
+
+            // Step 3: Store in Redux and AsyncStorage
+            const userDataToStore = {
+              fullName: userData.fullName,
+              level: userData.level,
+              university: userData.university.value,
+              selectedCollege: userData.college.value,
+            };
+
+            // Store in AsyncStorage
+            await AsyncStorage.setItem("user", JSON.stringify(userDataToStore));
+            console.log(
+              "✅ User data stored in AsyncStorage:",
+              userDataToStore
+            );
+
+            // Store in Redux
+            dispatch(setUserInfo(userDataToStore));
+            console.log("✅ User data dispatched to Redux");
+            console.log("📦 Current Redux Store State:", userState);
+
+            // Navigate to home screen after successful signup
+            // navigation.navigate("Home");
           } catch (firestoreError) {
             console.error("Firestore error:", firestoreError);
+            throw firestoreError; // Re-throw to be caught by outer catch
           }
-
-          // Navigate to home screen or wherever appropriate
-          // Alert.alert("Success", "Your account has been created successfully!");
-          // navigation.navigate("Home");
+          authCtx.authenticate(token);
         } catch (error) {
-          setError(error.message);
-          console.error(error.code);
+          setErrorMessage(error.message);
+          console.error("Error during sign up:", error.code);
+
           if (error.code === "auth/email-already-in-use") {
             Alert.alert(
               "Account Exists",
@@ -282,38 +318,34 @@ export default function SignUp() {
                 },
               ]
             );
-            setError(
+            setErrorMessage(
               "An account with this email already exists. Please try logging in."
             );
-          }
-          if (error.code === "auth/network-request-failed") {
+          } else if (error.code === "auth/network-request-failed") {
             Alert.alert(
               "Network Error",
               "Unable to complete the signup process due to a network issue. Please check your internet connection and try again.",
               [{ text: "OK" }]
             );
-            setError(
+            setErrorMessage(
               "Network request failed. Please ensure you're connected to the internet."
             );
-          }
-          if (error.message === "timeout-error") {
+          } else if (error.message === "timeout-error") {
             Alert.alert(
               "Timeout",
               "The signup process is taking too long. Please check your connection and try again.",
               [{ text: "OK" }]
             );
-            setError("Signup timed out. Please try again.");
+            setErrorMessage("Signup timed out. Please try again.");
           }
-
-          console.error("Error during sign up:", error.code);
         } finally {
           setLoading(false);
         }
       } else {
-        setError("Please select a college.");
+        setErrorMessage("Please select a college.");
       }
     } else {
-      setError("Please fill in all required fields.");
+      setErrorMessage("Please fill in all required fields.");
     }
   };
 
