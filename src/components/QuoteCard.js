@@ -55,7 +55,7 @@ const QuoteCard = ({ quote, author, onShare }) => {
 const styles = StyleSheet.create({
   cardContainer: {
     borderRadius: moderateScale(20),
-    margin: moderateScale(16),
+    // margin: moderateScale(16),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     minHeight: moderateVerticalScale(230, 0.2),
     // maxHeight: moderateVerticalScale(300, 0.2),
-    width: "100%",
+    // width: "100%",
     alignSelf: "center",
     justifyContent: "center",
   },
