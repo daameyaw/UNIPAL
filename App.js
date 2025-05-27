@@ -27,7 +27,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { setUserInfo } from "./src/store/features/userSlice";
-// import { setUserInfo } from "./src/store/userSlice";
+import ProfileDetailsScreen from "./src/screens/ProfileDetailsScreen";
+import HelpFAQScreen from "./src/screens/HelpFAQScreen";
+import ReportProblemScreen from "./src/screens/ReportProblemScreen";
+import ContactSupportScreen from "./src/screens/ContactSupportScreen";
+import AboutApplicationScreen from "./src/screens/AboutApplicationScreen";
+import RateAppScreen from "./src/screens/RateAppScreen";
+import ReferralSystemScreen from "./src/screens/ReferralSystemScreen";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -139,6 +145,16 @@ function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
+      <Stack.Screen name="HelpFAQ" component={HelpFAQScreen} />
+      <Stack.Screen name="ReportProblem" component={ReportProblemScreen} />
+      <Stack.Screen name="ContactSupport" component={ContactSupportScreen} />
+      <Stack.Screen
+        name="AboutApplication"
+        component={AboutApplicationScreen}
+      />
+      <Stack.Screen name="RateApp" component={RateAppScreen} />
+      <Stack.Screen name="ReferralSystem" component={ReferralSystemScreen} />
     </Stack.Navigator>
   );
 }
