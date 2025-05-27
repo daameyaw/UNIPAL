@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -12,17 +12,23 @@ import {
   moderateVerticalScale,
 } from "react-native-size-matters";
 import BackButton from "../components/BackButton";
+import { ThemeContext } from "../context/ThemeContext";
 
 const ReportProblemScreen = () => {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <BackButton />
-          <Text style={styles.headerText}>Report a Problem</Text>
-          <View style={{ width: 24 }} />
-        </View>
+  const { theme } = useContext(ThemeContext);
 
+  return (
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
+      <View style={[styles.header, { backgroundColor: theme.primary }]}>
+        <BackButton color="#fff" />
+        <Text style={[styles.headerText, { color: "#fff" }]}>
+          Report a Problem
+        </Text>
+        <View style={{ width: 24 }} />
+      </View>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         {/* Add your report problem form here */}
       </View>
     </SafeAreaView>
@@ -32,7 +38,6 @@ const ReportProblemScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   container: {

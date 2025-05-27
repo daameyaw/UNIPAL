@@ -34,6 +34,7 @@ import ContactSupportScreen from "./src/screens/ContactSupportScreen";
 import AboutApplicationScreen from "./src/screens/AboutApplicationScreen";
 import RateAppScreen from "./src/screens/RateAppScreen";
 import ReferralSystemScreen from "./src/screens/ReferralSystemScreen";
+import { ThemeProvider } from "./src/context/ThemeContext";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -240,7 +241,9 @@ export default function App() {
         <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
           <StatusBar style="dark" />
           <AuthContextProvider>
-            <Root />
+            <ThemeProvider>
+              <Root />
+            </ThemeProvider>
           </AuthContextProvider>
         </View>
       </QueryClientProvider>

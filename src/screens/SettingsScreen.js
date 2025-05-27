@@ -21,48 +21,63 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../store/features/userSlice";
 import BackButton from "../components/BackButton";
 import { useNavigation } from "@react-navigation/native";
+import { ThemeContext } from "../context/ThemeContext";
 // import { StatusBar } from "expo-status-bar";
 
 const SettingsScreen = () => {
   const userState = useSelector(selectUser);
   const navigation = useNavigation();
+  const { theme, toggleTheme } = React.useContext(ThemeContext);
 
   console.log("User State", userState);
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleDarkMode = () => setIsDarkMode((previousState) => !previousState);
+  const isDarkMode = theme.mode === "dark";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
+      <ScrollView
+        style={[styles.container, { backgroundColor: theme.background }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: theme.card }]}>
           {/* <BackButton/> */}
           <TouchableOpacity>
-            <Ionicons name="arrow-back" size={24} color="#9B0E10" />
+            <Ionicons name="arrow-back" size={24} color={theme.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerText}>Settings</Text>
+          <Text style={[styles.headerText, { color: theme.text }]}>
+            Settings
+          </Text>
           <View style={{ width: 24 }} />
         </View>
 
         {/* Profile Section */}
-        <TouchableOpacity style={styles.profileCard}>
+        <TouchableOpacity
+          style={[styles.profileCard, { backgroundColor: theme.card }]}
+        >
           <Image
             source={{ uri: "https://i.pravatar.cc/100" }}
             style={styles.avatar}
           />
           <View style={styles.profileText}>
-            <Text style={styles.name}>Alfred Daniel</Text>
-            <Text style={styles.role}>Product/UI Designer</Text>
+            <Text style={[styles.name, { color: theme.text }]}>
+              Alfred Daniel
+            </Text>
+            <Text style={[styles.role, { color: theme.text }]}>
+              Product/UI Designer
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#9B0E10" />
+          <Ionicons name="chevron-forward" size={20} color={theme.primary} />
         </TouchableOpacity>
 
         {/* Other Settings */}
-        <Text style={styles.sectionTitle}>Other settings</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          Other settings
+        </Text>
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
           <SettingItem
             icon="person-outline"
             label="Profile details"
@@ -76,7 +91,7 @@ const SettingsScreen = () => {
             </View>
             <Switch
               value={isDarkMode}
-              onValueChange={toggleDarkMode}
+              onValueChange={toggleTheme}
               thumbColor={isDarkMode ? "#9B0E10" : "#f4f3f4"}
               trackColor={{ false: "#ccc", true: "#767577" }}
             />
@@ -90,7 +105,7 @@ const SettingsScreen = () => {
         </View>
 
         {/* Additional Section */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
           <SettingItem
             icon="help-circle-outline"
             label="Help/FAQ"
@@ -112,7 +127,7 @@ const SettingsScreen = () => {
         </View>
 
         {/* Contact & Legal Section */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
           <SettingItem
             icon="information-circle-outline"
             label="About application"

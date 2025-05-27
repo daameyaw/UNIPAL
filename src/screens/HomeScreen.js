@@ -25,6 +25,7 @@ import { useMotivation } from "../hooks/useMotivation";
 import { useSelector } from "react-redux";
 import { selectFullName } from "../store/features/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ThemeContext } from "../context/ThemeContext";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -45,6 +46,7 @@ const HomeScreen = ({ navigation }) => {
   const authCtx = useContext(AuthContext);
   const fullName = useSelector(selectFullName);
   const [greeting, setGreeting] = useState(getGreeting());
+  const { theme } = useContext(ThemeContext);
 
   const auth = getAuth(app);
 
@@ -76,10 +78,12 @@ const HomeScreen = ({ navigation }) => {
   return (
     <>
       {/* // <SafeAreaView style={styles.container}> */}
-      <View style={styles.statusBarBackground} />
-      <StatusBar style="light" />
+      <View
+        style={[styles.statusBarBackground, { backgroundColor: theme.primary }]}
+      />
+      <StatusBar style={theme.mode === "dark" ? "light" : "dark"} />
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -103,10 +107,14 @@ const HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
             <View style={styles.usernameBlock}>
               <View style={styles.usernameLine}>
-                <Text style={styles.text1}>{greeting}</Text>
+                <Text style={[styles.text1, { color: theme.text }]}>
+                  {greeting},
+                </Text>
               </View>
               <View style={styles.usernameLineShort}>
-                <Text style={styles.text2}>Ameyaw David Asante</Text>
+                <Text style={[styles.text2, { color: theme.text }]}>
+                  {fullName}
+                </Text>
               </View>
             </View>
             <TouchableOpacity
@@ -116,7 +124,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons
                 name="search"
                 size={20}
-                color="#9B0E10"
+                color={theme.primary}
                 style={styles.searchIcon}
               />
             </TouchableOpacity>
@@ -126,38 +134,60 @@ const HomeScreen = ({ navigation }) => {
         <MyCarousel />
 
         {/* Locations */}
-        <Text style={styles.sectionTitle}>Locations</Text>
+        <Text style={[styles.sectionTitle, { color: theme.primary }]}>
+          Locations
+        </Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
         >
           {[...Array(5)].map((_, i) => (
-            <View key={i} style={styles.locationItem} />
+            <View
+              key={i}
+              style={[styles.locationItem, { backgroundColor: theme.card }]}
+            />
           ))}
         </ScrollView>
 
         {/* Categories */}
-        <Text style={styles.sectionTitle}>Categories</Text>
+        <Text style={[styles.sectionTitle, { color: theme.primary }]}>
+          Categories
+        </Text>
         <FlatList
           data={[...Array(4)]}
           numColumns={2}
-          renderItem={({ item, index }) => <View style={styles.categoryItem} />}
+          renderItem={({ item, index }) => (
+            <View
+              style={[styles.categoryItem, { backgroundColor: theme.card }]}
+            />
+          )}
           keyExtractor={(_, index) => index.toString()}
           columnWrapperStyle={styles.categoryRow}
         />
 
         {/* Explore Section */}
-        <Text style={styles.sectionTitle}>Explore</Text>
+        <Text style={[styles.sectionTitle, { color: theme.primary }]}>
+          Explore
+        </Text>
         <FlatList
           data={[...Array(4)]}
           renderItem={({ item, index }) => (
-            <TouchableOpacity style={styles.exploreCard}>
+            <TouchableOpacity
+              style={[
+                styles.exploreCard,
+                { backgroundColor: theme.background, shadowColor: theme.text },
+              ]}
+            >
               <View>
-                <Text style={styles.exploreTitle}>STUFFFFFFFF</Text>
-                <Text style={styles.exploreText}>XXXXXXXXXXXXXXX</Text>
+                <Text style={[styles.exploreTitle, { color: theme.text }]}>
+                  STUFFFFFFFF
+                </Text>
+                <Text style={[styles.exploreText, { color: theme.text }]}>
+                  XXXXXXXXXXXXXXX
+                </Text>
               </View>
-              <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+              <Ionicons name="arrow-forward" size={20} color={theme.primary} />
             </TouchableOpacity>
           )}
           keyExtractor={(_, index) => index.toString()}
