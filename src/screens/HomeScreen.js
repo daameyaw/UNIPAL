@@ -25,6 +25,8 @@ import { useMotivation } from "../hooks/useMotivation";
 import { useSelector } from "react-redux";
 import { selectFullName } from "../store/features/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LocationCard from "../components/LocationCard";
+import CategoryCard from "../components/CategoryCard";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -40,11 +42,28 @@ const getGreeting = () => {
   }
 };
 
+const initialCategories = [
+  { icon: "home-outline", label: "STUDENT HOUSING" },
+  { icon: "navigate-outline", label: "CAMPUS NAVIGATION" },
+  { icon: "book-outline", label: "ACADEMICS" },
+  { icon: "headset-outline", label: "SUPPORT SERVICES" },
+  { icon: "people-circle-outline", label: "CAMPUS LIFE" },
+  { icon: "school-outline", label: "ADMISSIONS" },
+];
+
+function shuffleArray(array) {
+  return array
+    .map((value) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+}
+
 const HomeScreen = ({ navigation }) => {
-  const { isLoading, quote, author, date, error } = useMotivation();
+  // const { isLoading, quote, author, date, error } = useMotivation();
   const authCtx = useContext(AuthContext);
   const fullName = useSelector(selectFullName);
   const [greeting, setGreeting] = useState(getGreeting());
+  const [categories, setCategories] = useState([]);
 
   const auth = getAuth(app);
 
@@ -65,6 +84,10 @@ const HomeScreen = ({ navigation }) => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    setCategories(shuffleArray(initialCategories).slice(0, 4));
+  }, []);
+
   // useEffect(() => {
   //   async function fetchMotivation() {
   //     const motivation = await getMotivation();
@@ -73,99 +96,119 @@ const HomeScreen = ({ navigation }) => {
   //   fetchMotivation();
   // }, []);
 
-  return (
+  const renderHeader = () => (
     <>
-      {/* // <SafeAreaView style={styles.container}> */}
       <View style={styles.statusBarBackground} />
       <StatusBar style="light" />
-      <ScrollView
-        style={styles.container}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <ImageBackground
+        source={require("../../assets/images/Hero1.png")}
+        style={styles.topBar}
+        imageStyle={{
+          borderBottomLeftRadius: moderateScale(55),
+          borderBottomRightRadius: moderateScale(55),
+        }}
       >
-        {/* Top Profile Bar */}
-        <ImageBackground
-          source={require("../../assets/images/Hero1.png")}
-          style={styles.topBar}
-          imageStyle={{
-            borderBottomLeftRadius: moderateScale(55),
-            borderBottomRightRadius: moderateScale(55),
-          }}
-        >
-          <View style={styles.topBarContent}>
-            <TouchableOpacity onPress={() => console.log("clicked")}>
-              <Image
-                source={{ uri: "https://i.pravatar.cc/100" }}
-                style={styles.avatar}
-              />
-
-              {/* <View style={styles.avatar} /> */}
-            </TouchableOpacity>
-            <View style={styles.usernameBlock}>
-              <View style={styles.usernameLine}>
-                <Text style={styles.text1}>{greeting}</Text>
-              </View>
-              <View style={styles.usernameLineShort}>
-                <Text style={styles.text2}>Ameyaw David Asante</Text>
-              </View>
+        <View style={styles.topBarContent}>
+          <TouchableOpacity onPress={() => console.log("clicked")}>
+            <Image
+              source={{ uri: "https://i.pravatar.cc/100" }}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
+          <View style={styles.usernameBlock}>
+            <View style={styles.usernameLine}>
+              <Text style={styles.text1}>{greeting}</Text>
             </View>
-            <TouchableOpacity
-              onPress={handleSignOut}
-              style={styles.searchIconContainer}
-            >
-              <Ionicons
-                name="search"
-                size={20}
-                color="#9B0E10"
-                style={styles.searchIcon}
-              />
-            </TouchableOpacity>
+            <View style={styles.usernameLineShort}>
+              <Text style={styles.text2}>Ameyaw David Asante</Text>
+            </View>
           </View>
-        </ImageBackground>
+          <TouchableOpacity
+            onPress={handleSignOut}
+            style={styles.searchIconContainer}
+          >
+            <Ionicons
+              name="search"
+              size={20}
+              color="#9B0E10"
+              style={styles.searchIcon}
+            />
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
 
-        <MyCarousel />
+      <MyCarousel />
 
-        {/* Locations */}
-        <Text style={styles.sectionTitle}>Locations</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.horizontalScroll}
-        >
-          {[...Array(5)].map((_, i) => (
-            <View key={i} style={styles.locationItem} />
-          ))}
-        </ScrollView>
-
-        {/* Categories */}
-        <Text style={styles.sectionTitle}>Categories</Text>
-        <FlatList
-          data={[...Array(4)]}
-          numColumns={2}
-          renderItem={({ item, index }) => <View style={styles.categoryItem} />}
-          keyExtractor={(_, index) => index.toString()}
-          columnWrapperStyle={styles.categoryRow}
+      {/* Locations */}
+      <Text style={styles.sectionTitle}>Need directions?</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.horizontalScroll}
+      >
+        <LocationCard
+          icon="medkit-outline"
+          label="Medical Centers"
+          onPress={() => {}}
         />
-
-        {/* Explore Section */}
-        <Text style={styles.sectionTitle}>Explore</Text>
-        <FlatList
-          data={[...Array(4)]}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity style={styles.exploreCard}>
-              <View>
-                <Text style={styles.exploreTitle}>STUFFFFFFFF</Text>
-                <Text style={styles.exploreText}>XXXXXXXXXXXXXXX</Text>
-              </View>
-              <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
-            </TouchableOpacity>
-          )}
-          keyExtractor={(_, index) => index.toString()}
-          scrollEnabled={false}
+        <LocationCard
+          icon="finger-print-outline"
+          label="Biometric Check"
+          onPress={() => {}}
+        />
+        <LocationCard
+          icon="bus-outline"
+          label="Shuttle Stops"
+          onPress={() => {}}
+        />
+        <LocationCard
+          icon="library-outline"
+          label="School libraries"
+          onPress={() => {}}
         />
       </ScrollView>
-      {/* </SafeAreaView> */}
+
+      {/* Categories */}
+      <Text style={styles.sectionTitle}>Categories</Text>
+      <FlatList
+        data={categories}
+        numColumns={2}
+        renderItem={({ item }) => (
+          <CategoryCard
+            icon={item.icon}
+            label={item.label}
+            onPress={() => {}}
+          />
+        )}
+        keyExtractor={(_, index) => index.toString()}
+        scrollEnabled={false}
+        columnWrapperStyle={styles.categoryRow}
+      />
+
+      {/* Explore Section */}
+      <Text style={styles.sectionTitle}>Explore</Text>
     </>
+  );
+
+  const renderExploreItem = ({ item, index }) => (
+    <TouchableOpacity style={styles.exploreCard}>
+      <View>
+        <Text style={styles.exploreTitle}>STUFFFFFFFF</Text>
+        <Text style={styles.exploreText}>XXXXXXXXXXXXXXX</Text>
+      </View>
+      <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+    </TouchableOpacity>
+  );
+
+  return (
+    <FlatList
+      data={[...Array(4)]}
+      renderItem={renderExploreItem}
+      keyExtractor={(_, index) => index.toString()}
+      ListHeaderComponent={renderHeader}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    />
   );
 };
 
@@ -287,11 +330,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   sectionTitle: {
-    fontSize: moderateScale(14, 0.9),
-    fontWeight: "bold",
-    marginBottom: moderateVerticalScale(8),
+    fontSize: moderateScale(16, 0.9),
+    fontWeight: "medium",
+    marginBottom: moderateVerticalScale(10,0.6),
     marginTop: moderateVerticalScale(10),
-    color: "#9B0E10",
+    // color: "#9B0E10",
   },
   horizontalScroll: {
     flexDirection: "row",
@@ -337,6 +380,7 @@ const styles = StyleSheet.create({
   },
   categoryRow: {
     justifyContent: "space-between",
+    marginBottom: moderateVerticalScale(12),
   },
   exploreCard: {
     backgroundColor: "#fff",
