@@ -43,7 +43,7 @@ const getGreeting = () => {
 };
 
 const initialCategories = [
-  { icon: "home-outline", label: "STUDENT HOUSING" },
+  { icon: "home", label: "STUDENT HOUSING" },
   { icon: "navigate-outline", label: "CAMPUS NAVIGATION" },
   { icon: "book-outline", label: "ACADEMICS" },
   { icon: "headset-outline", label: "SUPPORT SERVICES" },
