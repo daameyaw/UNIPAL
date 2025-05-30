@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: moderateScale(13),
     textAlign: "left",
-    maxWidth: moderateScale(70),
+    maxWidth: moderateScale(70,0.3),
     flexShrink: 1,
     marginLeft: 2,
   },
