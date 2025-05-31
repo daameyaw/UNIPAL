@@ -36,10 +36,10 @@ export default function Wave() {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.appName}>
+          {/* <Text style={styles.appName}>
             UNI
-            <Text style={styles.appNameBold}>PAL</Text>
-          </Text>
+            <Text style={styles.appNameBold}>PAL</Text> */}
+          {/* </Text> */}
         </View>
       </View>
     </View>
