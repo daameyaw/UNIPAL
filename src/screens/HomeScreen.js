@@ -272,13 +272,13 @@ const styles = StyleSheet.create({
   },
   text1: {
     color: "#fff",
-    fontSize: moderateScale(14, 0.8),
+    fontSize: moderateScale(16, 0.8),
     fontWeight: "bold",
   },
   text2: {
     color: "#fff",
     fontSize: moderateScale(18, 0.8),
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   usernameLineShort: {
     borderRadius: moderateScale(4),
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: moderateScale(16, 0.9),
     fontWeight: "medium",
-    marginBottom: moderateVerticalScale(10,0.6),
+    marginBottom: moderateVerticalScale(10, 0.6),
     marginTop: moderateVerticalScale(10),
     // color: "#9B0E10",
   },
