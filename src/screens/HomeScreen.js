@@ -120,7 +120,7 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.text1}>{greeting}</Text>
             </View>
             <View style={styles.usernameLineShort}>
-              <Text style={styles.text2}>Ameyaw David Asante</Text>
+              <Text style={styles.text2}>{fullName}</Text>
             </View>
           </View>
           <TouchableOpacity
