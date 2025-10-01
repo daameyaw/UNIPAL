@@ -34,6 +34,7 @@ import ContactSupportScreen from "./src/screens/ContactSupportScreen";
 import AboutApplicationScreen from "./src/screens/AboutApplicationScreen";
 import RateAppScreen from "./src/screens/RateAppScreen";
 import ReferralSystemScreen from "./src/screens/ReferralSystemScreen";
+import LocationPlacesScreen from "./src/screens/LocationPlacesScreen";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -121,11 +122,13 @@ function TabNavigator() {
 
           if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "Campus") {
+          } else if (route.name === "Locations") {
             iconName = focused ? "map" : "map-outline";
           } else if (route.name === "Guides") {
             iconName = focused ? "book" : "book-outline";
           } else if (route.name === "Settings") {
+            iconName = focused ? "settings" : "settings-outline";
+          } else if (route.name === "CWA ") {
             iconName = focused ? "settings" : "settings-outline";
           }
 
@@ -134,7 +137,9 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Campus" component={MapScreen} />
+      <Tab.Screen name="Locations" component={MapScreen} />
+      <Tab.Screen name="CWA " component={MapScreen} />
+
       <Tab.Screen name="Guides" component={ExploreScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
@@ -145,6 +150,7 @@ function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="LocationPlaces" component={LocationPlacesScreen} />
       <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
       <Stack.Screen name="HelpFAQ" component={HelpFAQScreen} />
       <Stack.Screen name="ReportProblem" component={ReportProblemScreen} />
