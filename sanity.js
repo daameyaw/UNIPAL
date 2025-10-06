@@ -1,5 +1,6 @@
 // sanity.js
 import sanityClient, { createClient } from "@sanity/client";
+import imageUrlBuilder from "@sanity/image-url";
 
 
 const client = createClient({
@@ -8,5 +9,9 @@ const client = createClient({
   apiVersion: "2025-05-24", // Safe, this will never change
   useCdn: true, // `true` makes it faster for read-only data
 });
+
+const builder = imageUrlBuilder(client);
+
+export const urlFor = (source) => builder.image(source);
 
 export default client;
