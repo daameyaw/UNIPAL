@@ -7,6 +7,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { moderateScale } from "react-native-size-matters";
 
 const LocationListItem = ({ iconName, title, description, onPress, style }) => {
   return (
@@ -32,7 +33,7 @@ const LocationListItem = ({ iconName, title, description, onPress, style }) => {
             <Text style={styles.title}>{title}</Text>
             <View style={styles.descriptionBox}>
               {description ? (
-                <Text numberOfLines={2} style={styles.descriptionText}>
+                <Text numberOfLines={3} style={styles.descriptionText}>
                   {description}
                 </Text>
               ) : null}
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 25,
+    paddingVertical: moderateScale(16,0.9),
     paddingHorizontal: 16,
     backgroundColor: "#dedede",
   },
@@ -75,13 +76,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
     title: {
-    fontSize: 16,
+    fontSize: moderateScale(14,0.7),
     color: "#121212",
     fontWeight: "700",
     letterSpacing: 0.2,
   },
   descriptionBox: {
-    marginTop: 8,
+    marginTop: 4,
     minHeight: 28,
     // backgroundColor: "#ffffff",
     borderRadius: 6,
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     color: "#555555",
-    fontSize: 12,
+    fontSize: moderateScale(10,0.6),
     marginLeft: 0,
     lineHeight: 18,
   },
