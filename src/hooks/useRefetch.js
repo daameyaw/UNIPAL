@@ -9,9 +9,9 @@ export function useRefreshOnFocus(refetch) {
         firstTimeRef.current = false;
         return;
       }
-      console.log("refetching");
+      // console.log("refetching");
       refetch();
-      console.log("refetched");
+      // console.log("refetched");
     }, [refetch])
   );
 }
