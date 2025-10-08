@@ -8,7 +8,7 @@ export function useAcademicEvents() {
     queryKey: ["academicEvents"],
     queryFn: async () => {
       const result = await getAcademicEvents();
-      console.log("Fetched new data:", result);
+      // console.log("Fetched new data:", result);
       return result;
     },
     // staleTime: 0,
@@ -29,9 +29,9 @@ export function useAcademicEvents() {
   useRefreshOnFocus(refetch);
 
   // Debug logs
-  console.log("Current data:", data);
-  console.log("Loading state:", isLoading);
-  console.log("Error state:", error);
+  // console.log("Current data:", data);
+  // console.log("Loading state:", isLoading);
+  // console.log("Error state:", error);
 
   return { isLoading, data, error };
 }
