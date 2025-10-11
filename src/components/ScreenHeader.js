@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { moderateScale } from "react-native-size-matters";
 
 const ScreenHeader = ({ title = "", onBack }) => {
   const navigation = useNavigation();
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   headerText: {
-    fontSize: 22,
+    fontSize: moderateScale(18,0.7),
     fontWeight: "700",
     color: "#121212",
   },
