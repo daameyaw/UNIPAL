@@ -22,6 +22,8 @@ import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import { Ionicons } from "@expo/vector-icons";
 import MapScreen from "./src/screens/MapScreen";
 import ExploreScreen from "./src/screens/ExploreScreen";
+import ArticlesScreen from "./src/screens/ArticlesScreen";
+import ArticleScreen from "./src/screens/ArticleScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -35,6 +37,7 @@ import AboutApplicationScreen from "./src/screens/AboutApplicationScreen";
 import RateAppScreen from "./src/screens/RateAppScreen";
 import ReferralSystemScreen from "./src/screens/ReferralSystemScreen";
 import LocationPlacesScreen from "./src/screens/LocationPlacesScreen";
+import SearchScreen from "./src/screens/SearchScreen";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -150,6 +153,9 @@ function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="Search" component={SearchScreen} />
+      <Stack.Screen name="Articles" component={ArticlesScreen} />
+      <Stack.Screen name="Article" component={ArticleScreen} />
       <Stack.Screen name="LocationPlaces" component={LocationPlacesScreen} />
       <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
       <Stack.Screen name="HelpFAQ" component={HelpFAQScreen} />
