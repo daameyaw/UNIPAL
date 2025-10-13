@@ -18,45 +18,72 @@ const categories = [
   {
     id: "admissions",
     title: "ADMISSIONS",
-    subtitle: "XXXXXXXXXXXXXXXX",
+    subtitle: "Everything you need to know before stepping on campus!",
     icon: "school-outline",
   },
   {
     id: "academics",
     title: "ACADEMICS",
-    subtitle: "XXXXXXXXXXXXXXXX",
+    subtitle: "Study smarter, ace your courses, and make learning easier.",
     icon: "book-outline",
   },
   {
     id: "navigation",
     title: "CAMPUS NAVIGATION",
-    subtitle: "XXXXXXXXXXXXXXXX",
+    subtitle: "Find your way around campus like a true insider.",
     icon: "map-outline",
   },
   {
     id: "support",
     title: "SUPPORT SERVICES",
-    subtitle: "XXXXXXXXXXXXXXXX",
+    subtitle: "Get the help you need—mental health, finance, or academics.",
     icon: "help-buoy-outline",
   },
   {
     id: "life",
     title: "CAMPUS LIFE",
-    subtitle: "XXXXXXXXXXXXXXXX",
+    subtitle:
+      "Discover events, hangouts, and tips for living your best campus life!",
     icon: "happy-outline",
   },
 ];
 
-const ExploreScreen = () => {
+const ExploreScreen = ({ navigation }) => {
+  // const handleCategoryPress = (categoryId) => {
+  //   if (categoryId === "admissions") {
+  //     navigation.navigate("Articles", {
+  //       code :
+  //     };
+  //   }
+  //   // Add navigation for other categories as needed
+  // };
+
   return (
     <SafeAreaView style={styles.background} edges={["top", "left", "right"]}>
       <ScreenHeader title="Guides" />
+      <View style={styles.searchContainer}>
+        <TouchableOpacity
+          style={styles.searchButton}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate("Search")}
+        >
+          <Ionicons name="search-outline" size={20} color="#666" />
+          <Text style={styles.searchText}>Search guides...</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {categories.map((c) => (
-          <TouchableOpacity key={c.id} activeOpacity={0.9} style={styles.card}>
+          <TouchableOpacity
+            key={c.id}
+            activeOpacity={0.9}
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("Articles", { code: c.id, title: c.title })
+            } // Navigate to Articles screen with category
+          >
             <ImageBackground
               source={require("../../assets/images/card1.png")}
               resizeMode="cover"
@@ -89,6 +116,27 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  searchContainer: {
+    marginTop: 10,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  searchButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  searchText: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: "#666",
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 24,
     paddingVertical: 24,
@@ -111,7 +159,7 @@ const styles = StyleSheet.create({
   cardRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: moderateScale(25,0.8), // Move padding here
+    paddingVertical: moderateScale(25, 0.8), // Move padding here
     paddingHorizontal: 16, // Move padding here
   },
   leftIconWrap: {
