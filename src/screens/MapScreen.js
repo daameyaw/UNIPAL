@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
 import { useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
+import { moderateScale } from "react-native-size-matters";
 
 const MapScreen = () => {
   const navigation = useNavigation();
@@ -107,10 +108,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   list: {
-    padding: 16,
-    gap: 14,
+    padding: moderateScale(16),
+    gap: moderateScale(11),
   },
   item: {
     marginBottom: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    overflow: "hidden",
   },
 });
