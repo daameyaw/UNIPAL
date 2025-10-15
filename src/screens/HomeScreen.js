@@ -67,7 +67,7 @@ const HomeScreen = ({ navigation }) => {
 
   const auth = getAuth(app);
 
-  console.log("Name", fullName);
+  // console.log("Name", fullName);
 
   const handleSignOut = async () => {
     authCtx.logout();
@@ -78,7 +78,7 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setGreeting(getGreeting());
-      console.log(greeting);
+      // console.log(greeting);
     }, 60000); // Update every minute
 
     return () => clearInterval(interval);
@@ -145,26 +145,70 @@ const HomeScreen = ({ navigation }) => {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.horizontalScroll}
+        contentContainerStyle={styles.horizontalScrollContent}
       >
         <LocationCard
           icon="medkit-outline"
           label="Medical Centers"
-          onPress={() => {}}
+          onPress={() =>
+            navigation.navigate("LocationPlaces", {
+              code: "medical_centers",
+              title: "Medical Centers",
+            })
+          }
         />
         <LocationCard
           icon="finger-print-outline"
-          label="Biometric Check"
-          onPress={() => {}}
+          label="Biometric Centers"
+          onPress={() =>
+            navigation.navigate("LocationPlaces", {
+              code: "biometric_centers",
+              title: "Biometric Centers",
+            })
+          }
         />
         <LocationCard
           icon="bus-outline"
           label="Shuttle Stops"
-          onPress={() => {}}
+          onPress={() => {
+            console.log("clicked");
+            navigation.navigate("LocationPlaces", {
+              code: "shuttle_stops",
+              title: "Shuttle Stops",
+            });
+          }}
         />
         <LocationCard
           icon="library-outline"
           label="School libraries"
-          onPress={() => {}}
+          onPress={() => {
+            console.log("clicked");
+
+            navigation.navigate("LocationPlaces", {
+              code: "school_libraries",
+              title: "School Libraries",
+            });
+          }}
+        />
+        <LocationCard
+          icon="school-outline"
+          label="Colleges"
+          onPress={() =>
+            navigation.navigate("LocationPlaces", {
+              code: "colleges",
+              title: "Colleges",
+            })
+          }
+        />
+        <LocationCard
+          icon="home-outline"
+          label="Halls of Residence"
+          onPress={() =>
+            navigation.navigate("LocationPlaces", {
+              code: "halls_of_residences",
+              title: "Halls of Residences",
+            })
+          }
         />
       </ScrollView>
 
@@ -219,6 +263,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: moderateScale(16),
+  },
+  horizontalScrollContent: {
+    paddingHorizontal: 24, // or whatever padding you need
+    paddingRight: 24, // Ensure there's padding at the end
   },
   statusBarBackground: {
     position: "absolute",
