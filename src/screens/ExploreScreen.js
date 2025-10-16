@@ -22,6 +22,13 @@ const categories = [
     icon: "school-outline",
   },
   {
+    id: "programs",
+    title: "PROGRAMS",
+    subtitle:
+      "Explore entry requirements, cut-off points, and programs under each college.",
+    icon: "leaf-outline",
+  },
+  {
     id: "academics",
     title: "ACADEMICS",
     subtitle: "Study smarter, ace your courses, and make learning easier.",
