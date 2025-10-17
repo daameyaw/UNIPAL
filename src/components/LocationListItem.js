@@ -23,12 +23,14 @@ const LocationListItem = ({ iconName, title, description, onPress, style }) => {
         imageStyle={styles.bgImage}
       >
         <View style={styles.leftSection}>
-          <Ionicons
-            name={iconName}
-            size={24}
-            color="#9B0E10"
-            style={styles.leftIcon}
-          />
+          <View style={styles.leftIconWrap}>
+            <Ionicons
+              name={iconName}
+              size={24}
+              color="#9B0E10"
+              style={styles.leftIcon}
+            />
+          </View>
           <View style={styles.textBlock}>
             <Text style={styles.title}>{title}</Text>
             <View style={styles.descriptionBox}>
@@ -57,10 +59,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: moderateScale(16,0.9),
+    paddingVertical: moderateScale(16, 0.9),
     paddingHorizontal: 16,
     backgroundColor: "#dedede",
   },
+  leftIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    backgroundColor: "#fff0f0",
+  },
+
   bgImage: {
     borderRadius: 12,
   },
@@ -69,14 +81,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  leftIcon: {
-    marginRight: 10,
-  },
+  // leftIcon: {
+  //   marginRight: 10,
+  // },
   textBlock: {
     flex: 1,
   },
-    title: {
-    fontSize: moderateScale(14,0.7),
+  title: {
+    fontSize: moderateScale(14, 0.7),
     color: "#121212",
     fontWeight: "700",
     letterSpacing: 0.2,
@@ -92,7 +104,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     color: "#555555",
-    fontSize: moderateScale(10,0.6),
+    fontSize: moderateScale(10, 0.6),
     marginLeft: 0,
     lineHeight: 18,
   },
