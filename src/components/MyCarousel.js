@@ -173,7 +173,7 @@ export default function MyCarousel() {
         width={width * 1}
         height={280}
         data={data}
-        autoPlay={false}
+        autoPlay={true}
         autoPlayInterval={5000}
         scrollAnimationDuration={1000}
         renderItem={renderItem}
