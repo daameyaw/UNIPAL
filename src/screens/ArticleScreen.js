@@ -5,70 +5,212 @@ import {
   ScrollView,
   Platform,
   StatusBar,
+  TouchableOpacity,
 } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
+import { Ionicons } from "@expo/vector-icons";
 
 const ArticleScreen = ({ route }) => {
+    const { guide } = route.params || {};
+    
+    console.log("Guide data:", guide);
+
   // Extract parameters from navigation
-  const { item } = route.params || {};
+  //   const { item } = route.params || {};
 
   // Console log the received parameters
-  console.log("ArticleScreen - Received params:", route.params);
-  console.log("ArticleScreen - Item data:", item);
+//   console.log("ArticleScreen - Received params:", route.params);
+//   console.log("ArticleScreen - Item data:", guide);
 
-  return (
-    <SafeAreaView style={styles.background} edges={["top", "left", "right"]}>
-      <ScreenHeader title="Article Details" />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          {item ? (
-            <View style={styles.articleContainer}>
-              <Text style={styles.title}>Article Information</Text>
 
-              <View style={styles.infoSection}>
-                <Text style={styles.label}>Title:</Text>
-                <Text style={styles.value}>
-                  {item.title || "No title provided"}
-                </Text>
-              </View>
+  const renderContentBlock = (block, index) => {
+    // Handle step blocks (numbered steps)
+    if (block._type === "stepBlock") {
+      return (
+        <View key={block._key || index} style={styles.stepCard}>
+          <View style={styles.stepHeader}>
+            {block.emoji && <Text style={styles.emoji}>{block.emoji}</Text>}
+            {block.stepTitle && (
+              <Text style={styles.stepTitle}>{block.stepTitle}</Text>
+            )}
+          </View>
 
-              <View style={styles.infoSection}>
-                <Text style={styles.label}>Description:</Text>
-                <Text style={styles.value}>
-                  {item.description || "No description provided"}
-                </Text>
-              </View>
+          {block.description && (
+            <Text style={styles.stepDescription}>{block.description}</Text>
+          )}
 
-              <View style={styles.infoSection}>
-                <Text style={styles.label}>Icon:</Text>
-                <Text style={styles.value}>
-                  {item.icon || "No icon provided"}
-                </Text>
-              </View>
-
-              <View style={styles.infoSection}>
-                <Text style={styles.label}>ID:</Text>
-                <Text style={styles.value}>{item.id || "No ID provided"}</Text>
-              </View>
-
-              <View style={styles.rawDataSection}>
-                <Text style={styles.rawDataTitle}>Raw Data (JSON):</Text>
-                <Text style={styles.rawData}>
-                  {JSON.stringify(item, null, 2)}
-                </Text>
-              </View>
+          {block.points && block.points.length > 0 && (
+            <View style={styles.pointsList}>
+              {block.points.map((point, idx) => (
+                <View key={idx} style={styles.pointItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.pointText}>{point}</Text>
+                </View>
+              ))}
             </View>
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No article data received</Text>
-              <Text style={styles.noDataSubtext}>
-                Check the navigation parameters
-              </Text>
+          )}
+
+          {block.linkText && (
+            <TouchableOpacity
+              style={styles.linkButton}
+              onPress={() => console.log("Navigate to:", block.linkUrl)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.linkText}>{block.linkText}</Text>
+              <Ionicons name="arrow-forward" size={16} color="#9B0E10" />
+            </TouchableOpacity>
+          )}
+        </View>
+      );
+    }
+
+    // Handle points block (just bullet points, no step styling)
+    if (block._type === "pointsBlock") {
+      return (
+        <View key={block._key || index} style={styles.pointsCard}>
+          {(block.emoji || block.heading) && (
+            <View style={styles.pointsHeader}>
+              {block.emoji && <Text style={styles.emoji}>{block.emoji}</Text>}
+              {block.heading && (
+                <Text style={styles.pointsHeading}>{block.heading}</Text>
+              )}
+            </View>
+          )}
+
+          {block.description && (
+            <Text style={styles.pointsDescription}>{block.description}</Text>
+          )}
+
+          {block.points && block.points.length > 0 && (
+            <View style={styles.pointsList}>
+              {block.points.map((point, idx) => (
+                <View key={idx} style={styles.pointItem}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.pointText}>{point}</Text>
+                </View>
+              ))}
             </View>
           )}
         </View>
+      );
+    }
+
+    // Handle simple text block
+    if (block._type === "textBlock") {
+      return (
+        <View key={block._key || index} style={styles.textBlock}>
+          {block.heading && (
+            <Text style={styles.textBlockHeading}>{block.heading}</Text>
+          )}
+          {block.content && (
+            <Text style={styles.textBlockContent}>{block.content}</Text>
+          )}
+        </View>
+      );
+    }
+
+    // Handle tip blocks
+    if (block._type === "tipBlock") {
+      const tipStyles = {
+        info: styles.tipInfo,
+        warning: styles.tipWarning,
+        success: styles.tipSuccess,
+        tip: styles.tipDefault,
+      };
+
+      return (
+        <View
+          key={block._key || index}
+          style={[
+            styles.tipCard,
+            tipStyles[block.tipType] || styles.tipDefault,
+          ]}
+        >
+          <View style={styles.stepHeader}>
+            {block.emoji && <Text style={styles.emoji}>{block.emoji}</Text>}
+            {block.tipTitle && (
+              <Text style={styles.tipTitle}>{block.tipTitle}</Text>
+            )}
+          </View>
+          {block.tipContent && (
+            <Text style={styles.tipDescription}>{block.tipContent}</Text>
+          )}
+        </View>
+      );
+    }
+
+    // Handle link block
+    if (block._type === "linkBlock") {
+      return (
+        <TouchableOpacity
+          key={block._key || index}
+          style={styles.linkBlock}
+          onPress={() => console.log("Navigate to:", block.linkUrl)}
+          activeOpacity={0.7}
+        >
+          {block.icon && (
+            <Ionicons
+              name={block.icon}
+              size={20}
+              color="#9B0E10"
+              style={styles.linkIcon}
+            />
+          )}
+          <Text style={styles.linkBlockText}>{block.linkText}</Text>
+          <Ionicons name="arrow-forward" size={18} color="#9B0E10" />
+        </TouchableOpacity>
+      );
+    }
+
+    // Handle regular text blocks (portable text)
+    if (block._type === "block") {
+      const text = block.children?.map((child) => child.text).join(" ");
+
+      if (block.style === "h2") {
+        return (
+          <Text key={block._key || index} style={styles.heading2}>
+            {text}
+          </Text>
+        );
+      }
+
+      if (block.style === "h3") {
+        return (
+          <Text key={block._key || index} style={styles.heading3}>
+            {text}
+          </Text>
+        );
+      }
+
+      return (
+        <Text key={block._key || index} style={styles.paragraph}>
+          {text}
+        </Text>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <ScreenHeader title={guide?.category.toUpperCase() || "Guide"} />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {guide?.title && <Text style={styles.mainTitle}>{guide.title}</Text>}
+
+        {guide?.subtitle && (
+          <Text style={styles.subtitle}>{guide.subtitle}</Text>
+        )}
+
+        {guide?.content?.map((block, index) =>
+          renderContentBlock(block, index)
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -77,93 +219,219 @@ const ArticleScreen = ({ route }) => {
 export default ArticleScreen;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
   container: {
     flex: 1,
+    backgroundColor: "#f8f9fa",
   },
-  content: {
-    paddingHorizontal: 24,
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
     paddingVertical: 24,
+    paddingBottom: 40,
   },
-  articleContainer: {
+  mainTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#1a1a1a",
+    marginBottom: 12,
+    letterSpacing: 0.3,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  heading2: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  heading3: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  paragraph: {
+    fontSize: 15,
+    color: "#666",
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  // Step card styles
+  stepCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#9B0E10",
-    marginBottom: 20,
-    textAlign: "center",
+  stepHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
   },
-  infoSection: {
+  emoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  stepTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    flex: 1,
+  },
+  stepDescription: {
+    fontSize: 15,
+    color: "#555",
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  // Points card styles (lighter, no heavy borders)
+  pointsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 18,
     marginBottom: 16,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
+  pointsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
   },
-  value: {
+  pointsHeading: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#1a1a1a",
+    flex: 1,
+  },
+  pointsDescription: {
     fontSize: 14,
     color: "#666",
+    marginBottom: 14,
     lineHeight: 20,
-    backgroundColor: "#f8f8f8",
-    padding: 12,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: "#9B0E10",
   },
-  rawDataSection: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+  pointsList: {
+    marginTop: 4,
   },
-  rawDataTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
+  pointItem: {
+    flexDirection: "row",
+    marginBottom: 12,
+    paddingRight: 8,
   },
-  rawData: {
-    fontSize: 12,
-    color: "#666",
-    backgroundColor: "#f0f0f0",
-    padding: 12,
-    borderRadius: 8,
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+  bullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#9B0E10",
+    marginTop: 7,
+    marginRight: 12,
   },
-  noDataContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 40,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+  pointText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#444",
+    lineHeight: 20,
   },
-  noDataText: {
+  // Text block styles
+  textBlock: {
+    marginBottom: 20,
+  },
+  textBlockHeading: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#666",
+    color: "#1a1a1a",
     marginBottom: 8,
   },
-  noDataSubtext: {
+  textBlockContent: {
+    fontSize: 15,
+    color: "#555",
+    lineHeight: 22,
+  },
+  // Tip card styles
+  tipCard: {
+    borderRadius: 12,
+    padding: 18,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+  },
+  tipDefault: {
+    backgroundColor: "#fffbea",
+    borderLeftColor: "#f59e0b",
+  },
+  tipInfo: {
+    backgroundColor: "#eff6ff",
+    borderLeftColor: "#3b82f6",
+  },
+  tipWarning: {
+    backgroundColor: "#fef2f2",
+    borderLeftColor: "#ef4444",
+  },
+  tipSuccess: {
+    backgroundColor: "#f0fdf4",
+    borderLeftColor: "#22c55e",
+  },
+  tipTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    flex: 1,
+  },
+  tipDescription: {
     fontSize: 14,
-    color: "#999",
-    textAlign: "center",
+    color: "#333",
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  // Link button styles
+  linkButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#fff0f0",
+    borderRadius: 10,
+    marginTop: 8,
+  },
+  linkText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#9B0E10",
+    marginRight: 8,
+    flex: 1,
+  },
+  // Standalone link block
+  linkBlock: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  linkIcon: {
+    marginRight: 12,
+  },
+  linkBlockText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1a1a1a",
   },
 });
