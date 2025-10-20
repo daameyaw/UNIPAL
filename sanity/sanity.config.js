@@ -9,6 +9,7 @@ export default defineConfig({
 
   projectId: 'x60kx28g',
   dataset: 'production',
+  appId: 'r86ydzb2trym56nx1i4kpmo0',
 
   plugins: [structureTool(), visionTool()],
 
