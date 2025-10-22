@@ -7,7 +7,7 @@ export function useGuides(category) {
     queryKey: ["guides", category],
     queryFn: async () => {
       const result = await getGuidesByCategory(category);
-      console.log("Fetched guides for category:", category, result);
+      // console.log("Fetched guides for category:", category, result);
       return result;
     },
     enabled: !!category, // Only run query if category is provided
@@ -26,9 +26,9 @@ export function useGuides(category) {
   useRefreshOnFocus(refetch);
 
   // Debug logs
-  console.log("Current guides data:", data);
-  console.log("Loading state:", isLoading);
-  console.log("Error state:", error);
+  // console.log("Current guides data:", data);
+  // console.log("Loading state:", isLoading);
+  // console.log("Error state:", error);
 
   return { isLoading, data, error };
 }
