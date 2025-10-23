@@ -1,12 +1,13 @@
 import client from "../../sanity";
 
 const query = `
-*[_type == "guides" && category == $category] | order(_createdAt asc) {
+*[_type == "guides" && category == $category] | order(rankNumber asc) {
   _id,
   title,
   subtitle,
   category,
   icon,
+  rankNumber,
   content[] {
     _type,
     _key,
