@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 const ArticleScreen = ({ route }) => {
     const { guide } = route.params || {};
     
-    console.log("Guide data:", guide);
+    // console.log("Guide data:", guide);
 
   // Extract parameters from navigation
   //   const { item } = route.params || {};
