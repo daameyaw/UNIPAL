@@ -37,20 +37,40 @@ export default {
       type: 'string',
       options: {
         list: [
-          {title: 'School Outline', value: 'school-outline'},
-          {title: 'Card Outline', value: 'card-outline'},
-          {title: 'Library Outline', value: 'library-outline'},
-          {title: 'Book Outline', value: 'book-outline'},
           {title: 'Map Outline', value: 'map-outline'},
-          {title: 'Help Buoy Outline', value: 'help-buoy-outline'},
-          {title: 'Happy Outline', value: 'happy-outline'},
-          {title: 'Create Outline', value: 'create-outline'},
+          // 3.1 College of Agriculture and Natural Resources
+          {title: 'Agriculture Outline', value: 'agriculture-outline'},
+
           {title: 'Leaf Outline', value: 'leaf-outline'},
-          {title: 'Checkmark Circle Outline', value: 'checkmark-circle-outline'},
-          {title: 'Home Outline', value: 'home-outline'},
+
+          {title: 'Brush Outline', value: 'brush-outline'},
+
+          // 3.2 College of Art and Built Environment (CABE)
+          {title: 'Business Outline', value: 'business-outline'},
+
+          // 3.3 College of Engineering
+          {title: 'Hammer Outline', value: 'hammer-outline'},
+
+          // 3.4 College of Health Sciences
+          {title: 'Medical Outline', value: 'medical-outline'},
+
+          // 3.5 College of Humanities and Social Sciences
+          {title: 'People Outline', value: 'people-outline'},
+
+          // 3.6 College of Science
+          {title: 'School Outline', value: 'school-outline'},
+
+          {title: 'Rocket Outline', value: 'rocket-outline'},
         ],
       },
       validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'rankNumber',
+      title: 'Rank Number',
+      type: 'number',
+      description: 'Used for ordering guides by priority (lower numbers appear first)',
+      // validation: (Rule) => Rule.required().min(1),
     },
     {
       name: 'content',
@@ -198,6 +218,53 @@ export default {
           ],
           preview: {
             select: {title: 'linkText'},
+          },
+        },
+        // Cut-off Points Block
+        {
+          name: 'cutOffBlock',
+          title: 'Cut-off Points Block',
+          type: 'object',
+          fields: [
+            {name: 'heading', title: 'Heading (optional)', type: 'string'},
+            {name: 'description', title: 'Description (optional)', type: 'text'},
+            {
+              name: 'cutOffs',
+              title: 'Cut-off Points',
+              type: 'array',
+              of: [
+                {
+                  type: 'object',
+                  fields: [
+                    {
+                      name: 'program',
+                      title: 'Program',
+                      type: 'string',
+                      validation: (Rule) => Rule.required(),
+                    },
+                    {
+                      name: 'grade',
+                      title: 'Grade/Cut-off',
+                      type: 'string',
+                      validation: (Rule) => Rule.required(),
+                    },
+                  ],
+                  preview: {
+                    select: {title: 'program', subtitle: 'grade'},
+                  },
+                },
+              ],
+              validation: (Rule) => Rule.required().min(1),
+            },
+          ],
+          preview: {
+            select: {title: 'heading', subtitle: 'cutOffs'},
+            prepare({title, subtitle}) {
+              return {
+                title: title || 'Cut-off Points',
+                subtitle: `${subtitle?.length || 0} programs`,
+              }
+            },
           },
         },
       ],
