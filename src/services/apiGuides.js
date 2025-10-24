@@ -51,6 +51,16 @@ const query = `
       icon
     },
     
+    // For cutOffBlock
+    _type == "cutOffBlock" => {
+      heading,
+      description,
+      cutOffs[] {
+        program,
+        grade
+      }
+    },
+    
     // For regular portable text blocks
     _type == "block" => {
       style,
