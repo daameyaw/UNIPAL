@@ -66,6 +66,31 @@ const ArticleScreen = ({ route }) => {
       );
     }
 
+    // Handle cut-off points block
+    if (block._type === "cutOffBlock") {
+      return (
+        <View key={block._key || index} style={styles.cutOffCard}>
+          {block.heading && (
+            <Text style={styles.cutOffHeading}>{block.heading}</Text>
+          )}
+          {block.description && (
+            <Text style={styles.cutOffDescription}>{block.description}</Text>
+          )}
+
+          {block.cutOffs && block.cutOffs.length > 0 && (
+            <View style={styles.cutOffList}>
+              {block.cutOffs.map((item, idx) => (
+                <View key={idx} style={styles.cutOffRow}>
+                  <Text style={styles.programText}>{item.program}</Text>
+                  <Text style={styles.gradeText}>{item.grade}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      );
+    }
+
     // Handle points block (just bullet points, no step styling)
     if (block._type === "pointsBlock") {
       return (
@@ -433,5 +458,56 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#1a1a1a",
+  },
+  // Cut-off points block styles
+  cutOffCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  cutOffHeading: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 8,
+  },
+  cutOffDescription: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  cutOffList: {
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    paddingTop: 12,
+  },
+  cutOffRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  programText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+    paddingRight: 16,
+  },
+  gradeText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#9B0E10",
+    minWidth: 50,
+    textAlign: "right",
   },
 });
