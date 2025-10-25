@@ -23,7 +23,7 @@ export function useGuides(category) {
     },
   });
 
-  // useRefreshOnFocus(refetch);
+  useRefreshOnFocus(refetch);
 
   // Debug logs
   // console.log("Current guides data:", data);
