@@ -6,28 +6,64 @@ import {
   Platform,
   StatusBar,
   TouchableOpacity,
+  Linking,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
+import { getGuideById } from "../services/apiGuides";
 
-const ArticleScreen = ({ route }) => {
-    const { guide } = route.params || {};
-    
-    // console.log("Guide data:", guide);
+const ArticleScreen = ({ route, navigation }) => {
+  const { guide: routeGuide, id } = route.params || {};
+  const [guide, setGuide] = useState(routeGuide);
+
+  useEffect(() => {
+    async function fetchGuideById() {
+      if (id && !routeGuide) {
+        try {
+          const fetchedGuide = await getGuideById(id);
+          setGuide(fetchedGuide);
+        } catch (error) {
+          console.error("Error fetching guide:", error);
+        }
+      }
+    }
+
+    fetchGuideById();
+
+    return () => {
+      // Cleanup function
+    };
+  }, [id, routeGuide]);
+
+  // console.log("Guide data:", guide);
 
   // Extract parameters from navigation
   //   const { item } = route.params || {};
 
   // Console log the received parameters
-//   console.log("ArticleScreen - Received params:", route.params);
-//   console.log("ArticleScreen - Item data:", guide);
-
+  //   console.log("ArticleScreen - Received params:", route.params);
+  //   console.log("ArticleScreen - Item data:", guide);
 
   const renderContentBlock = (block, index) => {
     // Handle step blocks (numbered steps)
     if (block._type === "stepBlock") {
+      const handleLinkPress = async () => {
+        if (block.linkUrl) {
+          console.log("URL trimmed:", block.linkUrl?.trim());
+
+          // Sanitize the URL
+          const url = block.linkUrl.trim();
+
+          try {
+            await Linking.openURL(url);
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        }
+      };
+
       return (
         <View key={block._key || index} style={styles.stepCard}>
           <View style={styles.stepHeader}>
@@ -55,7 +91,8 @@ const ArticleScreen = ({ route }) => {
           {block.linkText && (
             <TouchableOpacity
               style={styles.linkButton}
-              onPress={() => console.log("Navigate to:", block.linkUrl)}
+              // onPress={() => console.log("Navigate to:", block.linkUrl)}
+              onPress={handleLinkPress}
               activeOpacity={0.7}
             >
               <Text style={styles.linkText}>{block.linkText}</Text>
@@ -172,17 +209,12 @@ const ArticleScreen = ({ route }) => {
         <TouchableOpacity
           key={block._key || index}
           style={styles.linkBlock}
-          onPress={() => console.log("Navigate to:", block.linkUrl)}
+          onPress={() => {
+            navigation.navigate("Article", { id: block.linkUrl });
+          }}
           activeOpacity={0.7}
         >
-          {block.icon && (
-            <Ionicons
-              name={block.icon}
-              size={20}
-              color="#9B0E10"
-              style={styles.linkIcon}
-            />
-          )}
+          {block.emoji && <Text style={styles.emoji}>{block.emoji}</Text>}
           <Text style={styles.linkBlockText}>{block.linkText}</Text>
           <Ionicons name="arrow-forward" size={18} color="#9B0E10" />
         </TouchableOpacity>
