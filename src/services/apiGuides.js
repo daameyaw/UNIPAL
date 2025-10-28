@@ -1,5 +1,15 @@
 import client from "../../sanity";
 
+/**
+ * Guides API service
+ *
+ * Provides typed fetch helpers for retrieving guide content from Sanity.
+ * Two entry points:
+ * - getGuidesByCategory(category): ordered list of guides for a category
+ * - getGuideById(id): single guide by id (supports drafts and published)
+ */
+
+// Query: fetch all guides for a category, ordered by rankNumber asc
 const query = `
 *[_type == "guides" && category == $category] | order(rankNumber asc) {
   _id,
@@ -46,9 +56,10 @@ const query = `
     
     // For linkBlock
     _type == "linkBlock" => {
+      linkTitle,
       linkText,
       linkUrl,
-      icon
+      emoji
     },
     
     // For cutOffBlock
@@ -72,11 +83,17 @@ const query = `
   }
 }
 `;
+
+/**
+ * getGuidesByCategory
+ * @param {string} category - Category slug/name to filter guides (e.g., "Admissions")
+ * @returns {Promise<Array>} A list of guide objects ordered by rankNumber.
+ */
 export async function getGuidesByCategory(category) {
   return await client.fetch(query, { category }, { cache: "no-store" });
 }
 
-
+// Query: fetch a single guide by id. Supports preview of drafts by checking both ids
 const queryById = `
 *[_id in ["drafts." + $id, $id]] | order(_updatedAt desc)[0] {
   _id,
@@ -151,9 +168,13 @@ const queryById = `
 }
 `;
 
-
+/**
+ * getGuideById
+ * @param {string} id - Sanity document id. Accepts either published id or a "drafts." prefixed id.
+ * @returns {Promise<Object|null>} Guide object or null if not found.
+ */
 export async function getGuideById(id) {
-  // Remove 'drafts.' prefix if present
+  // Normalize: accept ids with or without the 'drafts.' prefix
   const cleanId = id.replace("drafts.", "");
   return await client.fetch(queryById, { id: cleanId }, { cache: "no-store" });
 }
