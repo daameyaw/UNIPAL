@@ -7,6 +7,7 @@ import {
   StatusBar,
   TouchableOpacity,
   Linking,
+  ImageBackground,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,11 +15,20 @@ import ScreenHeader from "../components/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
 import { getGuideById } from "../services/apiGuides";
 
+/**
+ * ArticleScreen
+ *
+ * Renders a single guide article. It can receive either:
+ * - a full `guide` object via navigation params, or
+ * - an `id` param, in which case the guide is fetched on mount.
+ */
 const ArticleScreen = ({ route, navigation }) => {
+  // Prefer a concrete guide passed via navigation; fall back to id-based fetch
   const { guide: routeGuide, id } = route.params || {};
   const [guide, setGuide] = useState(routeGuide);
 
   useEffect(() => {
+    // Fetch only when we were not provided a full guide but we do have an id
     async function fetchGuideById() {
       if (id && !routeGuide) {
         try {
@@ -33,18 +43,9 @@ const ArticleScreen = ({ route, navigation }) => {
     fetchGuideById();
 
     return () => {
-      // Cleanup function
+      // No subscriptions to clean up currently
     };
   }, [id, routeGuide]);
-
-  // console.log("Guide data:", guide);
-
-  // Extract parameters from navigation
-  //   const { item } = route.params || {};
-
-  // Console log the received parameters
-  //   console.log("ArticleScreen - Received params:", route.params);
-  //   console.log("ArticleScreen - Item data:", guide);
 
   const renderContentBlock = (block, index) => {
     // Handle step blocks (numbered steps)
@@ -204,24 +205,44 @@ const ArticleScreen = ({ route, navigation }) => {
     }
 
     // Handle link block
-    if (block._type === "linkBlock") {
-      return (
-        <TouchableOpacity
-          key={block._key || index}
-          style={styles.linkBlock}
-          onPress={() => {
-            navigation.navigate("Article", { id: block.linkUrl });
-          }}
-          activeOpacity={0.7}
-        >
-          {block.emoji && <Text style={styles.emoji}>{block.emoji}</Text>}
-          <Text style={styles.linkBlockText}>{block.linkText}</Text>
-          <Ionicons name="arrow-forward" size={18} color="#9B0E10" />
-        </TouchableOpacity>
-      );
-    }
-
-    // Handle regular text blocks (portable text)
+if (block._type === "linkBlock") {
+  console.log(block.linkUrl);
+  return (
+    <TouchableOpacity
+      key={block._key || index}
+      style={styles.linkBlock}
+      onPress={() => {
+        console.log(block.linkUrl);
+        navigation.push("Article", { id: block.linkUrl });
+      }}
+      activeOpacity={0.9}
+    >
+      <ImageBackground
+        source={require("../../assets/images/Splash.png")}
+        style={styles.linkBlockBackground}
+        imageStyle={styles.linkBlockBackgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.linkBlockOverlay}>
+          <View style={styles.linkBlockContent}>
+            {block.emoji && (
+              <View style={styles.emojiContainer}>
+                <Text style={styles.emoji}>{block.emoji}</Text>
+              </View>
+            )}
+            <View style={styles.linkBlockTextContainer}>
+              {block.linkTitle && (
+                <Text style={styles.linkBlockTitle}>{block.linkTitle}</Text>
+              )}
+              <Text style={styles.linkBlockText}>{block.linkText}</Text>
+            </View>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+        </View>
+      </ImageBackground>
+    </TouchableOpacity>
+  );
+}    // Handle regular text blocks (portable text)
     if (block._type === "block") {
       const text = block.children?.map((child) => child.text).join(" ");
 
@@ -491,7 +512,65 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1a1a1a",
   },
-  // Cut-off points block styles
+
+  linkBlock: {
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: "hidden", // Important for borderRadius to work with ImageBackground
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  linkBlockBackground: {
+    width: "100%",
+  },
+  linkBlockBackgroundImage: {
+    borderRadius: 12,
+  },
+  linkBlockOverlay: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255, 255, 255, 0.95)", // Semi-transparent overlay
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+  },
+  linkBlockContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    marginRight: 12,
+  },
+  emojiContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#fff0f0",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  emoji: {
+    fontSize: 22,
+  },
+  linkBlockTextContainer: {
+    flex: 1,
+  },
+  linkBlockTitle: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#666",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  linkBlockText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1a1a1a",
+  }, // Cut-off points block styles
   cutOffCard: {
     backgroundColor: "#fff",
     borderRadius: 12,
