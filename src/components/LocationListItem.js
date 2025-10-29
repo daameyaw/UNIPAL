@@ -51,7 +51,7 @@ const LocationListItem = ({ iconName, title, description, onPress, style }) => {
 const styles = StyleSheet.create({
   wrapper: {
     alignSelf: "center",
-    width: "92%",
+    width: "95%",
     borderRadius: 12,
     overflow: "hidden",
   },
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: moderateScale(16, 0.9),
+    paddingVertical: moderateScale(22, 0.8),
     paddingHorizontal: 16,
     backgroundColor: "#dedede",
   },
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     minHeight: 28,
     // backgroundColor: "#ffffff",
     borderRadius: 6,
-    width: "75%",
+    width: "85%",
     justifyContent: "center",
     paddingHorizontal: 0,
   },
