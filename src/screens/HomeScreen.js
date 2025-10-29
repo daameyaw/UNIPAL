@@ -51,6 +51,51 @@ const initialCategories = [
   { icon: "school-outline", label: "ADMISSIONS" },
 ];
 
+const locationItems = [
+  {
+    id: 1,
+    icon: "medkit-outline",
+    label: "Medical Centers",
+    code: "medical_centers",
+    title: "Medical Centers",
+  },
+  {
+    id: 2,
+    icon: "finger-print-outline",
+    label: "Biometric Centers",
+    code: "biometric_centers",
+    title: "Biometric Centers",
+  },
+  {
+    id: 3,
+    icon: "bus-outline",
+    label: "Shuttle Stops",
+    code: "shuttle_stops",
+    title: "Shuttle Stops",
+  },
+  {
+    id: 4,
+    icon: "library-outline",
+    label: "School libraries",
+    code: "school_libraries",
+    title: "School Libraries",
+  },
+  {
+    id: 5,
+    icon: "school-outline",
+    label: "Colleges",
+    code: "colleges",
+    title: "Colleges",
+  },
+  {
+    id: 6,
+    icon: "home-outline",
+    label: "Halls of Residence",
+    code: "halls_of_residences",
+    title: "Halls of Residences",
+  },
+];
+
 function shuffleArray(array) {
   return array
     .map((value) => ({ value, sort: Math.random() }))
@@ -98,7 +143,7 @@ const HomeScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <>
-      <View style={styles.statusBarBackground} />
+      <View style={styles.statusBarBackground} pointerEvents="none" />
       <StatusBar style="light" />
       <ImageBackground
         source={require("../../assets/images/Hero1.png")}
@@ -141,76 +186,27 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Locations */}
       <Text style={styles.sectionTitle}>Need directions?</Text>
-      <ScrollView
+      <FlatList
         horizontal
+        data={locationItems}
+        renderItem={({ item }) => (
+          <LocationCard
+            icon={item.icon}
+            label={item.label}
+            onPress={() => {
+              console.log(item.title);
+              navigation.navigate("LocationPlaces", {
+                code: item.code,
+                title: item.title,
+              });
+            }}
+          />
+        )}
+        keyExtractor={(item) => item.id.toString()}
         showsHorizontalScrollIndicator={false}
         style={styles.horizontalScroll}
         contentContainerStyle={styles.horizontalScrollContent}
-      >
-        <LocationCard
-          icon="medkit-outline"
-          label="Medical Centers"
-          onPress={() =>
-            navigation.navigate("LocationPlaces", {
-              code: "medical_centers",
-              title: "Medical Centers",
-            })
-          }
-        />
-        <LocationCard
-          icon="finger-print-outline"
-          label="Biometric Centers"
-          onPress={() =>
-            navigation.navigate("LocationPlaces", {
-              code: "biometric_centers",
-              title: "Biometric Centers",
-            })
-          }
-        />
-        <LocationCard
-          icon="bus-outline"
-          label="Shuttle Stops"
-          onPress={() => {
-            console.log("clicked");
-            navigation.navigate("LocationPlaces", {
-              code: "shuttle_stops",
-              title: "Shuttle Stops",
-            });
-          }}
-        />
-        <LocationCard
-          icon="library-outline"
-          label="School libraries"
-          onPress={() => {
-            console.log("clicked");
-
-            navigation.navigate("LocationPlaces", {
-              code: "school_libraries",
-              title: "School Libraries",
-            });
-          }}
-        />
-        <LocationCard
-          icon="school-outline"
-          label="Colleges"
-          onPress={() =>
-            navigation.navigate("LocationPlaces", {
-              code: "colleges",
-              title: "Colleges",
-            })
-          }
-        />
-        <LocationCard
-          icon="home-outline"
-          label="Halls of Residence"
-          onPress={() =>
-            navigation.navigate("LocationPlaces", {
-              code: "halls_of_residences",
-              title: "Halls of Residences",
-            })
-          }
-        />
-      </ScrollView>
+      />
 
       {/* Categories */}
       <Text style={styles.sectionTitle}>Categories</Text>
@@ -265,9 +261,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(16),
   },
   horizontalScrollContent: {
-    paddingHorizontal: 24, // or whatever padding you need
-    paddingRight: 24, // Ensure there's padding at the end
-  },
+    paddingHorizontal: 16, // Add horizontal padding
+    paddingRight: 20, // Extra padding on the right
+    gap: 12,
+  }, // If supported, otherwise use margin on LocationCard  },}
   statusBarBackground: {
     position: "absolute",
     top: 0,
@@ -275,6 +272,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: StatusBar.currentHeight, // leave as-is, dynamic
     backgroundColor: "#7e1d1d",
+    zIndex: -1,
   },
   topBar: {
     // backgroundColor: "#7e1d1d",
