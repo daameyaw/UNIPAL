@@ -16,18 +16,26 @@ import { moderateScale } from "react-native-size-matters";
 
 const categories = [
   {
-    id: "admissions",
-    title: "ADMISSIONS",
-    subtitle: "Everything you need to know before stepping on campus!",
-    icon: "school-outline",
-  },
-  {
     id: "programs",
     title: "PROGRAMS",
     subtitle:
       "Explore entry requirements, cut-off points, and programs under each college.",
     icon: "leaf-outline",
   },
+
+  {
+    id: "admissions",
+    title: "ADMISSIONS",
+    subtitle: "Everything you need to know before stepping on campus!",
+    icon: "school-outline",
+  },
+  {
+    id: "arrival-settling",
+    title: "ARRIVAL & SETTLING-IN",
+    subtitle: "From packing to orientation — start your campus journey right!",
+    icon: "airplane-outline",
+  },
+
   {
     id: "academics",
     title: "ACADEMICS",
