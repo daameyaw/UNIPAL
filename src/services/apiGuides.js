@@ -71,6 +71,16 @@ const query = `
         grade
       }
     },
+    // For locationLinkBlock
+    _type == "locationLinkBlock" => {
+      locationName,
+      locationDescription,
+      locationId,
+      openingTimes,
+      distance,
+      code,
+      title
+    },
     
     // For regular portable text blocks
     _type == "block" => {
@@ -155,6 +165,17 @@ const queryById = `
         grade
       }
     },
+        // For locationLinkBlock
+    _type == "locationLinkBlock" => {
+      locationName,
+      locationDescription,
+      locationId,
+      openingTimes,
+      distance,
+      code,
+      title
+    },
+
     
     // For regular portable text blocks
     _type == "block" => {
