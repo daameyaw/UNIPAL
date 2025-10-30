@@ -27,6 +27,7 @@ export default {
           {title: 'Support Services', value: 'support'},
           {title: 'Campus Life', value: 'life'},
           {title: 'Program Requirements & Cut-off Points', value: 'programs'},
+          {title: 'Arrival & Settling-In', value: 'arrival-settling'},
         ],
       },
       validation: (Rule) => Rule.required(),
@@ -208,16 +209,105 @@ export default {
           type: 'object',
           fields: [
             {
+              name: 'linkTitle',
+              title: 'Link Title',
+              type: 'string',
+              description: 'Title or heading for this link section',
+            },
+            {
               name: 'linkText',
               title: 'Link Text',
               type: 'string',
               validation: (Rule) => Rule.required(),
             },
-            {name: 'linkUrl', title: 'Link URL or Screen Name', type: 'string'},
-            {name: 'icon', title: 'Icon (optional)', type: 'string'},
+            {
+              name: 'linkUrl',
+              title: 'Link URL or Screen Name',
+              type: 'string',
+            },
+            {
+              name: 'emoji',
+              title: 'Emoji',
+              type: 'string',
+              description: 'Add an emoji (e.g., 🔗, 📄, ➡️)',
+            },
           ],
           preview: {
-            select: {title: 'linkText'},
+            select: {
+              title: 'linkText',
+              subtitle: 'linkTitle',
+              emoji: 'emoji',
+            },
+            prepare({title, subtitle, emoji}) {
+              return {
+                title: `${emoji || '🔗'} ${title}`,
+                subtitle: subtitle || 'Link Block',
+              }
+            },
+          },
+        },
+        {
+          name: 'locationLinkBlock',
+          title: 'Location Link Block',
+          type: 'object',
+          fields: [
+            {
+              name: 'code',
+              title: 'Code',
+              type: 'string',
+              description: 'Location code or identifier',
+            },
+            {
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              description: 'Additional title for the location',
+            },
+            {
+              name: 'locationName',
+              title: 'Location Name',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'locationDescription',
+              title: 'Location Description',
+              type: 'text',
+              rows: 2,
+              description: 'Brief description of the location',
+            },
+            {
+              name: 'locationId',
+              title: 'Location ID',
+              type: 'string',
+              description: 'The ID to pass to the Locations screen',
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'openingTimes',
+              title: 'Opening Times',
+              type: 'string',
+              description: 'Opening hours (e.g., "Mon-Fri: 9AM-5PM", "Open 24/7", "10:00 - 22:00")',
+            },
+            {
+              name: 'distance',
+              title: 'Distance',
+              type: 'string',
+              description: 'Optional distance indicator (e.g., "2.5 km away", "15 min walk")',
+            },
+          ],
+          preview: {
+            select: {
+              title: 'locationName',
+              subtitle: 'locationDescription',
+              distance: 'distance',
+            },
+            prepare({title, subtitle, distance}) {
+              return {
+                title: `📍 ${title}`,
+                subtitle: distance ? `${subtitle} • ${distance}` : subtitle,
+              }
+            },
           },
         },
         // Cut-off Points Block
