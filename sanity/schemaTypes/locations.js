@@ -15,6 +15,7 @@ export default {
           {title: 'Medical Centers', value: 'medical_centers'},
           {title: 'Biometric Centers', value: 'biometric_centers'},
           {title: 'Halls of Residences', value: 'halls_of_residences'},
+          {title: 'Support Services', value: 'support_services'},
           {title: 'Food Joints', value: 'food_joints'},
           {title: 'Banks and ATMs', value: 'banks_atms'},
           {title: 'Printing Centers', value: 'printing_centers'},
