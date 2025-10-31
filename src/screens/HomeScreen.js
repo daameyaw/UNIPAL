@@ -43,12 +43,48 @@ const getGreeting = () => {
 };
 
 const initialCategories = [
-  { icon: "home", label: "STUDENT HOUSING" },
-  { icon: "navigate-outline", label: "CAMPUS NAVIGATION" },
-  { icon: "book-outline", label: "ACADEMICS" },
-  { icon: "headset-outline", label: "SUPPORT SERVICES" },
-  { icon: "people-circle-outline", label: "CAMPUS LIFE" },
-  { icon: "school-outline", label: "ADMISSIONS" },
+  {
+    icon: "navigate-outline",
+    label: "CAMPUS NAVIGATION",
+    id: "navigation",
+    title: "CAMPUS NAVIGATION",
+  },
+  {
+    icon: "book-outline",
+    label: "ACADEMICS",
+    id: "academics",
+    title: "ACADEMICS",
+  },
+  {
+    icon: "headset-outline",
+    label: "SUPPORT SERVICES",
+    id: "support",
+    title: "SUPPORT SERVICES",
+  },
+  {
+    icon: "people-circle-outline",
+    label: "CAMPUS LIFE",
+    id: "life",
+    title: "CAMPUS LIFE",
+  },
+  {
+    icon: "school-outline",
+    label: "ADMISSIONS",
+    id: "admissions",
+    title: "ADMISSIONS",
+  },
+  {
+    label: "ARRIVAL & SETTLING-IN",
+    icon: "airplane-outline",
+    id: "arrival-settling",
+    title: "ARRIVAL & SETTLING-IN",
+  },
+  {
+    label: "PROGRAMS",
+    icon: "leaf-outline",
+    id: "programs",
+    title: "PROGRAMS",
+  },
 ];
 
 const locationItems = [
@@ -217,7 +253,9 @@ const HomeScreen = ({ navigation }) => {
           <CategoryCard
             icon={item.icon}
             label={item.label}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("Articles", { code: item.id, title: item.title });
+            }}
           />
         )}
         keyExtractor={(_, index) => index.toString()}
