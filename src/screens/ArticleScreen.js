@@ -14,6 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
 import { Ionicons } from "@expo/vector-icons";
 import { getGuideById } from "../services/apiGuides";
+import { LinearGradient } from "expo-linear-gradient";
+import { moderateScale } from "react-native-size-matters";
 
 /**
  * ArticleScreen
@@ -34,6 +36,7 @@ const ArticleScreen = ({ route, navigation }) => {
         try {
           const fetchedGuide = await getGuideById(id);
           setGuide(fetchedGuide);
+          console.log(guide)
         } catch (error) {
           console.error("Error fetching guide:", error);
         }
@@ -204,45 +207,134 @@ const ArticleScreen = ({ route, navigation }) => {
       );
     }
 
-    // Handle link block
-if (block._type === "linkBlock") {
-  console.log(block.linkUrl);
-  return (
-    <TouchableOpacity
-      key={block._key || index}
-      style={styles.linkBlock}
-      onPress={() => {
-        console.log(block.linkUrl);
-        navigation.push("Article", { id: block.linkUrl });
-      }}
-      activeOpacity={0.9}
-    >
-      <ImageBackground
-        source={require("../../assets/images/Splash.png")}
-        style={styles.linkBlockBackground}
-        imageStyle={styles.linkBlockBackgroundImage}
-        resizeMode="cover"
-      >
-        <View style={styles.linkBlockOverlay}>
-          <View style={styles.linkBlockContent}>
-            {block.emoji && (
-              <View style={styles.emojiContainer}>
-                <Text style={styles.emoji}>{block.emoji}</Text>
+    //LOCATION BLOCK
+
+    if (block._type === "locationLinkBlock") {
+      return (
+        <TouchableOpacity
+          key={block._key || index}
+          style={styles.locationLinkBlock}
+          onPress={() =>
+            navigation.navigate("LocationPlaces", {
+              code: block.code,
+              title: block.title,
+            })
+          }
+          activeOpacity={0.9}
+        >
+          {/* <ImageBackground
+            source={require("../../assets/images/Splash.png")}
+            style={styles.locationBlockBackground}
+            imageStyle={styles.locationBlockBackgroundImage}
+            resizeMode="cover"
+          > */}
+            <View style={styles.locationOverlay}>
+              <View style={styles.locationContent}>
+                <View style={styles.locationIconContainer}>
+                  <Ionicons name="location" size={28} color="#9B0E10" />
+                </View>
+
+                <View style={styles.locationTextContainer}>
+                  {block.locationName && (
+                    <Text style={styles.locationName}>
+                      {block.locationName}
+                    </Text>
+                  )}
+                  {block.locationDescription && (
+                    <Text style={styles.locationDescription}>
+                      {block.locationDescription}
+                    </Text>
+                  )}
+
+                  <View style={styles.locationMetaContainer}>
+                    {block.openingTimes && (
+                      <View style={styles.locationTimesContainer}>
+                        <Ionicons name="time-outline" size={12} color="#666" />
+                        <Text style={styles.locationTimes}>
+                          {block.openingTimes}
+                        </Text>
+                      </View>
+                    )}
+                    {block.distance && (
+                      <View style={styles.locationDistanceContainer}>
+                        <Ionicons
+                          name="navigate-outline"
+                          size={12}
+                          color="#666"
+                        />
+                        <Text style={styles.locationDistance}>
+                          {block.distance}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Get Directions Button */}
+                  <TouchableOpacity
+                    style={styles.directionsButton}
+                    onPress={() => {
+                      console.log("pressed");
+                      navigation.navigate("LocationPlaces", {
+                        code: block.code,
+                        title: block.title,
+                      });
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="navigate" size={16} color="#FFFFFF" />
+                    <Text style={styles.directionsButtonText}>
+                      Get Directions
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.locationArrowContainer}>
+                  <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+                </View>
               </View>
-            )}
-            <View style={styles.linkBlockTextContainer}>
-              {block.linkTitle && (
-                <Text style={styles.linkBlockTitle}>{block.linkTitle}</Text>
-              )}
-              <Text style={styles.linkBlockText}>{block.linkText}</Text>
             </View>
-          </View>
-          <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
-        </View>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
-}    // Handle regular text blocks (portable text)
+          {/* </ImageBackground> */}
+        </TouchableOpacity>
+      );
+    } // Handle link block
+    if (block._type === "linkBlock") {
+      console.log(block.linkUrl);
+      return (
+        <TouchableOpacity
+          key={block._key || index}
+          style={styles.linkBlock}
+          onPress={() => {
+            console.log(block.linkUrl);
+            navigation.push("Article", { id: block.linkUrl });
+          }}
+          activeOpacity={0.9}
+        >
+          <ImageBackground
+            source={require("../../assets/images/Splash.png")}
+            style={styles.linkBlockBackground}
+            imageStyle={styles.linkBlockBackgroundImage}
+            resizeMode="cover"
+          >
+            <View style={styles.linkBlockOverlay}>
+              <View style={styles.linkBlockContent}>
+                {block.emoji && (
+                  <View style={styles.emojiContainer}>
+                    <Text style={styles.emoji}>{block.emoji}</Text>
+                  </View>
+                )}
+                <View style={styles.linkBlockTextContainer}>
+                  {block.linkTitle && (
+                    <Text style={styles.linkBlockTitle}>{block.linkTitle}</Text>
+                  )}
+                  <Text style={styles.linkBlockText}>{block.linkText}</Text>
+                </View>
+              </View>
+              <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+      );
+    } // Handle regular text blocks (portable text)
     if (block._type === "block") {
       const text = block.children?.map((child) => child.text).join(" ");
 
@@ -621,4 +713,144 @@ const styles = StyleSheet.create({
     minWidth: 50,
     textAlign: "right",
   },
+
+  locationLinkBlock: {
+    marginVertical: 10,
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  locationBlockBackground: {
+    width: "100%",
+    minHeight: 100,
+  },
+  locationBlockBackgroundImage: {
+    borderRadius: 12,
+    opacity: 0.95,
+  },
+  locationOverlay: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    padding: 16,
+    borderRadius: 12,
+  },
+  locationContent: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  locationGradient: {
+    padding: 20,
+  },
+  locationIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFE5E6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  locationTextContainer: {
+    flex: 1,
+  },
+  locationName: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 4,
+  },
+  locationDescription: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 8,
+    lineHeight: 18,
+  },
+  locationMetaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 10,
+  },
+  locationTimesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  locationTimes: {
+    fontSize: 12,
+    color: "#666",
+    marginLeft: 4,
+    fontWeight: "500",
+  },
+  locationDistanceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  locationDistance: {
+    fontSize: 12,
+    color: "#666",
+    marginLeft: 4,
+    fontWeight: "500",
+  },
+  locationArrowContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FFE5E6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  directionsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#9B0E10",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    gap: 6,
+    alignSelf: "flex-start",
+  },
+  directionsButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "600",
+  },
 });
+
+// open maps for directions if lat/lng exists, otherwise try a query string
+
+function openDirections(item) {
+  // Safely extract fields
+  const lat = item?.latitude ?? item?.lat;
+  const lng = item?.longitude ?? item?.lng;
+  const name = item?.name || "Destination";
+
+  // Encode name for use in URL
+  const query = encodeURIComponent(name);
+
+  // Build the Google Maps search URL
+  let url = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+  // If coordinates are available, append them to make the search more accurate
+  if (typeof lat === "number" && typeof lng === "number") {
+    url += `%20(${lat},${lng})`; // e.g., "KNUST Library (6.67,-1.57)"
+  }
+
+  // Open Google Maps or browser
+  Linking.openURL(url).catch((err) => {
+    console.error("Failed to open map:", err);
+  });
+}
