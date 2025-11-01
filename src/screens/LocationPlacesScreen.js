@@ -60,7 +60,7 @@ const LocationPlacesScreen = ({ route }) => {
                   </View>
                 ) : null}
                 {item.description ? (
-                  <Text numberOfLines={2} style={styles.placeDesc}>
+                  <Text  style={styles.placeDesc}>
                     {item.description}
                   </Text>
                 ) : null}
@@ -74,7 +74,9 @@ const LocationPlacesScreen = ({ route }) => {
               <View style={styles.footerRow}>
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => openDirections(item)}
+                  onPress={() => {
+                    openDirections(item)
+                  }}
                   style={styles.directionsBtn}
                 >
                   <Text style={styles.directionsText}>Get Directions</Text>
