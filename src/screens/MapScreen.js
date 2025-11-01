@@ -54,6 +54,13 @@ const MapScreen = () => {
       code: "halls_of_residences",
     },
     {
+      title: "Support Services",
+      icon: "help-buoy-outline",
+      description:
+        "Student support centers for counseling, guidance, disability and welfare services.",
+      code: "support_services",
+    },
+    {
       title: "Food Joints",
       icon: "restaurant-outline",
       description:
