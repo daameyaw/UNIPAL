@@ -55,8 +55,8 @@ const categories = [
     icon: "help-buoy-outline",
   },
   {
-    id: "life",
-    title: "CAMPUS LIFE",
+    id: "accommodation-residence-life",
+    title: "ACCOMMODATION & RESIDENCE LIFE",
     subtitle:
       "Discover events, hangouts, and tips for living your best campus life!",
     icon: "happy-outline",
