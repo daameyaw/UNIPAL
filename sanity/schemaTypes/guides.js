@@ -26,6 +26,7 @@ export default {
           {title: 'Campus Navigation', value: 'navigation'},
           {title: 'Support Services', value: 'support'},
           {title: 'Campus Life', value: 'life'},
+          {title: 'Accommodation & Residence Life', value: 'accommodation-residence-life'},
           {title: 'Program Requirements & Cut-off Points', value: 'programs'},
           {title: 'Arrival & Settling-In', value: 'arrival-settling'},
         ],
