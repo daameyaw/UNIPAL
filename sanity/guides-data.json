@@ -1,0 +1,515 @@
+[
+  {
+    "_type": "guides",
+    "title": "COLLEGE OF ART AND BUILT ENVIRONMENT",
+    "subtitle": "Entry requirements for Architecture programme",
+    "category": "programs",
+    "icon": "school-outline",
+    "content": [
+      {
+        "_type": "textBlock",
+        "_key": "arch-intro",
+        "heading": "Faculty of Built Environment",
+        "content": "The Faculty of Built Environment is a leading institution in the field of built environment. It offers a range of programmes in architecture, construction technology and management, quantity surveying and construction economics, development planning, human settlement planning, and land economy and real estate."
+      },
+
+      {
+        "_type": "textBlock",
+        "_key": "arch-intro",
+        "heading": "WASSCE/SSSCE Applicants",
+        "content": "Below are the undergraduate programmes offered under the Faculty of Built Environment and their respective entry requirements for WASSCE and SSSCE applicants."
+      },
+      {
+        "_type": "tipBlock",
+        "_key": "arch-tip",
+        "emoji": "⚠️",
+        "tipTitle": "Important Reminder",
+        "tipType": "warning",
+        "tipContent": "All applicants must ensure that they meet the minimum general entry requirements in addition to the programme-specific requirements listed above."
+      },
+
+      {
+        "_type": "stepBlock",
+        "_key": "arch-intro",
+        "heading": "BSc Architecture",
+        "content": "The BSc Architecture programme prepares students for professional practice in architectural design and construction."
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "arch-wassce",
+        "emoji": "📝",
+        "stepTitle": "A. WASSCE/SSSCE Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "arch-core",
+        "heading": "Core Subjects",
+        "points": [
+          "Credit passes in English Language",
+          "Credit passes in Mathematics",
+          "Credit passes in Integrated Science"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "arch-elective",
+        "heading": "Elective Subjects",
+        "description": "Credit passes in Mathematics and any TWO from the following options:",
+        "points": [
+          "Technical: Technical Drawing or Engineering Science, Woodwork or Building Construction, Metalwork",
+          "General Science: Biology, Chemistry, Physics",
+          "Visual Art: General Knowledge in Art, Graphic Design, Picture Making",
+          "General Arts: Economics, Geography"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "arch-alevel",
+        "emoji": "🎓",
+        "stepTitle": "B. A' Level Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "arch-alevel-req",
+        "points": [
+          "'O' Level or equivalent: Credit passes in FIVE (5) subjects including English Language and Mathematics",
+          "'A' Level or equivalent: Credit passes in THREE (3) subjects from the following groups",
+          "Option i: Three (3) Subjects from Group A (Technical/Science)",
+          "Option ii: Three (3) Subjects from Group B (Visual Art/General Art)",
+          "Option iii: Three (3) Subject Combinations from Groups A and B",
+          "A pass in General Paper is mandatory"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "arch-mature",
+        "emoji": "👨‍🎓",
+        "stepTitle": "C. Mature Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "arch-mature-req",
+        "points": [
+          "Applicants must be 25 years at the time of the application",
+          "Must satisfy the requirements for WASSCE/SSSCE or A' Level or HND",
+          "An applicant must have demonstrated interest in the area of Architectural Design",
+          "Applicants may be required to pass a written and an oral examination after pre-qualification exercise"
+        ]
+      },
+      {
+        "_type": "tipBlock",
+        "_key": "arch-tip",
+        "emoji": "⚠️",
+        "tipTitle": "Important Note",
+        "tipType": "warning",
+        "tipContent": "Experience at an Architect's Office or familiarity with computer drafting techniques alone is not a special advantage. The Department shall not regard these as substitutes for the minimum entry requirements."
+      },
+
+      {
+        "_type": "textBlock",
+        "_key": "arch-overview",
+        "heading": "BSc Construction Technology and Management",
+        "content": "The BSc Construction Technology and Management programme prepares students for professional practice in construction technology and management."
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "ctm-wassce",
+        "emoji": "📝",
+        "stepTitle": "A. WASSCE/SSSCE Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "ctm-core",
+        "heading": "Core Subjects",
+        "points": [
+          "Credit passes in English Language",
+          "Credit passes in Mathematics",
+          "Credit passes in Integrated Science"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "ctm-elective",
+        "heading": "Elective Subjects",
+        "description": "Credit passes in Mathematics and any Two (2) from the following options:",
+        "points": [
+          "Technical: Technical Drawing or Engineering Science, Woodwork, Building Construction, and Metalwork",
+          "Science: Chemistry, and Physics",
+          "General Art: Economics, and Geography"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "ctm-alevel",
+        "emoji": "🎓",
+        "stepTitle": "B. A' Level Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "ctm-alevel-req",
+        "points": [
+          "'O' Level or equivalent: Credit passes in FIVE (5) subjects including English Language and Mathematics",
+          "'A' Level or equivalent: Credit passes in Mathematics and any TWO (2) from the following options:",
+          "Group A: Physics, and Chemistry",
+          "Group B: Geography, Economics, Technical Drawing, and Building Construction"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "ctm-mature",
+        "emoji": "👨‍🎓",
+        "stepTitle": "C. Mature Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "ctm-mature-req",
+        "points": [
+          "Applicants must be 25 years at the time of the application",
+          "Must satisfy the requirements for WASSCE/SSSCE or A' Level or HND",
+          "An applicant may be required to pass a qualifying examination which shall form the basis for short-listing of candidates for an interview",
+          "Candidates must also pass an interview"
+        ]
+      },
+
+      {
+        "_type": "textBlock",
+        "_key": "arch-overview",
+        "heading": "BSc Quantity Surveying and Construction Economics",
+        "content": "The BSc Quantity Surveying and Construction Economics programme prepares students for professional practice in quantity surveying and construction economics."
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "qs-wassce",
+        "emoji": "📝",
+        "stepTitle": "A. WASSCE/SSSCE Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "qs-core",
+        "heading": "Core Subjects",
+        "points": [
+          "Credit passes in English Language",
+          "Credit passes in Mathematics",
+          "Credit passes in Integrated Science"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "qs-elective",
+        "heading": "Elective Subjects",
+        "description": "Credit passes in Mathematics and any Two (2) from the following:",
+        "points": [
+          "Chemistry",
+          "Economics",
+          "Geography",
+          "Technical Drawing",
+          "Building Construction",
+          "Physics"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "qs-alevel",
+        "emoji": "🎓",
+        "stepTitle": "B. A' Level Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "qs-alevel-req",
+        "points": [
+          "'O' Level or equivalent: Credit passes in FIVE (5) subjects including English Language and Mathematics",
+          "'A' Level or equivalent: Credit passes in Mathematics and any TWO (2) from the following: Physics, Chemistry, Geography, Economics, Building Construction and Technical Drawing"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "qs-mature",
+        "emoji": "👨‍🎓",
+        "stepTitle": "C. Mature Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "qs-mature-req",
+        "points": [
+          "Applicants must be 25 years at the time of the application",
+          "Must satisfy the requirements for WASSCE/SSSCE or A' Level or HND",
+          "An applicant may be required to pass a qualifying examination which shall form the basis for short-listing of candidates for an interview",
+          "Candidates must also pass an interview"
+        ]
+      },
+
+      {
+        "_type": "textBlock",
+        "_key": "arch-overview",
+        "heading": "BSc Development Planning",
+        "content": "The BSc Development Planning programme prepares students for professional practice in development planning."
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "dp-wassce",
+        "emoji": "📝",
+        "stepTitle": "A. WASSCE/SSSCE Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "dp-core",
+        "heading": "Core Subjects",
+        "points": [
+          "Credit passes in English Language",
+          "Credit passes in Mathematics",
+          "Credit passes in Integrated Science"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "dp-elective",
+        "heading": "Elective Subjects",
+        "description": "Credit passes in THREE (3) Elective Subjects as follows:",
+        "points": [
+          "Option 1: THREE (3) Electives from Group A, including Geography",
+          "Option 2: Two (2) from Group A, including Geography and One (1) from Group B"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "dp-groups",
+        "heading": "Subject Groups",
+        "points": [
+          "Group A: Economics, Introduction to Business Management, Geography, Government, Elective Mathematics, General Knowledge in Art",
+          "Group B: Accounting, Technical Drawing, Graphic Design, Picture Making, Sculpture, and Painting"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "dp-alevel",
+        "emoji": "🎓",
+        "stepTitle": "B. A' Level Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "dp-alevel-req",
+        "points": [
+          "'O' Level or equivalent: Credit passes in FIVE (5) subjects including English Language and Mathematics",
+          "'A' Level or equivalent: Credit passes in THREE (3) subjects from the groups below:",
+          "Option (a): All Subjects from Group A, including Geography",
+          "Option (b): Two (2) subjects from Group A, including Geography, and one (1) subject from Group B"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "dp-alevel-groups",
+        "heading": "Subject Groups",
+        "points": [
+          "GROUP A: Economics, Geography and Government",
+          "GROUP B: Mathematics, Statistics, General Knowledge in Art, Accounting and Business Management"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "dp-mature",
+        "emoji": "👨‍🎓",
+        "stepTitle": "C. Mature Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "dp-mature-req",
+        "points": [
+          "Applicants must be 25 years at the time of the application",
+          "Must satisfy the requirements for WASSCE/SSSCE or A' Level",
+          "An applicant may be required to pass a qualifying examination which shall form the basis for short-listing of candidates for an interview",
+          "Candidates must also pass an interview"
+        ]
+      },
+
+      {
+        "_type": "textBlock",
+        "_key": "arch-overview",
+        "heading": "BSc Human Settlement Planning",
+        "content": "The BSc Human Settlement Planning programme prepares students for professional practice in human settlement planning."
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "hsp-wassce",
+        "emoji": "📝",
+        "stepTitle": "A. WASSCE/SSSCE Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "hsp-core",
+        "heading": "Core Subjects",
+        "points": [
+          "Credit passes in English Language",
+          "Credit passes in Mathematics",
+          "Credit passes in Integrated Science"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "hsp-elective",
+        "heading": "Elective Subjects",
+        "description": "Credit passes in THREE (3) Subjects as follows:",
+        "points": [
+          "Option 1: THREE (3) Subjects in Group A including Geography",
+          "Option 2: TWO (2) Subjects in Group A, including Geography, and ONE (1) from Group B"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "hsp-groups",
+        "heading": "Subject Groups",
+        "points": [
+          "GROUP A: Economics, Introduction to Business Management, Geography, Government, Mathematics, General Knowledge in Art",
+          "GROUP B: Accounting, Technical Drawing, Graphic Design, Picture Making, Sculpture Painting"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "hsp-alevel",
+        "emoji": "🎓",
+        "stepTitle": "B. A' Level Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "hsp-alevel-req",
+        "points": [
+          "'O' Level or equivalent: Credit passes in FIVE (5) subjects including English Language and Mathematics",
+          "'A' Level or equivalent: Credit passes in TWO (2) from Group A and ONE (1) from Group B, plus a pass in General Paper"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "hsp-alevel-groups",
+        "heading": "Subject Groups",
+        "points": [
+          "GROUP A: Economics, Geography, and Government",
+          "GROUP B: Mathematics, Statistics, Art, Accounting, and Business Management"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "hsp-mature",
+        "emoji": "👨‍🎓",
+        "stepTitle": "C. Mature Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "hsp-mature-req",
+        "points": [
+          "Applicants must be 25 years at the time of the application",
+          "Must satisfy the requirements for WASSCE/SSSCE or A' Level",
+          "Higher National Diploma (HND), Construction Technician Course (Part III) or Professional Draughtmanship Certificates with a minimum of 5 years' experience in draughtsmanship",
+          "An applicant may be required to pass a qualifying examination which shall form the basis for short-listing of candidates for an interview"
+        ]
+      },
+
+      {
+        "_type": "textBlock",
+        "_key": "arch-overview",
+        "heading": "BSc Land Economy / BSc Real Estate",
+        "content": "The BSc Land Economy / BSc Real Estate programme prepares students for professional practice in land economy and real estate."
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "le-wassce",
+        "emoji": "📝",
+        "stepTitle": "A. WASSCE/SSSCE Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "le-core",
+        "heading": "Core Subjects",
+        "points": [
+          "Credit passes in English Language",
+          "Credit passes in Mathematics",
+          "Credit passes in Integrated Science"
+        ]
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "le-elective",
+        "heading": "Elective Subjects",
+        "description": "Credit passes in THREE subjects from the following:",
+        "points": [
+          "Option (a): Economics, Geography and a third subject relevant to the Land Economy Programme, preferably Accounting, Business Management, Government, Business Mathematics, French, Literature in English, History, Building Construction, Technical Drawing and Mathematics",
+          "Option (b): Economics, and TWO (2) other subjects from the following: Elective Mathematics, Geography, Accounting, Business Management, Business Mathematics, Government, French, Building Construction, Technical Drawing, and General Knowledge in Art"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "le-alevel",
+        "emoji": "🎓",
+        "stepTitle": "B. A' Level Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "le-alevel-req",
+        "points": [
+          "'O' Level or equivalent: Credit passes in FIVE (5) subjects including English Language and Mathematics",
+          "'A' Level or equivalent: Credit passes in THREE (3) subjects, two of which shall be Economics and Geography, at a grade not below C",
+          "Preference will be given to a third subject in Mathematics, Government or History",
+          "Candidates must also pass the General Paper"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "le-mature",
+        "emoji": "👨‍🎓",
+        "stepTitle": "C. Mature Applicants",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "le-mature-req",
+        "points": [
+          "Applicants must be 25 years at the time of the application",
+          "Must satisfy the requirements for WASSCE/SSSCE or A' Level, OR should hold a Diploma/HND in Estate Management",
+          "An applicant may be required to pass a qualifying examination which shall form the basis for short-listing of candidates for an interview",
+          "Candidates must also pass an interview"
+        ]
+      },
+      {
+        "_type": "stepBlock",
+        "_key": "le-diploma",
+        "emoji": "📜",
+        "stepTitle": "D. Diploma Holders",
+        "description": "Entry Requirements"
+      },
+      {
+        "_type": "pointsBlock",
+        "_key": "le-diploma-req",
+        "points": [
+          "Candidates with OND or HND in Estate Management or other relevant Diploma qualification from a recognized University or Polytechnic with CWA of 70% and above after a successful interview would be admitted into the second year of the Programme",
+          "Other Diploma holders with less than 70% as their CWA would be required to have three years' work experience in the real estate industry and in addition pass an interview to be admitted into first year of the Programme"
+        ]
+      },
+      {
+        "_type": "tipBlock",
+        "_key": "le-tip",
+        "emoji": "💡",
+        "tipTitle": "Note",
+        "tipType": "info",
+        "tipContent": "This applies to both BSc Land Economy and BSc Real Estate programmes."
+      }
+    ]
+
+
+    
+  }
+]
