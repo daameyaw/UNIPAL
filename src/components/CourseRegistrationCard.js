@@ -12,6 +12,7 @@ import {
   moderateVerticalScale,
 } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
+import { useNavigation } from "@react-navigation/native";
 
 const labels = ["Start Date", "End Date"];
 const customStyles = {
@@ -39,17 +40,16 @@ const customStyles = {
   stepIndicatorVerticalPadding: 30, // Only works in some versions!
 };
 
-const CourseRegistrationCard = ({
-  title,
-  subTitle,
-  startDate,
-  endDate,
-  iconName,
-}) => (
+
+
+const CourseRegistrationCard = ({ title, subTitle, startDate, endDate, iconName, linkUrl }) => {
+  const navigation = useNavigation();
+  console.log("Link URL:", linkUrl);
+  return (
   <ImageBackground
     source={require("../../assets/images/card1.png")}
     resizeMode="cover"
-    style={[styles.cardContainer, { width: "100%" }]}
+    style={[styles.cardContainer, { width: "100%" }]} 
     imageStyle={{ borderRadius: moderateScale(20) }}
   >
     <View style={styles.contentWrapper}>
@@ -74,13 +74,20 @@ const CourseRegistrationCard = ({
         stepCount={2}
         labels={[`Start Date: ${startDate}`, `End Date: ${endDate}`]}
       />
-      <TouchableOpacity style={styles.readMoreButton}>
+      <TouchableOpacity
+        style={styles.readMoreButton}
+        onPress={() => {
+          console.log(linkUrl);
+          navigation.navigate("Article", { id: linkUrl });
+        }}
+      >
         <Text style={styles.readMore}>Read More</Text>
         <Ionicons name="chevron-forward" size={20} color="#a52828" />
       </TouchableOpacity>
     </View>
   </ImageBackground>
 );
+};
 
 const styles = StyleSheet.create({
   cardContainer: {

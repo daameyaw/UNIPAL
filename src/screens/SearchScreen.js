@@ -8,13 +8,16 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import ScreenHeader from "../components/ScreenHeader";
 import { moderateScale } from "react-native-size-matters";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAllGuides } from "../hooks/useAllGuides";
 
 const SearchScreen = ({ navigation }) => {
+  const { isLoading, data: guides, error } = useAllGuides();
+  console.log("SearchScreen - Guides data:", guides);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
@@ -53,38 +56,68 @@ const SearchScreen = ({ navigation }) => {
   ];
 
   const handleSearch = (query) => {
-    setSearchQuery(query);
-    if (query.trim() === "") {
+    const searchTerm = query.trim().toLowerCase();
+
+    // 🛑 If the query is shorter than 4 characters, do nothing
+    if (searchTerm.length > 0 && searchTerm.length < 4) {
+      return;
+    }
+
+    // 🧹 Clear results if query is empty
+    if (searchTerm.length === 0) {
       setSearchResults([]);
       return;
     }
 
-    // Simple search logic - replace with actual search implementation
-    const filtered = mockResults.filter(
-      (item) =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.category.toLowerCase().includes(query.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.toLowerCase())
-    );
+    const filtered =
+      guides?.filter((guide) => {
+        // 1️⃣ Basic top-level fields
+        const matchesBasic =
+          guide.title.toLowerCase().includes(searchTerm) ||
+          guide.category.toLowerCase().includes(searchTerm) ||
+          guide.description?.toLowerCase().includes(searchTerm);
+
+        // 2️⃣ Deep content search — convert all nested text to lowercase JSON
+        const contentText = JSON.stringify(guide.content || {}).toLowerCase();
+        const matchesContent = contentText.includes(searchTerm);
+
+        return matchesBasic || matchesContent;
+      }) || [];
+
     setSearchResults(filtered);
   };
 
-  const renderSearchResult = ({ item }) => (
-    <TouchableOpacity
-      style={styles.resultItem}
-      onPress={() => {
-        // Navigate to article or handle result selection
-        console.log("Selected:", item.title);
-      }}
-    >
-      <View style={styles.resultContent}>
-        <Text style={styles.resultTitle}>{item.title}</Text>
-        <Text style={styles.resultCategory}>{item.category}</Text>
-        <Text style={styles.resultDescription}>{item.description}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#9B0E10" />
-    </TouchableOpacity>
-  );
+  // Debounce logic
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+  const renderSearchResult = ({ item }) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          console.log(item._id);
+          navigation.push("Article", { id: item._id });
+        }}
+        activeOpacity={0.9}
+        style={styles.card}
+      >
+        <View style={styles.cardRow}>
+          <View style={styles.leftIconWrap}>
+            <Ionicons name={item.icon} size={22} color="#9B0E10" />
+          </View>
+          <View style={styles.textWrap}>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -107,7 +140,7 @@ const SearchScreen = ({ navigation }) => {
               style={styles.searchInput}
               placeholder="Search guides..."
               value={searchQuery}
-              onChangeText={handleSearch}
+              onChangeText={setSearchQuery}
               autoFocus={true}
               returnKeyType="search"
             />
@@ -147,7 +180,7 @@ const SearchScreen = ({ navigation }) => {
             <FlatList
               data={searchResults}
               renderItem={renderSearchResult}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item._id}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.resultsList}
             />
@@ -169,7 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
   searchInputContainer: {
@@ -178,7 +211,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 4,
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
@@ -253,5 +286,47 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     lineHeight: 20,
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: moderateScale(15, 0.8),
+    paddingHorizontal: 16,
+  },
+  leftIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    backgroundColor: "#fff0f0",
+  },
+  textWrap: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+    marginBottom: 6,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    letterSpacing: 0.1,
+    width: "95%",
+    fontStyle: "italic",
   },
 });

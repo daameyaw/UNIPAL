@@ -88,6 +88,8 @@ export default function MyCarousel() {
     error: eventsError,
   } = useAcademicEvents();
 
+  console.log("Events data:", events);
+
   const ref = useRef(null);
   const progress = useSharedValue(0);
 
@@ -144,6 +146,8 @@ export default function MyCarousel() {
             startDate={item.startDate}
             endDate={item.endDate}
             iconName={item.iconName}
+            linkUrl={item.linkUrl}
+
           />
         );
       case "mov":
@@ -173,7 +177,7 @@ export default function MyCarousel() {
         width={width * 1}
         height={280}
         data={data}
-        autoPlay={true}
+        autoPlay={false}
         autoPlayInterval={5000}
         scrollAnimationDuration={1000}
         renderItem={renderItem}
