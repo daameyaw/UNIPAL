@@ -44,7 +44,7 @@ const customStyles = {
 
 const CourseRegistrationCard = ({ title, subTitle, startDate, endDate, iconName, linkUrl }) => {
   const navigation = useNavigation();
-  console.log("Link URL:", linkUrl);
+  // console.log("Link URL:", linkUrl);
   return (
   <ImageBackground
     source={require("../../assets/images/card1.png")}
