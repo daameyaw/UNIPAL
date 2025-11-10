@@ -18,6 +18,7 @@ import { useAllGuides } from "../hooks/useAllGuides";
 const SearchScreen = ({ navigation }) => {
   const { isLoading, data: guides, error } = useAllGuides();
   console.log("SearchScreen - Guides data:", guides);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
