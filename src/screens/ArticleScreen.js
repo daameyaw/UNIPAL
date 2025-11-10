@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Linking,
   ImageBackground,
+  Image,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getGuideById } from "../services/apiGuides";
 import { LinearGradient } from "expo-linear-gradient";
 import { moderateScale } from "react-native-size-matters";
+import { urlFor } from "../../sanity";
 
 /**
  * ArticleScreen
@@ -36,7 +38,7 @@ const ArticleScreen = ({ route, navigation }) => {
         try {
           const fetchedGuide = await getGuideById(id);
           setGuide(fetchedGuide);
-          console.log(guide)
+          console.log(guide);
         } catch (error) {
           console.error("Error fetching guide:", error);
         }
@@ -228,71 +230,69 @@ const ArticleScreen = ({ route, navigation }) => {
             imageStyle={styles.locationBlockBackgroundImage}
             resizeMode="cover"
           > */}
-            <View style={styles.locationOverlay}>
-              <View style={styles.locationContent}>
-                <View style={styles.locationIconContainer}>
-                  <Ionicons name="location" size={28} color="#9B0E10" />
-                </View>
+          <View style={styles.locationOverlay}>
+            <View style={styles.locationContent}>
+              <View style={styles.locationIconContainer}>
+                <Ionicons name="location" size={28} color="#9B0E10" />
+              </View>
 
-                <View style={styles.locationTextContainer}>
-                  {block.locationName && (
-                    <Text style={styles.locationName}>
-                      {block.locationName}
-                    </Text>
+              <View style={styles.locationTextContainer}>
+                {block.locationName && (
+                  <Text style={styles.locationName}>{block.locationName}</Text>
+                )}
+                {block.locationDescription && (
+                  <Text style={styles.locationDescription}>
+                    {block.locationDescription}
+                  </Text>
+                )}
+
+                <View style={styles.locationMetaContainer}>
+                  {block.openingTimes && (
+                    <View style={styles.locationTimesContainer}>
+                      <Ionicons name="time-outline" size={12} color="#666" />
+                      <Text style={styles.locationTimes}>
+                        {block.openingTimes}
+                      </Text>
+                    </View>
                   )}
-                  {block.locationDescription && (
-                    <Text style={styles.locationDescription}>
-                      {block.locationDescription}
-                    </Text>
+                  {block.distance && (
+                    <View style={styles.locationDistanceContainer}>
+                      <Ionicons
+                        name="navigate-outline"
+                        size={12}
+                        color="#666"
+                      />
+                      <Text style={styles.locationDistance}>
+                        {block.distance}
+                      </Text>
+                    </View>
                   )}
-
-                  <View style={styles.locationMetaContainer}>
-                    {block.openingTimes && (
-                      <View style={styles.locationTimesContainer}>
-                        <Ionicons name="time-outline" size={12} color="#666" />
-                        <Text style={styles.locationTimes}>
-                          {block.openingTimes}
-                        </Text>
-                      </View>
-                    )}
-                    {block.distance && (
-                      <View style={styles.locationDistanceContainer}>
-                        <Ionicons
-                          name="navigate-outline"
-                          size={12}
-                          color="#666"
-                        />
-                        <Text style={styles.locationDistance}>
-                          {block.distance}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  {/* Get Directions Button */}
-                  <TouchableOpacity
-                    style={styles.directionsButton}
-                    onPress={() => {
-                      console.log("pressed");
-                      navigation.navigate("LocationPlaces", {
-                        code: block.code,
-                        title: block.title,
-                      });
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="navigate" size={16} color="#FFFFFF" />
-                    <Text style={styles.directionsButtonText}>
-                      Get Directions
-                    </Text>
-                  </TouchableOpacity>
                 </View>
 
-                <View style={styles.locationArrowContainer}>
-                  <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
-                </View>
+                {/* Get Directions Button */}
+                <TouchableOpacity
+                  style={styles.directionsButton}
+                  onPress={() => {
+                    console.log("pressed");
+                    navigation.navigate("LocationPlaces", {
+                      code: block.code,
+                      title: block.title,
+                    });
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="navigate" size={16} color="#FFFFFF" />
+                  <Text style={styles.directionsButtonText}>
+                    Get Directions
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.locationArrowContainer}>
+                <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
               </View>
             </View>
+          </View>
           {/* </ImageBackground> */}
         </TouchableOpacity>
       );
@@ -334,7 +334,30 @@ const ArticleScreen = ({ route, navigation }) => {
           </ImageBackground>
         </TouchableOpacity>
       );
-    } // Handle regular text blocks (portable text)
+    }
+
+    // Add this inside the renderContentBlock function
+
+    if (block._type === "imageBlock") {
+      const imageUrl = block.image?.asset?.url;
+
+      if (!imageUrl) return null;
+
+      return (
+        <View key={block._key || index} style={styles.imageBlock}>
+          <Image
+            source={{ uri: urlFor(block.image).url() }}
+            style={styles.blockImage}
+            resizeMode="contain"
+          />
+          {block.caption && (
+            <Text style={styles.imageCaption}>{block.caption}</Text>
+          )}
+        </View>
+      );
+    }
+
+    // Handle regular text blocks (portable text)
     if (block._type === "block") {
       const text = block.children?.map((child) => child.text).join(" ");
 
@@ -827,6 +850,29 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "600",
+  },
+  imageBlock: {
+    marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  blockImage: {
+    width: "100%",
+    height: 300,
+    borderRadius: 8,
+  },
+  imageCaption: {
+    marginTop: 12,
+    fontSize: 13,
+    color: "#666",
+    textAlign: "center",
+    fontStyle: "italic",
   },
 });
 
