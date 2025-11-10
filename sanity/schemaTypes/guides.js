@@ -171,6 +171,50 @@ export default {
             },
           },
         },
+
+        {
+          name: 'imageBlock',
+          title: 'Image Block',
+          type: 'object',
+          fields: [
+            {
+              name: 'image',
+              title: 'Image',
+              type: 'image',
+              options: {
+                hotspot: true,
+              },
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'alt',
+              title: 'Alternative Text',
+              type: 'string',
+              description: 'Brief description of the image for accessibility',
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'caption',
+              title: 'Caption (optional)',
+              type: 'string',
+              description: 'Optional caption to display below the image',
+            },
+          ],
+          preview: {
+            select: {
+              title: 'alt',
+              subtitle: 'caption',
+              media: 'image',
+            },
+            prepare({title, subtitle, media}) {
+              return {
+                title: `🖼️ ${title || 'Image'}`,
+                subtitle: subtitle || 'No caption',
+                media: media,
+              }
+            },
+          },
+        },
         // Tip/Callout Block
         {
           name: 'tipBlock',
