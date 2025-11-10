@@ -62,6 +62,17 @@ const query = `
       emoji
     },
     
+    // For imageBlock
+    _type == "imageBlock" => {
+      image{
+        asset->{
+          url
+        }
+      },
+      alt,
+      caption
+    },
+    
     // For cutOffBlock
     _type == "cutOffBlock" => {
       heading,
@@ -145,6 +156,17 @@ const queryAll = `
       linkText,
       linkUrl,
       emoji
+    },
+    
+    // For imageBlock
+    _type == "imageBlock" => {
+      image{
+        asset->{
+          url
+        }
+      },
+      alt,
+      caption
     },
     
     // For cutOffBlock
@@ -247,6 +269,17 @@ const queryById = `
       linkText,
       linkUrl,
       emoji
+    },
+    
+    // For imageBlock
+    _type == "imageBlock" => {
+      image{
+        asset->{
+          url
+        }
+      },
+      alt,
+      caption
     },
     
     // For cutOffBlock
