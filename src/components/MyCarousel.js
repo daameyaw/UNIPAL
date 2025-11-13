@@ -101,6 +101,7 @@ export default function MyCarousel() {
         title: event.title,
         subTitle: event.description,
         iconName: event.iconName,
+        linkUrl: event.linkUrl,
         startDate: new Date(event.startDate).toLocaleDateString("en-US", {
           day: "numeric",
           month: "long",
