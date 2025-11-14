@@ -44,7 +44,7 @@ const customStyles = {
 
 const CourseRegistrationCard = ({ title, subTitle, startDate, endDate, iconName, linkUrl }) => {
   const navigation = useNavigation();
-  console.log("Link URL:", linkUrl);
+  // console.log("Link URL:", linkUrl);
   return (
   <ImageBackground
     source={require("../../assets/images/card1.png")}
@@ -77,7 +77,7 @@ const CourseRegistrationCard = ({ title, subTitle, startDate, endDate, iconName,
       <TouchableOpacity
         style={styles.readMoreButton}
         onPress={() => {
-          console.log(linkUrl);
+          // console.log(linkUrl);
           navigation.navigate("Article", { id: linkUrl });
         }}
       >
