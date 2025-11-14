@@ -74,6 +74,23 @@ export default {
       description: 'Used for ordering guides by priority (lower numbers appear first)',
       // validation: (Rule) => Rule.required().min(1),
     },
+    // NEW FIELD: Link guides to academic events
+    {
+      name: 'relatedEvents',
+      title: 'Related Academic Events',
+      type: 'array',
+      of: [{type: 'reference', to: [{type: 'academicEvent'}]}],
+      description:
+        'Link this guide to specific academic events. When these events are active, this guide will be prioritized in the Explore section.',
+    },
+    // NEW FIELD: Mark as featured for default display
+    {
+      name: 'isFeatured',
+      title: 'Featured Guide',
+      type: 'boolean',
+      description: 'Show this guide in Explore section when no events are active',
+      initialValue: false,
+    },
     {
       name: 'content',
       title: 'Content Blocks',
