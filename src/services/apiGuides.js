@@ -10,7 +10,7 @@ import client from "../../sanity";
  */
 
 // Query: fetch all guides for a category, ordered by rankNumber asc
-const query = `
+export const query = `
 *[_type == "guides" && category == $category] | order(rankNumber asc) {
   _id,
   title,
@@ -18,6 +18,7 @@ const query = `
   category,
   icon,
   rankNumber,
+  relatedEvents[]->{ _id, title },
   content[] {
     _type,
     _key,
@@ -106,7 +107,7 @@ const query = `
 `;
 
 // Query: fetch all guides regardless of category, ordered by rankNumber asc
-const queryAll = `
+export const queryAll = `
 *[_type == "guides"] | order(rankNumber asc) {
   _id,
   title,
@@ -114,6 +115,13 @@ const queryAll = `
   category,
   icon,
   rankNumber,
+  "relatedEvents": relatedEvents[]->{ 
+    _id, 
+    title,
+    startDate,
+    endDate,
+    _ref
+  },
   content[] {
     _type,
     _key,
