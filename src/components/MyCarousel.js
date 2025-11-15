@@ -88,7 +88,7 @@ export default function MyCarousel() {
     error: eventsError,
   } = useAcademicEvents();
 
-  console.log("Events data:", events);
+  // console.log("Events data:", events);
 
   const ref = useRef(null);
   const progress = useSharedValue(0);
