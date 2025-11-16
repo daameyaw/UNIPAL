@@ -21,6 +21,7 @@ import Login from "./src/screens/Login";
 import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import { Ionicons } from "@expo/vector-icons";
 import MapScreen from "./src/screens/MapScreen";
+import CWAScreen from "./src/screens/CWAScreen";
 import ExploreScreen from "./src/screens/ExploreScreen";
 import ArticlesScreen from "./src/screens/ArticlesScreen";
 import ArticleScreen from "./src/screens/ArticleScreen";
@@ -59,7 +60,7 @@ function AuthStack() {
           setShowOnboarding(true);
         }
       } catch (e) {
-        console.error("Error reading onboarding status:", e);
+        // console.error("Error reading onboarding status:", e);
         setShowOnboarding(true); // fallback to showing onboarding
       } finally {
         setIsLoading(false);
@@ -141,7 +142,7 @@ function TabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Locations" component={MapScreen} />
-      <Tab.Screen name="CWA " component={MapScreen} />
+      <Tab.Screen name="CWA " component={CWAScreen} />
 
       <Tab.Screen name="Guides" component={ExploreScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
@@ -200,11 +201,11 @@ function Root() {
           if (storedUserData) {
             const userData = JSON.parse(storedUserData);
             dispatch(setUserInfo(userData));
-            console.log("✅ Redux rehydrated from AsyncStorage:", userData);
+            // console.log("✅ Redux rehydrated from AsyncStorage:", userData);
           }
         }
       } catch (e) {
-        console.warn("Error initializing app:", e);
+        // console.warn("Error initializing app:", e);
       } finally {
         setIsTryingLogin(false);
       }
