@@ -9,6 +9,7 @@ import {
   Linking,
   ImageBackground,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,6 +31,8 @@ const ArticleScreen = ({ route, navigation }) => {
   // Prefer a concrete guide passed via navigation; fall back to id-based fetch
   const { guide: routeGuide, id } = route.params || {};
   const [guide, setGuide] = useState(routeGuide);
+
+  
 
   useEffect(() => {
     // Fetch only when we were not provided a full guide but we do have an id
