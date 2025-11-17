@@ -133,7 +133,7 @@ function TabNavigator() {
           } else if (route.name === "Settings") {
             iconName = focused ? "settings" : "settings-outline";
           } else if (route.name === "CWA ") {
-            iconName = focused ? "settings" : "settings-outline";
+            iconName = focused ? "calculator" : "calculator-outline";
           }
 
           return <Ionicons name={iconName} size={20} color={color} />;
