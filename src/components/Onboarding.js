@@ -186,7 +186,7 @@ export default function Onboarding() {
       flatListRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
       // Last screen - could navigate
-      console.log("Finished Onboarding!");
+      // console.log("Finished Onboarding!");
       navigation.navigate("SignUp"); // Uncomment this if you have a 'Home' screen
     }
   };
@@ -355,7 +355,7 @@ export default function Onboarding() {
                 // goToHome(); // or navigate to your home screen
                 navigation.navigate("SignUp"); // Uncomment this if you have a 'Home' screen
               } catch (e) {
-                console.error("Failed to save onboarding status:", e);
+                // console.error("Failed to save onboarding status:", e);
               }
             } else {
               scrollToNext();
