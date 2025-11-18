@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import ScreenHeader from "../components/ScreenHeader";
 import { moderateScale } from "react-native-size-matters";
@@ -18,75 +18,47 @@ import { useAllGuides } from "../hooks/useAllGuides";
 const SearchScreen = ({ navigation }) => {
   const { isLoading, data: guides, error } = useAllGuides();
   console.log("SearchScreen - Guides data:", guides);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  // Mock search results - replace with actual search logic
-  const mockResults = [
-    {
-      id: "1",
-      title: "How to Apply for Admission",
-      category: "Admissions",
-      description: "Complete guide to university admission process",
+
+  // Memoize the search function to prevent recreation on every render
+  const handleSearch = useCallback(
+    (query) => {
+      const searchTerm = query.trim().toLowerCase();
+
+      // 🧹 Clear results if query is empty
+      if (searchTerm.length === 0) {
+        setSearchResults([]);
+        return;
+      }
+
+      // 🛑 If the query is shorter than 4 characters, do nothing
+      if (searchTerm.length < 3) {
+        return;
+      }
+
+      const filtered =
+        guides?.filter((guide) => {
+          // 1️⃣ Basic top-level fields
+          const matchesBasic =
+            guide.title.toLowerCase().includes(searchTerm) ||
+            guide.category.toLowerCase().includes(searchTerm) ||
+            guide.description?.toLowerCase().includes(searchTerm);
+
+          // Early return if basic match found (skip expensive JSON.stringify)
+          if (matchesBasic) return true;
+
+          // 2️⃣ Deep content search — only if basic search didn't match
+          const contentText = JSON.stringify(guide.content || {}).toLowerCase();
+          return contentText.includes(searchTerm);
+        }) || [];
+
+      setSearchResults(filtered);
     },
-    {
-      id: "2",
-      title: "Course Registration Guide",
-      category: "Academics",
-      description: "Step-by-step course registration instructions",
-    },
-    {
-      id: "3",
-      title: "Campus Map Navigation",
-      category: "Navigation",
-      description: "Find your way around campus buildings",
-    },
-    {
-      id: "4",
-      title: "Student Support Services",
-      category: "Support",
-      description: "Mental health and academic support resources",
-    },
-    {
-      id: "5",
-      title: "Campus Events Calendar",
-      category: "Life",
-      description: "Upcoming events and activities on campus",
-    },
-  ];
-
-  const handleSearch = (query) => {
-    const searchTerm = query.trim().toLowerCase();
-
-    // 🛑 If the query is shorter than 4 characters, do nothing
-    if (searchTerm.length > 0 && searchTerm.length < 4) {
-      return;
-    }
-
-    // 🧹 Clear results if query is empty
-    if (searchTerm.length === 0) {
-      setSearchResults([]);
-      return;
-    }
-
-    const filtered =
-      guides?.filter((guide) => {
-        // 1️⃣ Basic top-level fields
-        const matchesBasic =
-          guide.title.toLowerCase().includes(searchTerm) ||
-          guide.category.toLowerCase().includes(searchTerm) ||
-          guide.description?.toLowerCase().includes(searchTerm);
-
-        // 2️⃣ Deep content search — convert all nested text to lowercase JSON
-        const contentText = JSON.stringify(guide.content || {}).toLowerCase();
-        const matchesContent = contentText.includes(searchTerm);
-
-        return matchesBasic || matchesContent;
-      }) || [];
-
-    setSearchResults(filtered);
-  };
+    [guides]
+  ); // Only recreate if guides changes
 
   // Debounce logic
   useEffect(() => {
@@ -95,7 +67,8 @@ const SearchScreen = ({ navigation }) => {
     }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
+  }, [searchQuery, handleSearch]); // Add handleSearch to dependencies
+
   const renderSearchResult = ({ item }) => {
     return (
       <TouchableOpacity
