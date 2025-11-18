@@ -57,13 +57,6 @@ const articles = [
 const ArticlesScreen = ({ route, navigation }) => {
   const { code, title } = route.params || {};
   const { isLoading, data: guides, error } = useGuides(code);
-  // console.log("ArticlesScreen - Guides data:", guides);
-
-  // Instead of:
-  // console.log(guides);
-
-  // Use:
-  // console.log(JSON.stringify(guides, null, 2));
 
   return (
     <SafeAreaView style={styles.background} edges={["top", "left", "right"]}>
