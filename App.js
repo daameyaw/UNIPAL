@@ -39,6 +39,9 @@ import RateAppScreen from "./src/screens/RateAppScreen";
 import ReferralSystemScreen from "./src/screens/ReferralSystemScreen";
 import LocationPlacesScreen from "./src/screens/LocationPlacesScreen";
 import SearchScreen from "./src/screens/SearchScreen";
+import SemesterCalculatorScreen from "./src/screens/SemesterCalculatorScreen";
+import SemesterCalculator from "./src/screens/SemesterCalculator";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -162,6 +165,9 @@ function AuthenticatedStack() {
       <Stack.Screen name="HelpFAQ" component={HelpFAQScreen} />
       <Stack.Screen name="ReportProblem" component={ReportProblemScreen} />
       <Stack.Screen name="ContactSupport" component={ContactSupportScreen} />
+      <Stack.Screen name="CWACalculator" component={SemesterCalculatorScreen} />
+      <Stack.Screen name="SemCalc" component={SemesterCalculator} />
+
       <Stack.Screen
         name="AboutApplication"
         component={AboutApplicationScreen}
@@ -248,16 +254,18 @@ export default function App() {
   }
 
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-          <StatusBar style="dark" />
-          <AuthContextProvider>
-            <Root />
-          </AuthContextProvider>
-        </View>
-      </QueryClientProvider>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+            <StatusBar style="dark" />
+            <AuthContextProvider>
+              <Root />
+            </AuthContextProvider>
+          </View>
+        </QueryClientProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }
 const styles = StyleSheet.create({
