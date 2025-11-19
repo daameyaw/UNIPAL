@@ -27,6 +27,11 @@ import { selectFullName } from "../store/features/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LocationCard from "../components/LocationCard";
 import CategoryCard from "../components/CategoryCard";
+import { useAllGuides } from "../hooks/useAllGuides";
+import { useAcademicEvents } from "../hooks/useAcademicEvents";
+import { query, queryAll } from "../services/apiGuides";
+import { academicEventsQuery } from "../services/apiAcademicEvents";
+import client from "../../sanity";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -139,14 +144,138 @@ function shuffleArray(array) {
     .map(({ value }) => value);
 }
 
+const isEventActive = (event) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startDate = new Date(event.startDate);
+  const endDate = new Date(event.endDate);
+
+  // Define the last day we care about (80 days from now)
+  const nextMonth = new Date();
+  nextMonth.setDate(nextMonth.getDate() + 80);
+  nextMonth.setHours(23, 59, 59, 999);
+
+  const isCurrent = today >= startDate && today <= endDate;
+
+  const isUpcomingWithinMonth = startDate > today && startDate <= nextMonth;
+
+  return isCurrent || isUpcomingWithinMonth;
+};
+
+// Function to get dynamic guides based on active events
+const getDynamicGuides = async (events, guides) => {
+  // Step 1: Filter active events
+  // const activeEvents = academicEvents.filter(isEventActive);
+
+  const activeEvents = events.filter(isEventActive) || [];
+
+  // Step 2: If there are active events, find guides linked to them
+  if (activeEvents.length > 0) {
+    const activeEventIds = activeEvents.map((event) => event._id);
+
+    // Filter guides that are linked to any of the active events
+    const eventRelatedGuides = guides.filter((guide) => {
+      if (!guide.relatedEvents || guide.relatedEvents.length === 0) {
+        return false;
+      }
+
+      // Check if guide is linked to any active event
+      return guide.relatedEvents.some((eventObj) =>
+        activeEventIds.includes(eventObj._id)
+      );
+    });
+
+    // Sort by rank number (lower = higher priority)
+    eventRelatedGuides.sort(
+      (a, b) => (a.rankNumber || 999) - (b.rankNumber || 999)
+    );
+
+    // Return up to 4 guides
+    if (eventRelatedGuides.length >= 4) {
+      return eventRelatedGuides.slice(0, 8);
+    }
+
+    // If we have some event-related guides but less than 4,
+    // fill the rest with featured guides
+    const featuredGuides = guides
+      .filter((g) => g.isFeatured && !eventRelatedGuides.includes(g))
+      .sort((a, b) => (a.rankNumber || 999) - (b.rankNumber || 999));
+
+    const combinedGuides = [
+      ...eventRelatedGuides,
+      ...featuredGuides.slice(0, 6 - eventRelatedGuides.length),
+    ];
+
+    return combinedGuides.slice(0, 8);
+  }
+
+  // Step 3: No active events - return featured guides
+  const featuredGuides = guides
+    .filter((guide) => guide.isFeatured)
+    .sort((a, b) => (a.rankNumber || 999) - (b.rankNumber || 999));
+
+  return featuredGuides.slice(0, 7);
+};
+
+const guidesQuery = `*[_type == "guides"] {
+  _id,
+  title,
+  subtitle,
+  category,
+  icon,
+  rankNumber,
+  isFeatured,
+  "relatedEvents": relatedEvents[]->{ 
+    _id, 
+    title,
+    startDate,
+    endDate
+  },
+}`;
+
+// GROQ query to fetch academic events
+const eventsQuery = `*[_type == "academicEvent"] {
+  _id,
+  title,
+  description,
+  startDate,
+  endDate,
+  linkUrl,
+  iconName
+}`;
+
+const fetchExploreGuides = async () => {
+  try {
+    // Fetch both guides and events from Sanity
+    const [guides, events] = await Promise.all([
+      client.fetch(guidesQuery),
+      client.fetch(eventsQuery),
+    ]);
+
+    const exploreGuides = await getDynamicGuides(events, guides);
+
+    return exploreGuides;
+  } catch (error) {
+    console.error("Error fetching explore guides:", error);
+    return [];
+  }
+};
+
 const HomeScreen = ({ navigation }) => {
+  const [exploreGuides, setExploreGuides] = useState([]);
   // const { isLoading, quote, author, date, error } = useMotivation();
   const authCtx = useContext(AuthContext);
   const fullName = useSelector(selectFullName);
   const [greeting, setGreeting] = useState(getGreeting());
+  const [loadingGuides, setLoadingGuides] = useState(true);
   const [categories, setCategories] = useState([]);
-
-  const auth = getAuth(app);
+  // const { isLoading, data: guides, error } = useAllGuides();
+  const {
+    isLoading: isLoadingEvents,
+    data: events,
+    error: eventsError,
+  } = useAcademicEvents();
 
   // console.log("Name", fullName);
 
@@ -169,13 +298,16 @@ const HomeScreen = ({ navigation }) => {
     setCategories(shuffleArray(initialCategories).slice(0, 4));
   }, []);
 
-  // useEffect(() => {
-  //   async function fetchMotivation() {
-  //     const motivation = await getMotivation();
-  //     console.log(motivation);
-  //   }
-  //   fetchMotivation();
-  // }, []);
+  useEffect(() => {
+    const loadGuides = async () => {
+      setLoadingGuides(true);
+      const guides = await fetchExploreGuides();
+      setExploreGuides(guides);
+      setLoadingGuides(false);
+    };
+
+    loadGuides();
+  }, [events]);
 
   const renderHeader = () => (
     <>
@@ -254,7 +386,10 @@ const HomeScreen = ({ navigation }) => {
             icon={item.icon}
             label={item.label}
             onPress={() => {
-              navigation.navigate("Articles", { code: item.id, title: item.title });
+              navigation.navigate("Articles", {
+                code: item.id,
+                title: item.title,
+              });
             }}
           />
         )}
@@ -269,18 +404,32 @@ const HomeScreen = ({ navigation }) => {
   );
 
   const renderExploreItem = ({ item, index }) => (
-    <TouchableOpacity style={styles.exploreCard}>
-      <View>
-        <Text style={styles.exploreTitle}>STUFFFFFFFF</Text>
-        <Text style={styles.exploreText}>XXXXXXXXXXXXXXX</Text>
+    <TouchableOpacity
+      onPress={() => {
+        console.log(item._id);
+        navigation.push("Article", { id: item._id });
+      }}
+      activeOpacity={0.9}
+      style={styles.card}
+    >
+      <View style={styles.cardRow}>
+        <View style={styles.leftIconWrap}>
+          <Ionicons name={item.icon} size={22} color="#9B0E10" />
+        </View>
+        <View style={styles.textWrap}>
+          <Text style={styles.cardTitle}>{item.title}</Text>
+          <Text numberOfLines={1} style={styles.cardSubtitle}>
+            {item.subtitle}
+          </Text>
+        </View>
+        <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
       </View>
-      <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
     </TouchableOpacity>
   );
 
   return (
     <FlatList
-      data={[...Array(4)]}
+      data={exploreGuides}
       renderItem={renderExploreItem}
       keyExtractor={(_, index) => index.toString()}
       ListHeaderComponent={renderHeader}
@@ -488,6 +637,48 @@ const styles = StyleSheet.create({
   exploreText: {
     fontSize: moderateScale(12),
     color: "#555",
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: moderateScale(15, 0.8),
+    paddingHorizontal: 16,
+  },
+  leftIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    backgroundColor: "#fff0f0",
+  },
+  textWrap: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+    marginBottom: 6,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    letterSpacing: 0.1,
+    width: "95%",
+    fontStyle: "italic",
   },
 });
 
