@@ -26,6 +26,11 @@ export default defineType({
       type: 'date',
     }),
     defineField({
+      name: 'linkUrl',
+      title: 'Event Link URL',
+      type: 'string',
+    }),
+    defineField({
       name: 'tag',
       title: 'Event Tag',
       type: 'string',
