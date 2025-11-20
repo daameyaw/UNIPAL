@@ -28,33 +28,38 @@ import { urlFor } from "../../sanity";
  * - an `id` param, in which case the guide is fetched on mount.
  */
 const ArticleScreen = ({ route, navigation }) => {
-  // Prefer a concrete guide passed via navigation; fall back to id-based fetch
-  const { guide: routeGuide, id } = route.params || {};
-  const [guide, setGuide] = useState(routeGuide);
+const { guide: routeGuide, id } = route.params || {};
+const [guide, setGuide] = useState(routeGuide);
+const [isLoading, setIsLoading] = useState(!routeGuide); // Only load if no guide provided
 
-  
+useEffect(() => {
+  // Combined effect: fetch guide if needed, then stop loading
+  let isMounted = true;
 
-  useEffect(() => {
-    // Fetch only when we were not provided a full guide but we do have an id
-    async function fetchGuideById() {
-      if (id && !routeGuide) {
-        try {
-          const fetchedGuide = await getGuideById(id);
+  async function initialize() {
+    if (id && !routeGuide) {
+      try {
+        const fetchedGuide = await getGuideById(id);
+        if (isMounted) {
           setGuide(fetchedGuide);
-          console.log(guide);
-        } catch (error) {
-          console.error("Error fetching guide:", error);
         }
+      } catch (error) {
+        console.error("Error fetching guide:", error);
       }
     }
 
-    fetchGuideById();
+    // Stop loading after fetch completes or immediately if no fetch needed
+    if (isMounted) {
+      setIsLoading(false);
+    }
+  }
 
-    return () => {
-      // No subscriptions to clean up currently
-    };
-  }, [id, routeGuide]);
+  initialize();
 
+  return () => {
+    isMounted = false; // Prevent state updates on unmounted component
+  };
+}, [id, routeGuide]);
   const renderContentBlock = (block, index) => {
     // Handle step blocks (numbered steps)
     if (block._type === "stepBlock") {
@@ -392,22 +397,28 @@ const ArticleScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <ScreenHeader title={guide?.category.toUpperCase() || "Guide"} />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {guide?.title && <Text style={styles.mainTitle}>{guide.title}</Text>}
+      <ScreenHeader title={guide?.category?.toUpperCase() || "Guide"} />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#9B0E10" />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {guide?.title && <Text style={styles.mainTitle}>{guide.title}</Text>}
 
-        {guide?.subtitle && (
-          <Text style={styles.subtitle}>{guide.subtitle}</Text>
-        )}
+          {guide?.subtitle && (
+            <Text style={styles.subtitle}>{guide.subtitle}</Text>
+          )}
 
-        {guide?.content?.map((block, index) =>
-          renderContentBlock(block, index)
-        )}
-      </ScrollView>
+          {guide?.content?.map((block, index) =>
+            renderContentBlock(block, index)
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -426,6 +437,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 24,
     paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
   mainTitle: {
     fontSize: 24,
