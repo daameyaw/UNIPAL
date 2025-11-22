@@ -38,8 +38,7 @@ export default function SemesterCalculator() {
 
   const sheetRef = useRef(null);
 
-    const plusRef = useRef(null);
-    
+  const plusRef = useRef(null);
 
   // Snap points tell the sheet how far to open
   const snapPoints = useMemo(() => ["45%", "60%"], []);
