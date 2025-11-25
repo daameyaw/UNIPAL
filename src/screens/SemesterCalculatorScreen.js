@@ -224,10 +224,10 @@ const SemesterCalculatorScreen = () => {
             </View>
           </View>
 
-          {/* <Text style={styles.footerNote}>
+          <Text style={styles.footerNote}>
             Tip: keep grades realistic—plug in projections before assessments to
             know what score you need on final papers or exams.
-          </Text> */}
+          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
