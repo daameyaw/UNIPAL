@@ -58,9 +58,9 @@ const SemesterCalculatorScreen = () => {
     );
   };
 
-  // const addCourse = () => {
-  //   setCourses((prev) => [...prev, createCourse()]);
-  // };
+  const addCourse = () => {
+    setCourses((prev) => [...prev, createCourse()]);
+  };
 
   const removeCourse = (id) => {
     setCourses((prev) =>
