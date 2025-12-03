@@ -54,7 +54,7 @@ export default function SemesterCalculator() {
     <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
   );
 
-  // const bottomSheetRef = useRef(null);
+  const bottomSheetRef = useRef(null);
 
   // callbacks
   const handleSheetChange = useCallback((index) => {
