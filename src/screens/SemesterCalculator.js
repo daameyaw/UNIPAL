@@ -23,10 +23,10 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-const createCourseChip = (index) => ({
-  id: `course-${index}`,
-  label: `Course ${index + 1}`,
-});
+// const createCourseChip = (index) => ({
+//   id: `course-${index}`,
+//   label: `Course ${index + 1}`,
+// });
 
 export default function SemesterCalculator() {
   const [courses, setCourses] = useState([]);
