@@ -31,8 +31,15 @@ const createCourseChip = (index) => ({
 export default function SemesterCalculator() {
   const [courses, setCourses] = useState([]);
   const isCalculateDisabled = courses.length === 0;
+
   const [currentCWA, setCurrentCWA] = useState("");
   const [targetCWA, setTargetCWA] = useState("");
+
+  const [courseCode, setCourseCode] = useState("");
+  const [courseName, setCourseName] = useState("");
+  const [creditHours, setCreditHours] = useState("");
+  const [targetScore, setTargetScore] = useState("");
+
 
   const isSaveDisabled = currentCWA.trim() === "" || targetCWA.trim() === "";
 
@@ -70,10 +77,40 @@ export default function SemesterCalculator() {
     setCurrentCWA("");
     setTargetCWA("");
   }, []);
+
+
   const handleSaveGoals = useCallback(() => {
     if (isSaveDisabled) return;
     plusRef.current?.close();
+
+    console.log("currentCWA", currentCWA);
+    console.log("targetCWA", targetCWA);
   }, [isSaveDisabled]);
+
+  const handleSaveCourse = () => {
+    if (!courseCode || !courseName || !creditHours || !targetScore) return;
+
+    const newCourse = {
+      id: Date.now().toString(),
+      courseCode,
+      courseName,
+      creditHours: Number(creditHours),
+      targetScore: Number(targetScore),
+    };
+
+    setCourses((prev) => [...prev, newCourse]);
+
+    // reset fields
+    setCourseCode("");
+    setCourseName("");
+    setCreditHours("");
+    setTargetScore("");
+
+    console.log("newCourse", newCourse);
+
+    sheetRef.current?.close();
+  };
+
 
   // render
   //   return (
@@ -113,14 +150,38 @@ export default function SemesterCalculator() {
               <Ionicons name="calculator-outline" size={24} color="#9B0E10" />
               <Text style={styles.overviewTitle}>Current Sem Overview</Text>
             </View>
-            <TouchableOpacity
-              style={styles.overviewAction}
-              onPress={() => {
-                (console.log("pressed"), handleAddCourse(1));
-              }}
-            >
-              <Ionicons name="add" size={26} color="#9B0E10" />
-            </TouchableOpacity>
+            {!currentCWA || !targetCWA ? (
+              /* ================= EMPTY STATE (PLUS BUTTON) ================= */
+              <TouchableOpacity
+                style={styles.overviewAction}
+                onPress={() => handleAddCourse(1)}
+              >
+                <Ionicons name="add" size={26} color="#9B0E10" />
+              </TouchableOpacity>
+            ) : (
+              /* ================= DATA STATE (IMAGE DESIGN) ================= */
+              <>
+                <View style={styles.statRow}>
+                  <Text style={styles.statText}>
+                    Current CWA: <Text style={styles.statValue}>{currentCWA}%</Text>
+                  </Text>
+                  <Text style={styles.statText}>
+                    Target CWA: <Text style={styles.statValue}>{targetCWA}%</Text>
+                  </Text>
+                </View>
+
+                {/* Progress bar */}
+                <View style={styles.progressTrack}>
+                  <View style={[styles.progressFill, { width: "94%" }]} />
+                </View>
+
+                <Text style={styles.helperText}>
+                  You need an average of{" "}
+                  <Text style={styles.emphasis}>82%</Text> this semester to
+                  reach your goal.
+                </Text>
+              </>
+            )}{" "}
           </ImageBackground>
 
           <View style={styles.courseArea}>
@@ -170,19 +231,100 @@ export default function SemesterCalculator() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Add Course Sheet */}
         <BottomSheet
           ref={sheetRef}
           snapPoints={snapPoints}
           enableDynamicSizing={false}
-          onChange={handleSheetChange}
-          enablePanDownToClose={true}
+          enablePanDownToClose
           backdropComponent={renderBackdrop}
           index={-1}
+          keyboardBehavior="extend" // Change to "extend"
+          keyboardBlurBehavior="restore"
+          android_keyboardInputMode="adjustResize"
+          // bottomInset={46}
         >
-          <BottomSheetView style={styles.contentContainer}>
-            <Text>Awesome 🔥</Text>
-          </BottomSheetView>
+          <BottomSheetScrollView
+            style={styles.contentContainer}
+            keyboardBehavior="interactive"
+            keyboardShouldPersistTaps="handled"
+          >
+                        <KeyboardAvoidingView
+              style={styles.sheetKeyboardWrapper}
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+            >
+
+            <Text style={styles.sheetTitle}>Add Course</Text>
+
+            {/* Course Code */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Course Code</Text>
+              <TextInput
+                value={courseCode}
+                onChangeText={setCourseCode}
+                placeholder="e.g. CS101"
+                style={styles.input}
+                autoCapitalize="characters"
+              />
+            </View>
+
+            {/* Course Name */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Course Name</Text>
+              <TextInput
+                value={courseName}
+                onChangeText={setCourseName}
+                placeholder="e.g. Introduction to Computing"
+                style={styles.input}
+              />
+            </View>
+
+            {/* Credit Hours */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Credit Hours</Text>
+              <TextInput
+                value={creditHours}
+                onChangeText={setCreditHours}
+                placeholder="e.g. 3"
+                style={styles.input}
+                keyboardType="numeric"
+              />
+            </View>
+
+            {/* Target Score */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Target Score (%)</Text>
+              <TextInput
+                value={targetScore}
+                onChangeText={setTargetScore}
+                placeholder="e.g. 80"
+                style={styles.input}
+                keyboardType="numeric"
+              />
+            </View>
+
+            {/* Actions */}
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => sheetRef.current?.close()}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSaveCourse}
+              >
+                <Text style={styles.saveText}>Save Course</Text>
+              </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </BottomSheetScrollView>
         </BottomSheet>
+
+        {/* Current Semester Overview Sheet */}
         <BottomSheet
           ref={plusRef}
           snapPoints={snapPoints}
@@ -194,7 +336,7 @@ export default function SemesterCalculator() {
           keyboardBehavior="extend" // Change to "extend"
           keyboardBlurBehavior="restore"
           android_keyboardInputMode="adjustResize"
-          bottomInset={46}
+          // bottomInset={46}
         >
           <BottomSheetScrollView style={styles.sheetContent}>
             <KeyboardAvoidingView
@@ -277,6 +419,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
+    // paddingHorizontal: 20,
   },
   safeArea: {
     flex: 1,
@@ -290,7 +433,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   contentContainer: {
-    paddingVertical: 28,
+    paddingVertical: 12,
     paddingBottom: 32,
     gap: 20,
   },
@@ -388,7 +531,7 @@ const styles = StyleSheet.create({
   overviewCard: {
     borderRadius: 18,
     padding: 16,
-    minHeight: 200,
+    minHeight: 150,
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -500,5 +643,165 @@ const styles = StyleSheet.create({
   },
   calculateTextDisabled: {
     color: "#B7A3A3",
+  },
+  overviewContainer: {
+    borderRadius: 18,
+    padding: 16,
+  },
+
+  overviewHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+
+  overviewTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#4B2F2F",
+  },
+
+  overviewRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  overviewLabel: {
+    fontSize: 13,
+    color: "#5A4A4A",
+  },
+
+  overviewValue: {
+    fontWeight: "700",
+    color: "#9B0E10",
+  },
+
+  progressTrack: {
+    height: 12,
+    backgroundColor: "#E6C7C7",
+    borderRadius: 999,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#9B0E10",
+    borderRadius: 999,
+  },
+
+  overviewHint: {
+    fontSize: 12,
+    color: "#6B5555",
+  },
+
+  highlight: {
+    color: "#9B0E10",
+    fontWeight: "700",
+  },
+  statRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingHorizontal: 6,
+  },
+
+  statText: {
+    fontSize: 13,
+    color: "#4B2F2F",
+    fontWeight: "500",
+  },
+
+  statValue: {
+    fontWeight: "700",
+    color: "#9B0E10",
+  },
+
+  progressTrack: {
+    height: 15,
+    backgroundColor: "#E4C5C5",
+    borderRadius: 999,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#9B0E10",
+    borderRadius: 999,
+  },
+
+  helperText: {
+    fontSize: 15,
+    color: "#6B4D4D",
+    lineHeight: 16,
+  },
+
+  emphasis: {
+    color: "#9B0E10",
+    fontWeight: "700",
+  },
+
+  /* ================= COURSE INPUT STYLES ================= */
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#3E2723",
+    marginBottom: 20,
+    marginHorizontal: 20,
+  },
+
+  field: {
+    marginBottom: 16,
+  },
+
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#5A4A4A",
+    marginBottom: 6,
+    marginHorizontal: 20,
+  },
+
+  input: {
+    height: 46,
+    borderWidth: 1,
+    borderColor: "#E6C7C7",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: "#FFF",
+    fontSize: 14,
+    marginHorizontal: 20,
+  },
+
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 24,
+  },
+
+  cancelButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+  },
+
+  cancelText: {
+    color: "#9B0E10",
+    fontWeight: "600",
+  },
+
+  saveButton: {
+    backgroundColor: "#9B0E10",
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 26,
+    marginHorizontal: 20,
+  },
+
+  saveText: {
+    color: "#FFF",
+    fontWeight: "700",
   },
 });
