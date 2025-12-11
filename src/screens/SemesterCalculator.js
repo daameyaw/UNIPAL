@@ -106,7 +106,7 @@ export default function SemesterCalculator() {
     setCreditHours("");
     setTargetScore("");
 
-    console.log("newCourse", newCourse);
+    // console.log("newCourse", newCourse);
 
     sheetRef.current?.close();
   };
