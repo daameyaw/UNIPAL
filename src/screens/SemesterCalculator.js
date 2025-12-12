@@ -34,12 +34,12 @@ export default function SemesterCalculator() {
 
   const [currentCWA, setCurrentCWA] = useState("");
   const [targetCWA, setTargetCWA] = useState("");
+  const [save, setSave] = useState(false);
 
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [creditHours, setCreditHours] = useState("");
   const [targetScore, setTargetScore] = useState("");
-
 
   const isSaveDisabled = currentCWA.trim() === "" || targetCWA.trim() === "";
 
@@ -48,7 +48,9 @@ export default function SemesterCalculator() {
   const plusRef = useRef(null);
 
   // Snap points tell the sheet how far to open
-  const snapPoints = useMemo(() => ["45%", "60%"], []);
+  // const snapPoints = useMemo(() => ["45%", "60%", "80%", "100%"], []);
+
+  const snapPoints = useMemo(() => ["80%", "81%"], []);
 
   const [isOpen, setIsOpen] = useState(true);
 
@@ -78,9 +80,11 @@ export default function SemesterCalculator() {
     setTargetCWA("");
   }, []);
 
-
   const handleSaveGoals = useCallback(() => {
     if (isSaveDisabled) return;
+
+    setSave(true);
+
     plusRef.current?.close();
 
     console.log("currentCWA", currentCWA);
@@ -106,11 +110,19 @@ export default function SemesterCalculator() {
     setCreditHours("");
     setTargetScore("");
 
-    // console.log("newCourse", newCourse);
+    console.log("newCourse", newCourse);
 
     sheetRef.current?.close();
   };
 
+  const getCwaProgress = () => {
+    if (!currentCWA || !targetCWA || !save) return null;
+
+    const C = Number(currentCWA);
+    const T = Number(targetCWA);
+
+    return (C / T) * 100;
+  };
 
   // render
   //   return (
@@ -132,6 +144,10 @@ export default function SemesterCalculator() {
   //     </GestureHandlerRootView>
   //   );
 
+  const hasCWA = currentCWA && targetCWA && save;
+
+  const progress = getCwaProgress();
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       <View style={styles.wrapper}>
@@ -147,10 +163,22 @@ export default function SemesterCalculator() {
             resizeMode="cover"
           >
             <View style={styles.overviewHeader}>
-              <Ionicons name="calculator-outline" size={24} color="#9B0E10" />
-              <Text style={styles.overviewTitle}>Current Sem Overview</Text>
+              <View style={styles.overviewHeaderLeft}>
+                <Ionicons name="calculator-outline" size={24} color="#9B0E10" />
+                <Text style={styles.overviewTitle}>Current Sem Overview</Text>
+              </View>
+              {hasCWA && (
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => handleAddCourse(1)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Edit CWA goals"
+                >
+                  <Ionicons name="pencil-outline" size={20} color="#9B0E10" />
+                </TouchableOpacity>
+              )}
             </View>
-            {!currentCWA || !targetCWA ? (
+            {!hasCWA ? (
               /* ================= EMPTY STATE (PLUS BUTTON) ================= */
               <TouchableOpacity
                 style={styles.overviewAction}
@@ -163,22 +191,28 @@ export default function SemesterCalculator() {
               <>
                 <View style={styles.statRow}>
                   <Text style={styles.statText}>
-                    Current CWA: <Text style={styles.statValue}>{currentCWA}%</Text>
+                    Current CWA:{" "}
+                    <Text style={styles.statValue}>{currentCWA}%</Text>
                   </Text>
                   <Text style={styles.statText}>
-                    Target CWA: <Text style={styles.statValue}>{targetCWA}%</Text>
+                    Target CWA:{" "}
+                    <Text style={styles.statValue}>{targetCWA}%</Text>
                   </Text>
                 </View>
 
                 {/* Progress bar */}
                 <View style={styles.progressTrack}>
-                  <View style={[styles.progressFill, { width: "94%" }]} />
+                  <View
+                    style={[styles.progressFill, { width: `${progress}%` }]}
+                  />
                 </View>
 
                 <Text style={styles.helperText}>
-                  You need an average of{" "}
-                  <Text style={styles.emphasis}>82%</Text> this semester to
-                  reach your goal.
+                  You are{" "}
+                  <Text style={styles.emphasis}>
+                    {progress ? progress.toFixed(1) : "--"}%
+                  </Text>{" "}
+                  of the way to your goal.
                 </Text>
               </>
             )}{" "}
@@ -250,75 +284,74 @@ export default function SemesterCalculator() {
             keyboardBehavior="interactive"
             keyboardShouldPersistTaps="handled"
           >
-                        <KeyboardAvoidingView
+            <KeyboardAvoidingView
               style={styles.sheetKeyboardWrapper}
               behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
+              <Text style={styles.sheetTitle}>Add Course</Text>
 
-            <Text style={styles.sheetTitle}>Add Course</Text>
+              {/* Course Code */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Course Code</Text>
+                <TextInput
+                  value={courseCode}
+                  onChangeText={setCourseCode}
+                  placeholder="e.g. CS101"
+                  style={styles.input}
+                  autoCapitalize="characters"
+                />
+              </View>
 
-            {/* Course Code */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Course Code</Text>
-              <TextInput
-                value={courseCode}
-                onChangeText={setCourseCode}
-                placeholder="e.g. CS101"
-                style={styles.input}
-                autoCapitalize="characters"
-              />
-            </View>
+              {/* Course Name */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Course Name</Text>
+                <TextInput
+                  value={courseName}
+                  onChangeText={setCourseName}
+                  placeholder="e.g. Introduction to Computing"
+                  style={styles.input}
+                />
+              </View>
 
-            {/* Course Name */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Course Name</Text>
-              <TextInput
-                value={courseName}
-                onChangeText={setCourseName}
-                placeholder="e.g. Introduction to Computing"
-                style={styles.input}
-              />
-            </View>
+              {/* Credit Hours */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Credit Hours</Text>
+                <TextInput
+                  value={creditHours}
+                  onChangeText={setCreditHours}
+                  placeholder="e.g. 3"
+                  style={styles.input}
+                  keyboardType="numeric"
+                />
+              </View>
 
-            {/* Credit Hours */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Credit Hours</Text>
-              <TextInput
-                value={creditHours}
-                onChangeText={setCreditHours}
-                placeholder="e.g. 3"
-                style={styles.input}
-                keyboardType="numeric"
-              />
-            </View>
+              {/* Target Score */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Target Score (%)</Text>
+                <TextInput
+                  value={targetScore}
+                  onChangeText={setTargetScore}
+                  placeholder="e.g. 80"
+                  style={styles.input}
+                  keyboardType="numeric"
+                />
+              </View>
 
-            {/* Target Score */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Target Score (%)</Text>
-              <TextInput
-                value={targetScore}
-                onChangeText={setTargetScore}
-                placeholder="e.g. 80"
-                style={styles.input}
-                keyboardType="numeric"
-              />
-            </View>
+              {/* Actions */}
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => sheetRef.current?.close()}
+                >
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </TouchableOpacity>
 
-            {/* Actions */}
-            <View style={styles.actions}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => sheetRef.current?.close()}
-              >
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveCourse}
-              >
-                <Text style={styles.saveText}>Save Course</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveCourseButton}
+                  onPress={handleSaveCourse}
+                >
+                  <Text style={styles.saveCourseText}>Save Course</Text>
+                </TouchableOpacity>
               </View>
             </KeyboardAvoidingView>
           </BottomSheetScrollView>
@@ -445,7 +478,7 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   sheetHeader: {
-    gap: 6,
+    // gap: 6,
     width: "100%",
   },
   sheetKeyboardWrapper: {
@@ -457,6 +490,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#2D0A0A",
+    // marginHorizontal: 20,
   },
   sheetSubtitle: {
     fontSize: 13,
@@ -544,7 +578,18 @@ const styles = StyleSheet.create({
   overviewHeader: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: 10,
+  },
+  overviewHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  editButton: {
+    padding: 4,
+    borderRadius: 8,
   },
   overviewTitle: {
     fontSize: 16,
@@ -792,7 +837,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  saveButton: {
+  saveCourseButton: {
     backgroundColor: "#9B0E10",
     borderRadius: 10,
     paddingVertical: 14,
@@ -800,7 +845,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
 
-  saveText: {
+  saveCourseText: {
     color: "#FFF",
     fontWeight: "700",
   },
