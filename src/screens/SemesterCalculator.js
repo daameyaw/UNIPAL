@@ -32,16 +32,19 @@ export default function SemesterCalculator() {
   const [courses, setCourses] = useState([]);
   const isCalculateDisabled = courses.length === 0;
 
-  const [currentCWA, setCurrentCWA] = useState("");
-  const [targetCWA, setTargetCWA] = useState("");
-  const [save, setSave] = useState(false);
+  const [currentCWA, setCurrentCWA] = useState(null);
+  const [targetCWA, setTargetCWA] = useState(null);
 
-  const [courseCode, setCourseCode] = useState("");
-  const [courseName, setCourseName] = useState("");
-  const [creditHours, setCreditHours] = useState("");
-  const [targetScore, setTargetScore] = useState("");
+  // Temporary sheet values
+  const [tempCurrent, setTempCurrent] = useState("");
+  const [tempTarget, setTempTarget] = useState("");
 
-  const isSaveDisabled = currentCWA.trim() === "" || targetCWA.trim() === "";
+  const [courseCode, setCourseCode] = useState("CS101");
+  const [courseName, setCourseName] = useState("Introduction to Computing");
+  const [creditHours, setCreditHours] = useState("3");
+  const [targetScore, setTargetScore] = useState("80");
+
+  const isSaveDisabled = !tempCurrent || !tempTarget;
 
   const sheetRef = useRef(null);
 
@@ -76,20 +79,23 @@ export default function SemesterCalculator() {
     sheetRef.current?.close();
   }, []);
   const handleResetGoals = useCallback(() => {
-    setCurrentCWA("");
+    setTempCurrent("");
+    setTempTarget("");
     setTargetCWA("");
   }, []);
 
   const handleSaveGoals = useCallback(() => {
     if (isSaveDisabled) return;
 
-    setSave(true);
+    setCurrentCWA(Number(tempCurrent));
+    setTargetCWA(Number(tempTarget));
 
     plusRef.current?.close();
 
-    console.log("currentCWA", currentCWA);
+    console.log("tempCurrent", tempCurrent);
+    console.log("tempTarget", tempTarget);
     console.log("targetCWA", targetCWA);
-  }, [isSaveDisabled]);
+  }, [isSaveDisabled, tempCurrent, tempTarget]);
 
   const handleSaveCourse = () => {
     if (!courseCode || !courseName || !creditHours || !targetScore) return;
@@ -116,7 +122,7 @@ export default function SemesterCalculator() {
   };
 
   const getCwaProgress = () => {
-    if (!currentCWA || !targetCWA || !save) return null;
+    if (!currentCWA || !targetCWA) return null;
 
     const C = Number(currentCWA);
     const T = Number(targetCWA);
@@ -144,7 +150,7 @@ export default function SemesterCalculator() {
   //     </GestureHandlerRootView>
   //   );
 
-  const hasCWA = currentCWA && targetCWA && save;
+  const hasCWA = currentCWA && targetCWA;
 
   const progress = getCwaProgress();
 
@@ -196,7 +202,7 @@ export default function SemesterCalculator() {
                   </Text>
                   <Text style={styles.statText}>
                     Target CWA:{" "}
-                    <Text style={styles.statValue}>{targetCWA}%</Text>
+                    <Text style={styles.statValue}>{targetCWA }%</Text>
                   </Text>
                 </View>
 
@@ -215,7 +221,7 @@ export default function SemesterCalculator() {
                   of the way to your goal.
                 </Text>
               </>
-            )}{" "}
+            )}
           </ImageBackground>
 
           <View style={styles.courseArea}>
@@ -385,25 +391,25 @@ export default function SemesterCalculator() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Current CWA</Text>
-                <BottomSheetTextInput
+                <TextInput
                   style={styles.inputField}
                   placeholder="e.g. 65.40"
                   placeholderTextColor="#B9A7A7"
-                  keyboardType="decimal-pad"
-                  value={currentCWA}
-                  onChangeText={setCurrentCWA}
+                  keyboardType="numeric"
+                  value={tempCurrent || ""}
+                  onChangeText={setTempCurrent}
                 />
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Target CWA</Text>
-                <BottomSheetTextInput
+                <TextInput
                   style={styles.inputField}
                   placeholder="e.g. 72.00"
                   placeholderTextColor="#B9A7A7"
-                  keyboardType="decimal-pad"
-                  value={targetCWA}
-                  onChangeText={setTargetCWA}
+                  keyboardType="numeric"
+                  value={tempTarget || ""}
+                  onChangeText={setTempTarget}
                 />
               </View>
 
