@@ -42,6 +42,7 @@ import SearchScreen from "./src/screens/SearchScreen";
 import SemesterCalculatorScreen from "./src/screens/SemesterCalculatorScreen";
 import SemesterCalculator from "./src/screens/SemesterCalculator";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -255,16 +256,18 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-            <StatusBar style="dark" />
-            <AuthContextProvider>
-              <Root />
-            </AuthContextProvider>
-          </View>
-        </QueryClientProvider>
-      </Provider>
+      <BottomSheetModalProvider>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+              <StatusBar style="dark" />
+              <AuthContextProvider>
+                <Root />
+              </AuthContextProvider>
+            </View>
+          </QueryClientProvider>
+        </Provider>
+      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 }
