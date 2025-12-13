@@ -49,9 +49,29 @@ export default function SemesterCalculator() {
 
   const isSaveDisabled = !tempCurrent || !tempTarget;
 
-  const sheetRef = useRef(null);
+  const courseRef = useRef(null);
 
-  const plusRef = useRef(null);
+  const CWARef = useRef(null);
+
+  const openCourseModal = useCallback(() => {
+    console.log("openSheet called");
+
+    courseRef.current?.present();
+  }, []);
+
+  const closeCourseModal = () => {
+    courseRef.current?.dismiss();
+  };
+
+  const openCWAModal = useCallback(() => {
+    console.log("openSheet called");
+
+    CWARef.current?.present();
+  }, []);
+
+  const closeCWAModal = () => {
+    CWARef.current?.dismiss();
+  };
 
   // Snap points tell the sheet how far to open
   // const snapPoints = useMemo(() => ["45%", "60%", "80%", "100%"], []);
@@ -96,7 +116,8 @@ export default function SemesterCalculator() {
     setCurrentCWA(Number(tempCurrent));
     setTargetCWA(Number(tempTarget));
 
-    plusRef.current?.close();
+    CWARef.current?.dismiss();
+
 
     console.log("tempCurrent", tempCurrent);
     console.log("tempTarget", tempTarget);
@@ -140,7 +161,7 @@ export default function SemesterCalculator() {
     setTargetScore("");
     setEditingCourseId(null);
 
-    sheetRef.current?.close();
+    courseRef.current?.dismiss();
   };
 
   const editCourse = (course) => {
@@ -149,7 +170,7 @@ export default function SemesterCalculator() {
     setCreditHours(course.creditHours.toString());
     setTargetScore(course.targetScore.toString());
     setEditingCourseId(course.id);
-    sheetRef.current?.expand();
+    courseRef.current?.present();
   };
 
   function getGrade(targetScore) {
@@ -282,7 +303,7 @@ export default function SemesterCalculator() {
               {hasCWA && (
                 <TouchableOpacity
                   style={styles.editButton}
-                  onPress={() => handleAddCourse(1)}
+                  onPress={() => openCWAModal()}
                   accessibilityRole="button"
                   accessibilityLabel="Edit CWA goals"
                 >
@@ -294,7 +315,7 @@ export default function SemesterCalculator() {
               /* ================= EMPTY STATE (PLUS BUTTON) ================= */
               <TouchableOpacity
                 style={styles.overviewAction}
-                onPress={() => handleAddCourse(1)}
+                onPress={() => openCWAModal()}
               >
                 <Ionicons name="add" size={26} color="#9B0E10" />
               </TouchableOpacity>
@@ -329,21 +350,6 @@ export default function SemesterCalculator() {
               </>
             )}
           </ImageBackground>
-          <TouchableOpacity
-            style={styles.addCourseButton}
-            onPress={() => {
-              // Reset form and editing state for new course
-              setCourseCode("");
-              setCourseName("");
-              setCreditHours("");
-              setTargetScore("");
-              setEditingCourseId(null);
-              handleSnapPress(1);
-            }}
-          >
-            <Ionicons name="add" size={18} color="#9B0E10" />
-            <Text style={styles.addCourseText}>Add Course</Text>
-          </TouchableOpacity>
 
           <View style={styles.courseArea}>
             <FlatList
@@ -361,6 +367,21 @@ export default function SemesterCalculator() {
               }
             />
           </View>
+          <TouchableOpacity
+            style={styles.addCourseButton}
+            onPress={() => {
+              // Reset form and editing state for new course
+              setCourseCode("");
+              setCourseName("");
+              setCreditHours("");
+              setTargetScore("");
+              setEditingCourseId(null);
+              openCourseModal();
+            }}
+          >
+            <Ionicons name="add" size={18} color="#9B0E10" />
+            <Text style={styles.addCourseText}>Add Course</Text>
+          </TouchableOpacity>
         </ScrollView>
         <View style={styles.footer}>
           <TouchableOpacity
@@ -380,17 +401,19 @@ export default function SemesterCalculator() {
             </Text>
           </TouchableOpacity>
         </View>
-        Add Course Sheet
-        <BottomSheet
-          ref={sheetRef}
+
+        {/* Add Course Sheet */}
+
+        <BottomSheetModal
+          ref={courseRef}
           snapPoints={snapPoints}
           enableDynamicSizing={false}
           enablePanDownToClose
           backdropComponent={renderBackdrop}
-          index={-1}
           keyboardBehavior="extend" // Change to "extend"
           keyboardBlurBehavior="restore"
           android_keyboardInputMode="adjustResize"
+          onChange={handleSheetChange}
           // bottomInset={46}
         >
           <BottomSheetScrollView
@@ -459,7 +482,7 @@ export default function SemesterCalculator() {
                   setCreditHours("");
                   setTargetScore("");
                   setEditingCourseId(null);
-                  sheetRef.current?.close();
+                  closeCourseModal();
                 }}
               >
                 <Text style={styles.cancelText}>Cancel</Text>
@@ -476,16 +499,16 @@ export default function SemesterCalculator() {
               </TouchableOpacity>
             </View>
           </BottomSheetScrollView>
-        </BottomSheet>
+        </BottomSheetModal>
+
         {/* Current Semester Overview Sheet */}
-        <BottomSheet
-          ref={plusRef}
+        <BottomSheetModal
+          ref={CWARef}
           snapPoints={snapPoints}
           enableDynamicSizing={false}
           onChange={handleSheetChange}
           enablePanDownToClose={true}
           backdropComponent={renderBackdrop}
-          index={-1}
           keyboardBehavior="extend" // Change to "extend"
           keyboardBlurBehavior="restore"
           android_keyboardInputMode="adjustResize"
@@ -556,7 +579,7 @@ export default function SemesterCalculator() {
               </View>
             </KeyboardAvoidingView>
           </BottomSheetScrollView>
-        </BottomSheet>
+        </BottomSheetModal>
       </View>
     </SafeAreaView>
   );
