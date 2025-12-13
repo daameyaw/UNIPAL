@@ -10,6 +10,8 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,7 +32,7 @@ const createCourseChip = (index) => ({
 
 export default function SemesterCalculator() {
   const [courses, setCourses] = useState([]);
-  const isCalculateDisabled = courses.length === 0;
+  const isCalculateDisabled = courses.length <= 3;
 
   const [currentCWA, setCurrentCWA] = useState(null);
   const [targetCWA, setTargetCWA] = useState(null);
@@ -43,6 +45,7 @@ export default function SemesterCalculator() {
   const [courseName, setCourseName] = useState("Introduction to Computing");
   const [creditHours, setCreditHours] = useState("3");
   const [targetScore, setTargetScore] = useState("80");
+  const [editingCourseId, setEditingCourseId] = useState(null);
 
   const isSaveDisabled = !tempCurrent || !tempTarget;
 
@@ -72,12 +75,15 @@ export default function SemesterCalculator() {
   const handleSheetChange = useCallback((index) => {
     console.log("handleSheetChange", index);
   }, []);
+
   const handleSnapPress = useCallback((index) => {
-    sheetRef.current?.snapToIndex(index);
+    sheetRef.current?.expand();
   }, []);
+
   const handleClosePress = useCallback(() => {
     sheetRef.current?.close();
   }, []);
+
   const handleResetGoals = useCallback(() => {
     setTempCurrent("");
     setTempTarget("");
@@ -100,26 +106,70 @@ export default function SemesterCalculator() {
   const handleSaveCourse = () => {
     if (!courseCode || !courseName || !creditHours || !targetScore) return;
 
-    const newCourse = {
-      id: Date.now().toString(),
-      courseCode,
-      courseName,
-      creditHours: Number(creditHours),
-      targetScore: Number(targetScore),
-    };
-
-    setCourses((prev) => [...prev, newCourse]);
+    if (editingCourseId) {
+      // Update existing course
+      setCourses((prev) =>
+        prev.map((course) =>
+          course.id === editingCourseId
+            ? {
+                ...course,
+                courseCode,
+                courseName,
+                creditHours: Number(creditHours),
+                targetScore: Number(targetScore),
+              }
+            : course
+        )
+      );
+    } else {
+      // Create new course
+      const newCourse = {
+        id: Date.now().toString(),
+        courseCode,
+        courseName,
+        creditHours: Number(creditHours),
+        targetScore: Number(targetScore),
+      };
+      setCourses((prev) => [...prev, newCourse]);
+    }
 
     // reset fields
     setCourseCode("");
     setCourseName("");
     setCreditHours("");
     setTargetScore("");
-
-    console.log("newCourse", newCourse);
+    setEditingCourseId(null);
 
     sheetRef.current?.close();
   };
+
+  const editCourse = (course) => {
+    setCourseCode(course.courseCode);
+    setCourseName(course.courseName);
+    setCreditHours(course.creditHours.toString());
+    setTargetScore(course.targetScore.toString());
+    setEditingCourseId(course.id);
+    sheetRef.current?.expand();
+  };
+
+  function getGrade(targetScore) {
+    const score = Number(targetScore);
+
+    if (isNaN(score)) return "-";
+
+    switch (true) {
+      case score >= 70:
+        return "A";
+      case score >= 60:
+        return "B";
+      case score >= 50:
+        return "C";
+      case score >= 40:
+        return "D";
+      default:
+        return "F";
+    }
+  }
 
   const getCwaProgress = () => {
     if (!currentCWA || !targetCWA) return null;
@@ -130,29 +180,85 @@ export default function SemesterCalculator() {
     return (C / T) * 100;
   };
 
-  // render
-  //   return (
-  //     <GestureHandlerRootView style={styles.container}>
-  //       <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
-  //       <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
-  //       <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
-  //       <Button title="Close" onPress={() => handleClosePress()} />
-  //       <BottomSheet
-  //         ref={sheetRef}
-  //         snapPoints={snapPoints}
-  //         enableDynamicSizing={false}
-  //         onChange={handleSheetChange}
-  //       >
-  //         <BottomSheetView style={styles.contentContainer}>
-  //           <Text>Awesome 🔥</Text>
-  //         </BottomSheetView>
-  //       </BottomSheet>
-  //     </GestureHandlerRootView>
-  //   );
-
   const hasCWA = currentCWA && targetCWA;
 
   const progress = getCwaProgress();
+
+  function deleteCourse(id) {
+    setCourses((prevCourses) =>
+      prevCourses.filter((course) => course.id !== id)
+    );
+  }
+
+  const renderCourseItem = ({ item: course }) => (
+    <View style={styles.courseCard}>
+      {/* Top Row: Code + Credit + Grade */}
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.courseCode}>
+            {course.courseCode} ({course.creditHours})
+          </Text>
+          <Text style={styles.courseName}>{course.courseName}</Text>
+        </View>
+
+        <Text style={styles.gradeText}>{getGrade(course.targetScore)}</Text>
+      </View>
+
+      {/* Divider */}
+      <View style={styles.divider} />
+
+      {/* Progress Bar */}
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${course.targetScore}%` }, // ex. 90
+          ]}
+        />
+      </View>
+
+      {/* Bottom Row: Target Score + Action Buttons */}
+      <View style={styles.bottomRow}>
+        <Text style={styles.targetText}>
+          Target Score (
+          <Text style={styles.targetScoreValue}>{course.targetScore}</Text>
+          /100)
+        </Text>
+
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => editCourse(course)}>
+            <View style={styles.actionIcon}>
+              <Ionicons name="pencil" size={18} color="#9B0E10" />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                "Delete Course",
+                `Are you sure you want to delete ${course.courseCode}?`,
+                [
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                  },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => deleteCourse(course.id),
+                  },
+                ]
+              );
+            }}
+          >
+            <View style={styles.actionIcon}>
+              <Ionicons name="trash" size={18} color="#9B0E10" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
@@ -202,7 +308,7 @@ export default function SemesterCalculator() {
                   </Text>
                   <Text style={styles.statText}>
                     Target CWA:{" "}
-                    <Text style={styles.statValue}>{targetCWA }%</Text>
+                    <Text style={styles.statValue}>{targetCWA}%</Text>
                   </Text>
                 </View>
 
@@ -223,35 +329,38 @@ export default function SemesterCalculator() {
               </>
             )}
           </ImageBackground>
-
-          <View style={styles.courseArea}>
-            {courses.length === 0 ? (
-              <Text style={styles.placeholderText}>
-                Add each course to estimate this semester&apos;s CWA.
-              </Text>
-            ) : (
-              courses.map((course) => (
-                <View key={course.id} style={styles.courseRow}>
-                  <Text style={styles.courseLabel}>{course.label}</Text>
-                  <View style={styles.courseDots}>
-                    <View style={styles.dot} />
-                    <View style={styles.dot} />
-                    <View style={styles.dot} />
-                  </View>
-                </View>
-              ))
-            )}
-          </View>
-
           <TouchableOpacity
             style={styles.addCourseButton}
             onPress={() => {
-              (console.log("pressed"), handleSnapPress(1));
+              // Reset form and editing state for new course
+              setCourseCode("");
+              setCourseName("");
+              setCreditHours("");
+              setTargetScore("");
+              setEditingCourseId(null);
+              handleSnapPress(1);
             }}
           >
             <Ionicons name="add" size={18} color="#9B0E10" />
             <Text style={styles.addCourseText}>Add Course</Text>
           </TouchableOpacity>
+
+          <View style={styles.courseArea}>
+            <FlatList
+              data={courses}
+              renderItem={renderCourseItem}
+              keyExtractor={(item) => item.id}
+              ListEmptyComponent={
+                <Text style={styles.placeholderText}>
+                  Add each course to estimate this semester&apos;s CWA.
+                </Text>
+              }
+              scrollEnabled={false}
+              contentContainerStyle={
+                courses.length === 0 ? styles.emptyListContainer : undefined
+              }
+            />
+          </View>
         </ScrollView>
         <View style={styles.footer}>
           <TouchableOpacity
@@ -271,8 +380,7 @@ export default function SemesterCalculator() {
             </Text>
           </TouchableOpacity>
         </View>
-
-        {/* Add Course Sheet */}
+        Add Course Sheet
         <BottomSheet
           ref={sheetRef}
           snapPoints={snapPoints}
@@ -286,83 +394,89 @@ export default function SemesterCalculator() {
           // bottomInset={46}
         >
           <BottomSheetScrollView
-            style={styles.contentContainer}
-            keyboardBehavior="interactive"
+            contentContainerStyle={styles.contentContainer}
             keyboardShouldPersistTaps="handled"
           >
-            <KeyboardAvoidingView
-              style={styles.sheetKeyboardWrapper}
-              behavior={Platform.OS === "ios" ? "padding" : undefined}
-            >
-              <Text style={styles.sheetTitle}>Add Course</Text>
+            <Text style={styles.sheetTitle}>
+              {editingCourseId ? "Edit Course" : "Add Course"}
+            </Text>
 
-              {/* Course Code */}
-              <View style={styles.field}>
-                <Text style={styles.label}>Course Code</Text>
-                <TextInput
-                  value={courseCode}
-                  onChangeText={setCourseCode}
-                  placeholder="e.g. CS101"
-                  style={styles.input}
-                  autoCapitalize="characters"
-                />
-              </View>
+            {/* Course Code */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Course Code</Text>
+              <TextInput
+                value={courseCode}
+                onChangeText={setCourseCode}
+                placeholder="e.g. CS101"
+                style={styles.input}
+                autoCapitalize="characters"
+              />
+            </View>
 
-              {/* Course Name */}
-              <View style={styles.field}>
-                <Text style={styles.label}>Course Name</Text>
-                <TextInput
-                  value={courseName}
-                  onChangeText={setCourseName}
-                  placeholder="e.g. Introduction to Computing"
-                  style={styles.input}
-                />
-              </View>
+            {/* Course Name */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Course Name</Text>
+              <TextInput
+                value={courseName}
+                onChangeText={setCourseName}
+                placeholder="e.g. Introduction to Computing"
+                style={styles.input}
+              />
+            </View>
 
-              {/* Credit Hours */}
-              <View style={styles.field}>
-                <Text style={styles.label}>Credit Hours</Text>
-                <TextInput
-                  value={creditHours}
-                  onChangeText={setCreditHours}
-                  placeholder="e.g. 3"
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
-              </View>
+            {/* Credit Hours */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Credit Hours</Text>
+              <TextInput
+                value={creditHours}
+                onChangeText={setCreditHours}
+                placeholder="e.g. 3"
+                style={styles.input}
+                keyboardType="numeric"
+              />
+            </View>
 
-              {/* Target Score */}
-              <View style={styles.field}>
-                <Text style={styles.label}>Target Score (%)</Text>
-                <TextInput
-                  value={targetScore}
-                  onChangeText={setTargetScore}
-                  placeholder="e.g. 80"
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
-              </View>
+            {/* Target Score */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Target Score (%)</Text>
+              <TextInput
+                value={targetScore}
+                onChangeText={setTargetScore}
+                placeholder="e.g. 80"
+                style={styles.input}
+                keyboardType="numeric"
+              />
+            </View>
 
-              {/* Actions */}
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => sheetRef.current?.close()}
-                >
-                  <Text style={styles.cancelText}>Cancel</Text>
-                </TouchableOpacity>
+            {/* Actions */}
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  // Reset form and editing state
+                  setCourseCode("");
+                  setCourseName("");
+                  setCreditHours("");
+                  setTargetScore("");
+                  setEditingCourseId(null);
+                  sheetRef.current?.close();
+                }}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.saveCourseButton}
-                  onPress={handleSaveCourse}
-                >
-                  <Text style={styles.saveCourseText}>Save Course</Text>
-                </TouchableOpacity>
-              </View>
-            </KeyboardAvoidingView>
+              <TouchableOpacity
+                style={styles.saveCourseButton}
+                onPress={handleSaveCourse}
+              >
+                <Text style={styles.saveCourseText}>
+                  {" "}
+                  {editingCourseId ? "Update Course" : "Add Course"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </BottomSheetScrollView>
         </BottomSheet>
-
         {/* Current Semester Overview Sheet */}
         <BottomSheet
           ref={plusRef}
@@ -616,16 +730,22 @@ const styles = StyleSheet.create({
   courseArea: {
     minHeight: 260,
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 0.2,
     borderColor: "#5A4A4A",
     borderStyle: "dashed",
     padding: 18,
+    // paddingTop: 0,
     justifyContent: "center",
   },
   placeholderText: {
     textAlign: "center",
     color: "#CBBFBF",
     fontSize: 14,
+  },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 200,
   },
   courseRow: {
     flexDirection: "row",
@@ -788,6 +908,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#6B4D4D",
     lineHeight: 16,
+    marginTop: 10,
   },
 
   emphasis: {
@@ -854,5 +975,92 @@ const styles = StyleSheet.create({
   saveCourseText: {
     color: "#FFF",
     fontWeight: "700",
+  },
+  courseCard: {
+    backgroundColor: "#FDECEC",
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  courseCode: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#9B0E10",
+  },
+
+  courseName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#5A0505",
+    marginTop: 2,
+    textTransform: "uppercase",
+  },
+
+  gradeText: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#9B0E10",
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#E3B4B4",
+    marginVertical: 10,
+  },
+
+  progressTrack: {
+    height: 10,
+    backgroundColor: "#E8B7B7",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#9B0E10",
+    borderRadius: 10,
+  },
+
+  bottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+  },
+
+  targetText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#9B0E10",
+    fontStyle: "italic",
+  },
+
+  targetScoreValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#9B0E10",
+  },
+
+  actions: {
+    flexDirection: "row",
+    gap: 14,
+  },
+
+  actionIcon: {
+    backgroundColor: "#F9D9D9",
+    padding: 8,
+    borderRadius: 50,
   },
 });
