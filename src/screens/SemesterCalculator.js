@@ -1,35 +1,42 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ImageBackground,
-  Button,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  FlatList,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import BottomSheet, {
+import {
   BottomSheetBackdrop,
   BottomSheetModal,
-  BottomSheetModalProvider,
   BottomSheetScrollView,
-  BottomSheetTextInput,
-  BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const createCourseChip = (index) => ({
-  id: `course-${index}`,
-  label: `Course ${index + 1}`,
-});
-
+/**
+ * SemesterCalculator Component
+ *
+ * Main component for the Semester Calculator screen. This component allows users to:
+ * - Set and track their current and target CWA (Cumulative Weighted Average) goals
+ * - Add, edit, and delete courses for the current semester
+ * - View course details including course code, name, credit hours, target score, and letter grade
+ * - Calculate semester CWA based on course data (calculation functionality pending)
+ *
+ * The component uses bottom sheet modals for user input and manages state for:
+ * - Course list (array of course objects)
+ * - CWA goals (current and target values)
+ * - Form inputs for adding/editing courses
+ * - Modal visibility states
+ *
+ * @returns {JSX.Element} The rendered Semester Calculator screen component
+ */
 export default function SemesterCalculator() {
   const [courses, setCourses] = useState([]);
   const isCalculateDisabled = courses.length <= 3;
@@ -53,63 +60,176 @@ export default function SemesterCalculator() {
 
   const CWARef = useRef(null);
 
+  /**
+   * openCourseModal
+   *
+   * Opens the bottom sheet modal for adding or editing a course.
+   * This function is memoized using useCallback to prevent unnecessary re-renders.
+   *
+   * Behavior:
+   * - Calls the present() method on the courseRef to display the bottom sheet
+   * - Uses optional chaining (?.) to safely handle cases where the ref might be null
+   * - Logs a debug message to console for development purposes
+   *
+   * @returns {void}
+   */
   const openCourseModal = useCallback(() => {
     console.log("openSheet called");
 
     courseRef.current?.present();
   }, []);
 
+  /**
+   * closeCourseModal
+   *
+   * Closes the bottom sheet modal for course input.
+   *
+   * Behavior:
+   * - Calls the dismiss() method on the courseRef to hide the bottom sheet
+   * - Uses optional chaining (?.) to safely handle cases where the ref might be null
+   * - Note: This function does not reset form fields; that should be handled
+   *   separately when opening the modal for a new course
+   *
+   * @returns {void}
+   */
   const closeCourseModal = () => {
     courseRef.current?.dismiss();
   };
 
+  /**
+   * openCWAModal
+   *
+   * Opens the bottom sheet modal for setting or editing CWA (Cumulative Weighted Average) goals.
+   * This function is memoized using useCallback to prevent unnecessary re-renders.
+   *
+   * Behavior:
+   * - Calls the present() method on the CWARef to display the bottom sheet
+   * - Uses optional chaining (?.) to safely handle cases where the ref might be null
+   * - Logs a debug message to console for development purposes
+   * - The modal allows users to input their current CWA and target CWA values
+   *
+   * @returns {void}
+   */
   const openCWAModal = useCallback(() => {
     console.log("openSheet called");
 
     CWARef.current?.present();
   }, []);
 
+  /**
+   * closeCWAModal
+   *
+   * Closes the bottom sheet modal for CWA goal input.
+   *
+   * Behavior:
+   * - Calls the dismiss() method on the CWARef to hide the bottom sheet
+   * - Uses optional chaining (?.) to safely handle cases where the ref might be null
+   * - Note: This function does not save or reset temporary values; that is handled
+   *   by handleSaveGoals or handleResetGoals functions
+   *
+   * @returns {void}
+   */
   const closeCWAModal = () => {
     CWARef.current?.dismiss();
   };
 
-  // Snap points tell the sheet how far to open
-  // const snapPoints = useMemo(() => ["45%", "60%", "80%", "100%"], []);
-
   const snapPoints = useMemo(() => ["80%", "81%"], []);
 
-  const [isOpen, setIsOpen] = useState(true);
-
-  const handleAddCourse = useCallback((index) => {
-    plusRef.current?.snapToIndex(index);
-  }, []);
-
-  // Backdrop component for dimming background
+  /**
+   * renderBackdrop
+   *
+   * Renders a backdrop component that dims the background when a bottom sheet modal is open.
+   * This provides visual feedback to users that a modal is active and helps focus attention
+   * on the modal content.
+   *
+   * @param {Object} props - Props passed from the BottomSheetModal component
+   * @param {Object} props.animatedIndex - Animated value representing the sheet's position
+   * @param {Object} props.style - Style object for the backdrop
+   *
+   * Behavior:
+   * - disappearsOnIndex={-1}: Backdrop disappears when sheet is at index -1 (closed)
+   * - appearsOnIndex={0}: Backdrop appears when sheet is at index 0 (first snap point)
+   * - Spreads all props to the BottomSheetBackdrop component for proper integration
+   *
+   * @returns {JSX.Element} The rendered BottomSheetBackdrop component
+   */
   const renderBackdrop = (props) => (
     <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
   );
 
-  const bottomSheetRef = useRef(null);
-
-  // callbacks
+  /**
+   * handleSheetChange
+   *
+   * Callback function that is triggered whenever a bottom sheet modal changes its position
+   * (opens, closes, or moves between snap points).
+   *
+   * This function is memoized using useCallback to prevent unnecessary re-renders.
+   * Currently used for debugging purposes to track sheet state changes.
+   *
+   * @param {number} index - The current snap point index of the bottom sheet
+   *                         -1 indicates the sheet is closed
+   *                         0, 1, etc. indicate which snap point the sheet is at
+   *
+   * Behavior:
+   * - Logs the sheet index to console for debugging
+   * - Can be extended to handle side effects based on sheet state (e.g., resetting
+   *   form fields when sheet closes, saving draft data, etc.)
+   *
+   * @returns {void}
+   */
   const handleSheetChange = useCallback((index) => {
     console.log("handleSheetChange", index);
   }, []);
 
-  const handleSnapPress = useCallback((index) => {
-    sheetRef.current?.expand();
-  }, []);
-
-  const handleClosePress = useCallback(() => {
-    sheetRef.current?.close();
-  }, []);
-
+  /**
+   * handleResetGoals
+   *
+   * Resets all CWA goal-related temporary input values and clears the saved target CWA.
+   * This function is called when the user clicks the trash/reset button in the CWA goals modal.
+   *
+   * This function is memoized using useCallback to prevent unnecessary re-renders.
+   *
+   * Behavior:
+   * - Clears the temporary current CWA input (tempCurrent)
+   * - Clears the temporary target CWA input (tempTarget)
+   * - Clears the saved target CWA value (targetCWA)
+   * - Note: This does NOT clear currentCWA, only targetCWA
+   * - Note: This does NOT close the modal; user must manually close it
+   *
+   * @returns {void}
+   */
   const handleResetGoals = useCallback(() => {
     setTempCurrent("");
     setTempTarget("");
     setTargetCWA("");
   }, []);
 
+  /**
+   * handleSaveGoals
+   *
+   * Saves the CWA goals entered by the user in the modal to the component's state.
+   * This function validates that both fields are filled before saving and automatically
+   * closes the modal after a successful save.
+   *
+   * This function is memoized using useCallback with dependencies on validation state
+   * and input values to ensure it updates when these change.
+   *
+   * Behavior:
+   * - Early returns if save is disabled (isSaveDisabled is true, meaning either
+   *   tempCurrent or tempTarget is empty)
+   * - Converts string inputs to numbers using Number() constructor
+   * - Updates currentCWA state with the converted tempCurrent value
+   * - Updates targetCWA state with the converted tempTarget value
+   * - Automatically dismisses the CWA modal after saving
+   * - Uses optional chaining to safely handle null ref
+   *
+   * Side Effects:
+   * - Updates currentCWA and targetCWA state, which triggers re-render
+   * - Closes the bottom sheet modal
+   * - May cause progress calculation to update if both values are now set
+   *
+   * @returns {void}
+   */
   const handleSaveGoals = useCallback(() => {
     if (isSaveDisabled) return;
 
@@ -117,13 +237,41 @@ export default function SemesterCalculator() {
     setTargetCWA(Number(tempTarget));
 
     CWARef.current?.dismiss();
-
-
-    console.log("tempCurrent", tempCurrent);
-    console.log("tempTarget", tempTarget);
-    console.log("targetCWA", targetCWA);
   }, [isSaveDisabled, tempCurrent, tempTarget]);
 
+  /**
+   * handleSaveCourse
+   *
+   * Saves or updates a course in the courses array. This function handles both creating
+   * new courses and updating existing ones based on whether editingCourseId is set.
+   *
+   * Behavior:
+   * - Validates that all required fields (courseCode, courseName, creditHours, targetScore)
+   *   are filled; returns early if any are missing
+   * - If editingCourseId is set: Updates the existing course with matching ID
+   * - If editingCourseId is null: Creates a new course with a unique ID (timestamp-based)
+   * - Converts creditHours and targetScore from strings to numbers
+   * - Resets all form fields to empty strings after saving
+   * - Clears the editingCourseId to exit edit mode
+   * - Automatically closes the course modal after saving
+   *
+   * Course Object Structure:
+   * {
+   *   id: string (unique identifier),
+   *   courseCode: string,
+   *   courseName: string,
+   *   creditHours: number,
+   *   targetScore: number (0-100)
+   * }
+   *
+   * Side Effects:
+   * - Updates the courses state array
+   * - Resets form input states
+   * - Closes the bottom sheet modal
+   * - May enable/disable the Calculate CWA button based on course count
+   *
+   * @returns {void}
+   */
   const handleSaveCourse = () => {
     if (!courseCode || !courseName || !creditHours || !targetScore) return;
 
@@ -164,6 +312,35 @@ export default function SemesterCalculator() {
     courseRef.current?.dismiss();
   };
 
+  /**
+   * editCourse
+   *
+   * Prepares the course form for editing by populating all input fields with the
+   * selected course's data and opening the course modal in edit mode.
+   *
+   * @param {Object} course - The course object to edit
+   * @param {string} course.id - Unique identifier for the course
+   * @param {string} course.courseCode - Course code (e.g., "CS101")
+   * @param {string} course.courseName - Full name of the course
+   * @param {number} course.creditHours - Number of credit hours for the course
+   * @param {number} course.targetScore - Target score (0-100) for the course
+   *
+   * Behavior:
+   * - Populates courseCode state with the course's code
+   * - Populates courseName state with the course's name
+   * - Converts creditHours to string and populates the input field
+   * - Converts targetScore to string and populates the input field
+   * - Sets editingCourseId to the course's ID to indicate edit mode
+   * - Opens the course modal by calling present() on the courseRef
+   * - The modal title will change to "Edit Course" based on editingCourseId being set
+   *
+   * Side Effects:
+   * - Updates all form input states
+   * - Sets editing mode flag
+   * - Opens the bottom sheet modal
+   *
+   * @returns {void}
+   */
   const editCourse = (course) => {
     setCourseCode(course.courseCode);
     setCourseName(course.courseName);
@@ -173,6 +350,35 @@ export default function SemesterCalculator() {
     courseRef.current?.present();
   };
 
+  /**
+   * getGrade
+   *
+   * Converts a numerical target score to a letter grade based on a standard grading scale.
+   * This function uses a percentage-based grading system commonly used in academic institutions.
+   *
+   * @param {number|string} targetScore - The target score to convert to a letter grade.
+   *                                     Can be a number or string that can be converted to a number.
+   *
+   * Grading Scale:
+   * - A: 70% and above
+   * - B: 60% to 69%
+   * - C: 50% to 59%
+   * - D: 40% to 49%
+   * - F: Below 40%
+   *
+   * Behavior:
+   * - Converts the input to a number using Number() constructor
+   * - Returns "-" if the conversion results in NaN (invalid input)
+   * - Uses a switch statement with case expressions to determine the grade
+   * - Returns the appropriate letter grade based on the score range
+   *
+   * @returns {string} The letter grade ("A", "B", "C", "D", "F") or "-" for invalid input
+   *
+   * Example Usage:
+   * getGrade(85) // returns "A"
+   * getGrade(65) // returns "B"
+   * getGrade("invalid") // returns "-"
+   */
   function getGrade(targetScore) {
     const score = Number(targetScore);
 
@@ -192,6 +398,30 @@ export default function SemesterCalculator() {
     }
   }
 
+  /**
+   * getCwaProgress
+   *
+   * Calculates the progress percentage toward the target CWA goal.
+   * This represents how close the user is to achieving their target CWA,
+   * expressed as a percentage where 100% means the target has been reached.
+   *
+   * Behavior:
+   * - Returns null if either currentCWA or targetCWA is not set (falsy)
+   * - Converts both values to numbers to ensure proper mathematical operations
+   * - Calculates progress as: (currentCWA / targetCWA) * 100
+   * - The result can be greater than 100% if current CWA exceeds target
+   * - The result can be less than 0% if current CWA is negative (edge case)
+   *
+   * Edge Cases:
+   * - Returns null if either value is missing (prevents division by zero or invalid calculations)
+   * - If targetCWA is 0, this would cause division by zero, but the null check prevents this
+   *
+   * @returns {number|null} The progress percentage (0-100+), or null if data is incomplete
+   *
+   * Example Usage:
+   * getCwaProgress() with currentCWA=65 and targetCWA=70 // returns ~92.86%
+   * getCwaProgress() with currentCWA=null // returns null
+   */
   const getCwaProgress = () => {
     if (!currentCWA || !targetCWA) return null;
 
@@ -205,12 +435,77 @@ export default function SemesterCalculator() {
 
   const progress = getCwaProgress();
 
+  /**
+   * deleteCourse
+   *
+   * Removes a course from the courses array by filtering out the course with the matching ID.
+   * This function is called after the user confirms deletion in an Alert dialog.
+   *
+   * @param {string} id - The unique identifier of the course to delete
+   *
+   * Behavior:
+   * - Uses the functional update form of setState to access the previous courses array
+   * - Filters the courses array to exclude the course with the matching ID
+   * - Creates a new array (immutable update pattern) without the deleted course
+   * - Updates the courses state with the filtered array
+   *
+   * Side Effects:
+   * - Updates the courses state, removing the specified course
+   * - Triggers a re-render of the course list
+   * - May disable the "Calculate CWA" button if course count drops to 3 or fewer
+   * - The course will no longer appear in the FlatList
+   *
+   * Note: This function does not show a confirmation dialog. The confirmation is handled
+   * in the renderCourseItem function before calling deleteCourse.
+   *
+   * @returns {void}
+   *
+   * Example Usage:
+   * deleteCourse("1234567890") // Removes course with id "1234567890"
+   */
   function deleteCourse(id) {
     setCourses((prevCourses) =>
       prevCourses.filter((course) => course.id !== id)
     );
   }
 
+  /**
+   * renderCourseItem
+   *
+   * Render function for individual course items in the FlatList. This function creates
+   * a visual card component that displays all course information and provides actions
+   * for editing and deleting the course.
+   *
+   * @param {Object} props - Props object from FlatList's renderItem
+   * @param {Object} props.item - The course object to render (aliased as 'course')
+   * @param {string} props.item.id - Unique identifier for the course
+   * @param {string} props.item.courseCode - Course code (e.g., "CS101")
+   * @param {string} props.item.courseName - Full name of the course
+   * @param {number} props.item.creditHours - Number of credit hours
+   * @param {number} props.item.targetScore - Target score (0-100)
+   *
+   * Component Structure:
+   * - Header Row: Displays course code with credit hours, course name, and letter grade
+   * - Divider: Visual separator between header and content
+   * - Progress Bar: Visual representation of target score (0-100%)
+   * - Bottom Row: Target score display and action buttons (edit/delete)
+   *
+   * Features:
+   * - Displays course code and credit hours in format: "CS101 (3)"
+   * - Shows course name in uppercase
+   * - Displays letter grade (A-F) calculated from target score
+   * - Visual progress bar showing target score as percentage
+   * - Edit button: Opens modal with course data pre-filled
+   * - Delete button: Shows confirmation alert before deletion
+   *
+   * Styling:
+   * - Uses courseCard style for the main container
+   * - Color scheme: Red theme (#9B0E10) for primary actions
+   * - Light pink background (#FDECEC) for card
+   * - Shadow effects for depth
+   *
+   * @returns {JSX.Element} A View component representing a single course card
+   */
   const renderCourseItem = ({ item: course }) => (
     <View style={styles.courseCard}>
       {/* Top Row: Code + Credit + Grade */}
