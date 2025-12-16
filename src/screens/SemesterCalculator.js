@@ -48,13 +48,121 @@ export default function SemesterCalculator() {
   const [tempCurrent, setTempCurrent] = useState("");
   const [tempTarget, setTempTarget] = useState("");
 
-  const [courseCode, setCourseCode] = useState("CS101");
-  const [courseName, setCourseName] = useState("Introduction to Computing");
-  const [creditHours, setCreditHours] = useState("3");
-  const [targetScore, setTargetScore] = useState("80");
+  const [courseCode, setCourseCode] = useState("");
+  const [courseName, setCourseName] = useState("");
+  const [creditHours, setCreditHours] = useState("");
+  const [targetScore, setTargetScore] = useState("");
+
   const [editingCourseId, setEditingCourseId] = useState(null);
 
   const isSaveDisabled = !tempCurrent || !tempTarget;
+  const isSaveCourseDisabled =
+    !courseCode || !courseName || !creditHours || !targetScore;
+
+  /**
+   * handleCurrentCWAChange
+   *
+   * Validates and updates the current CWA input value.
+   * Only allows numeric values that are less than or equal to 100.
+   *
+   * @param {string} text - The input text from the TextInput
+   *
+   * Behavior:
+   * - Allows empty string (for clearing the field)
+   * - Allows numeric input including decimals
+   * - Rejects values greater than 100
+   * - Only updates state if the value is valid
+   *
+   * @returns {void}
+   */
+  const handleCurrentCWAChange = (text) => {
+    // Allow empty string
+    if (text === "") {
+      setTempCurrent("");
+      return;
+    }
+
+    // Check if it's a valid number (including decimals)
+    const numValue = parseFloat(text);
+    if (isNaN(numValue)) {
+      return; // Don't update if not a valid number
+    }
+
+    // Check if value is <= 100
+    if (numValue <= 100) {
+      setTempCurrent(text);
+    }
+  };
+
+  /**
+   * handleTargetCWAChange
+   *
+   * Validates and updates the target CWA input value.
+   * Only allows numeric values that are less than or equal to 100.
+   *
+   * @param {string} text - The input text from the TextInput
+   *
+   * Behavior:
+   * - Allows empty string (for clearing the field)
+   * - Allows numeric input including decimals
+   * - Rejects values greater than 100
+   * - Only updates state if the value is valid
+   *
+   * @returns {void}
+   */
+  const handleTargetCWAChange = (text) => {
+    // Allow empty string
+    if (text === "") {
+      setTempTarget("");
+      return;
+    }
+
+    // Check if it's a valid number (including decimals)
+    const numValue = parseFloat(text);
+    if (isNaN(numValue)) {
+      return; // Don't update if not a valid number
+    }
+
+    // Check if value is <= 100
+    if (numValue <= 100) {
+      setTempTarget(text);
+    }
+  };
+
+  /**
+   * handleTargetScoreChange
+   *
+   * Validates and updates the target score input value.
+   * Only allows numeric values that are less than or equal to 100.
+   *
+   * @param {string} text - The input text from the TextInput
+   *
+   * Behavior:
+   * - Allows empty string (for clearing the field)
+   * - Allows numeric input including decimals
+   * - Rejects values greater than 100
+   * - Only updates state if the value is valid
+   *
+   * @returns {void}
+   */
+  const handleTargetScoreChange = (text) => {
+    // Allow empty string
+    if (text === "") {
+      setTargetScore("");
+      return;
+    }
+
+    // Check if it's a valid number (including decimals)
+    const numValue = parseFloat(text);
+    if (isNaN(numValue)) {
+      return; // Don't update if not a valid number
+    }
+
+    // Check if value is <= 100
+    if (numValue <= 100) {
+      setTargetScore(text);
+    }
+  };
 
   const courseRef = useRef(null);
 
@@ -379,6 +487,7 @@ export default function SemesterCalculator() {
    * getGrade(65) // returns "B"
    * getGrade("invalid") // returns "-"
    */
+
   function getGrade(targetScore) {
     const score = Number(targetScore);
 
@@ -524,7 +633,7 @@ export default function SemesterCalculator() {
       <View style={styles.divider} />
 
       {/* Progress Bar */}
-      <View style={styles.progressTrack}>
+      <View style={styles.progressTrack1}>
         <View
           style={[
             styles.progressFill,
@@ -759,7 +868,7 @@ export default function SemesterCalculator() {
               <Text style={styles.label}>Target Score (%)</Text>
               <TextInput
                 value={targetScore}
-                onChangeText={setTargetScore}
+                onChangeText={handleTargetScoreChange}
                 placeholder="e.g. 80"
                 style={styles.input}
                 keyboardType="numeric"
@@ -784,10 +893,19 @@ export default function SemesterCalculator() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.saveCourseButton}
+                style={[
+                  styles.saveCourseButton,
+                  isSaveCourseDisabled && styles.saveCourseButtonDisabled,
+                ]}
+                disabled={isSaveCourseDisabled}
                 onPress={handleSaveCourse}
               >
-                <Text style={styles.saveCourseText}>
+                <Text
+                  style={[
+                    styles.saveCourseText,
+                    isSaveCourseDisabled && styles.saveCourseTextDisabled,
+                  ]}
+                >
                   {" "}
                   {editingCourseId ? "Update Course" : "Add Course"}
                 </Text>
@@ -829,7 +947,7 @@ export default function SemesterCalculator() {
                   placeholderTextColor="#B9A7A7"
                   keyboardType="numeric"
                   value={tempCurrent || ""}
-                  onChangeText={setTempCurrent}
+                  onChangeText={handleCurrentCWAChange}
                 />
               </View>
 
@@ -841,7 +959,7 @@ export default function SemesterCalculator() {
                   placeholderTextColor="#B9A7A7"
                   keyboardType="numeric"
                   value={tempTarget || ""}
-                  onChangeText={setTempTarget}
+                  onChangeText={handleTargetCWAChange}
                 />
               </View>
 
@@ -1175,6 +1293,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+    progressTrack1: {
+    height: 4,
+    backgroundColor: "#E6C7C7",
+    borderRadius: 999,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+
+
   progressFill: {
     height: "100%",
     backgroundColor: "#9B0E10",
@@ -1267,9 +1394,12 @@ const styles = StyleSheet.create({
   },
 
   actions: {
+    flex : 1,
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 24,
+    // width: "100%",
+    //  paddingHorizontal: 16,
   },
 
   cancelButton: {
@@ -1288,11 +1418,22 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 26,
     marginHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "space-around",
+    flex: 1,
+  },
+
+  saveCourseButtonDisabled: {
+    backgroundColor: "#E7D5D5",
   },
 
   saveCourseText: {
     color: "#FFF",
     fontWeight: "700",
+  },
+
+  saveCourseTextDisabled: {
+    color: "#C2A9A9",
   },
   courseCard: {
     backgroundColor: "#FDECEC",
@@ -1327,9 +1468,10 @@ const styles = StyleSheet.create({
   },
 
   gradeText: {
-    fontSize: 32,
+    fontSize: 35,
     fontWeight: "700",
     color: "#9B0E10",
+    opacity : 0.75,
   },
 
   divider: {
