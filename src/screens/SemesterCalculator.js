@@ -4,7 +4,13 @@ import {
   BottomSheetModal,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Alert,
   FlatList,
@@ -19,6 +25,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { saveData, getData } from "../store/storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
  * SemesterCalculator Component
@@ -55,9 +63,62 @@ export default function SemesterCalculator() {
 
   const [editingCourseId, setEditingCourseId] = useState(null);
 
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const isSaveDisabled = !tempCurrent || !tempTarget;
   const isSaveCourseDisabled =
     !courseCode || !courseName || !creditHours || !targetScore;
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load courses
+        const savedCourses = await getData("semester_courses");
+        if (savedCourses) {
+          console.log("courses available");
+          setCourses(savedCourses);
+        } else {
+          console.log("courses not available");
+        }
+
+        // Load CWA
+        const savedCWA = await getData("cwa");
+        if (savedCWA) {
+          setCurrentCWA(savedCWA.currentCWA);
+          setTargetCWA(savedCWA.targetCWA);
+        }
+
+        setIsLoaded(true);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setIsLoaded(true);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // SAVE COURSES ASYNC STORAGE
+  useEffect(() => {
+    if (!isLoaded) return;
+    const persistCourses = async () => {
+      await saveData("semester_courses", courses);
+      console.log("saved courses to storage:", courses);
+    };
+
+    persistCourses();
+  }, [courses, isLoaded]);
+
+  //SAVE CWA TARGETS ASYNC STORAGE
+  useEffect(() => {
+    if (!isLoaded) return;
+    const persistCWA = async () => {
+      await saveData("cwa", { currentCWA, targetCWA });
+      console.log("saved cwa target to storage:", { currentCWA, targetCWA });
+    };
+
+    persistCWA();
+  }, [currentCWA, targetCWA, isLoaded]);
 
   /**
    * handleCurrentCWAChange
@@ -615,8 +676,15 @@ export default function SemesterCalculator() {
    *
    * @returns {JSX.Element} A View component representing a single course card
    */
+
+  // <View style={styles.courseCard}></View>;
   const renderCourseItem = ({ item: course }) => (
-    <View style={styles.courseCard}>
+    <ImageBackground
+      source={require("../../assets/images/card3.png")}
+      style={styles.courseCard}
+      imageStyle={{ borderRadius: 12 }}
+      resizeMode="cover"
+    >
       {/* Top Row: Code + Credit + Grade */}
       <View style={styles.headerRow}>
         <View>
@@ -682,7 +750,7 @@ export default function SemesterCalculator() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 
   return (
@@ -1293,14 +1361,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-    progressTrack1: {
+  progressTrack1: {
     height: 4,
     backgroundColor: "#E6C7C7",
     borderRadius: 999,
     overflow: "hidden",
     marginBottom: 10,
   },
-
 
   progressFill: {
     height: "100%",
@@ -1394,7 +1461,7 @@ const styles = StyleSheet.create({
   },
 
   actions: {
-    flex : 1,
+    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 24,
@@ -1436,7 +1503,8 @@ const styles = StyleSheet.create({
     color: "#C2A9A9",
   },
   courseCard: {
-    backgroundColor: "#FDECEC",
+    // backgroundColor: "#FDECEC",
+    // backgroundColor: "#ECD6D5",
     padding: 14,
     borderRadius: 12,
     marginBottom: 12,
@@ -1471,7 +1539,7 @@ const styles = StyleSheet.create({
     fontSize: 35,
     fontWeight: "700",
     color: "#9B0E10",
-    opacity : 0.75,
+    opacity: 0.75,
   },
 
   divider: {
