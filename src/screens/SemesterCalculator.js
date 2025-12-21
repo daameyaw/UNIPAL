@@ -75,7 +75,6 @@ export default function SemesterCalculator() {
         // Load courses
         const savedCourses = await getData("semester_courses");
         if (savedCourses) {
-          console.log("courses available");
           setCourses(savedCourses);
         } else {
           console.log("courses not available");
