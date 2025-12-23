@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   scrollContent: {
-    paddingVertical: 24,
+    // paddingVertical: ,
     paddingHorizontal: 20,
     gap: 24,
   },
