@@ -26,7 +26,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { saveData, getData } from "../store/storage";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "expo-status-bar";
 
 /**
  * SemesterCalculator Component
@@ -754,6 +754,7 @@ export default function SemesterCalculator() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <StatusBar style="dark" />
       <View style={styles.wrapper}>
         <ScrollView
           style={styles.scroll}
@@ -796,11 +797,11 @@ export default function SemesterCalculator() {
                 <View style={styles.statRow}>
                   <Text style={styles.statText}>
                     Current CWA:{" "}
-                    <Text style={styles.statValue}>{currentCWA}%</Text>
+                    <Text style={styles.statValue}>{currentCWA}% (First Class)</Text>
                   </Text>
                   <Text style={styles.statText}>
-                    Target CWA:{" "}
-                    <Text style={styles.statValue}>{targetCWA}%</Text>
+                    Cumulative Credit Hours:{" "}
+                    <Text style={styles.statValue}>{targetCWA}</Text>
                   </Text>
                 </View>
 
