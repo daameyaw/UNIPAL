@@ -41,7 +41,7 @@ const quickActions = [
 
 const cwaTips = [
   "Focus more on high-credit courses — they influence your CWA the most.",
-  // "Track each semester so dips never catch you off guard.",
+  "Track each semester so dips never catch you off guard.",
   "Use scenarios to know the scores you need before assessments arrive.",
 ];
 
