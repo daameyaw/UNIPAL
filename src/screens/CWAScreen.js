@@ -25,6 +25,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { getData, saveData } from "../store/storage";
 import { StatusBar } from "expo-status-bar";
+import { useFocusEffect } from "@react-navigation/native";
 
 const quickActions = [
   {
@@ -71,8 +72,12 @@ export default function CWAScreen({ navigation }) {
   const openCWAModal = useCallback(() => {
     console.log("openSheet called");
 
+    // Populate temp values with existing state values
+    setTempCurrent(currentCWA !== null ? currentCWA.toString() : "");
+    setTempTarget(targetCWA !== null ? targetCWA.toString() : "");
+
     CWARef.current?.present();
-  }, []);
+  }, [currentCWA, targetCWA]);
 
   const closeCWAModal = () => {
     CWARef.current?.dismiss();
@@ -84,15 +89,24 @@ export default function CWAScreen({ navigation }) {
 
   const snapPoints = useMemo(() => ["80%", "81%"], []);
 
+  // Load CWA data function (reusable)
+  const loadCWAData = useCallback(async () => {
+    try {
+      const savedCWA = await getData("cwa");
+      if (savedCWA) {
+        setCurrentCWA(savedCWA.currentCWA);
+        setTargetCWA(savedCWA.targetCWA);
+      }
+    } catch (error) {
+      console.error("Error loading CWA data:", error);
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
         // Load CWA
-        const savedCWA = await getData("cwa");
-        if (savedCWA) {
-          setCurrentCWA(savedCWA.currentCWA);
-          setTargetCWA(savedCWA.targetCWA);
-        }
+        await loadCWAData();
 
         setIsLoaded(true);
       } catch (error) {
@@ -102,7 +116,16 @@ export default function CWAScreen({ navigation }) {
     };
 
     loadData();
-  }, []);
+  }, [loadCWAData]);
+
+  // Reload CWA data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (isLoaded) {
+        loadCWAData();
+      }
+    }, [isLoaded, loadCWAData])
+  );
 
   //SAVE CWA TARGETS ASYNC STORAGE
   useEffect(() => {
@@ -162,6 +185,26 @@ export default function CWAScreen({ navigation }) {
       setTempTarget(text);
     }
   };
+
+    function getClass(currentCWA) {
+      const score = Number(currentCWA);
+
+      if (isNaN(score)) return "-";
+
+      switch (true) {
+        case score >= 70:
+          return "First Class";
+        case score >= 60:
+          return "Second Class Upper";
+        case score >= 50:
+          return "Second Class Lower";
+        default:
+          return "Third Class";
+      }
+    }
+
+    const currentClass = getClass(currentCWA);
+
 
   const getCwaProgress = () => {
     if (!currentCWA || !targetCWA) return null;
@@ -238,7 +281,7 @@ export default function CWAScreen({ navigation }) {
                   <Text style={styles.statText}>
                     Current CWA:{" "}
                     <Text style={styles.statValue}>
-                      {currentCWA}% (First Class)
+                      {currentCWA}% ({currentClass})
                     </Text>
                   </Text>
                   <Text style={styles.statText}>
