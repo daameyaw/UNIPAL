@@ -27,6 +27,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { saveData, getData } from "../store/storage";
 import { StatusBar } from "expo-status-bar";
+import { useFocusEffect } from "@react-navigation/native";
 
 /**
  * SemesterCalculator Component
@@ -52,6 +53,8 @@ export default function SemesterCalculator() {
   const [currentCWA, setCurrentCWA] = useState(null);
   const [targetCWA, setTargetCWA] = useState(null);
 
+  const [cumulativeCreditHours, setCumulativeCreditHours] = useState(null);
+
   // Temporary sheet values
   const [tempCurrent, setTempCurrent] = useState("");
   const [tempTarget, setTempTarget] = useState("");
@@ -69,6 +72,19 @@ export default function SemesterCalculator() {
   const isSaveCourseDisabled =
     !courseCode || !courseName || !creditHours || !targetScore;
 
+  // Load CWA data function (reusable)
+  const loadCWAData = useCallback(async () => {
+    try {
+      const savedCWA = await getData("cwa");
+      if (savedCWA) {
+        setCurrentCWA(savedCWA.currentCWA);
+        setTargetCWA(savedCWA.targetCWA);
+      }
+    } catch (error) {
+      console.error("Error loading CWA data:", error);
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -81,11 +97,7 @@ export default function SemesterCalculator() {
         }
 
         // Load CWA
-        const savedCWA = await getData("cwa");
-        if (savedCWA) {
-          setCurrentCWA(savedCWA.currentCWA);
-          setTargetCWA(savedCWA.targetCWA);
-        }
+        await loadCWAData();
 
         setIsLoaded(true);
       } catch (error) {
@@ -95,7 +107,16 @@ export default function SemesterCalculator() {
     };
 
     loadData();
-  }, []);
+  }, [loadCWAData]);
+
+  // Reload CWA data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (isLoaded) {
+        loadCWAData();
+      }
+    }, [isLoaded, loadCWAData])
+  );
 
   // SAVE COURSES ASYNC STORAGE
   useEffect(() => {
@@ -108,12 +129,15 @@ export default function SemesterCalculator() {
     persistCourses();
   }, [courses, isLoaded]);
 
-  //SAVE CWA TARGETS ASYNC STORAGE
+  //SAVE CWA TO ASYNC STORAGE (targetCWA represents cumulative credit hours)
   useEffect(() => {
     if (!isLoaded) return;
     const persistCWA = async () => {
-      await saveData("cwa", { currentCWA, targetCWA });
-      console.log("saved cwa target to storage:", { currentCWA, targetCWA });
+      await saveData("cwa", {
+        currentCWA,
+        targetCWA,
+      });
+      console.log("saved cwa to storage:", { currentCWA, targetCWA });
     };
 
     persistCWA();
@@ -271,6 +295,7 @@ export default function SemesterCalculator() {
    * This function is memoized using useCallback to prevent unnecessary re-renders.
    *
    * Behavior:
+   * - Populates temporary input fields with existing CWA values (if any)
    * - Calls the present() method on the CWARef to display the bottom sheet
    * - Uses optional chaining (?.) to safely handle cases where the ref might be null
    * - Logs a debug message to console for development purposes
@@ -281,8 +306,12 @@ export default function SemesterCalculator() {
   const openCWAModal = useCallback(() => {
     console.log("openSheet called");
 
+    // Populate temp values with existing state values
+    setTempCurrent(currentCWA !== null ? currentCWA.toString() : "");
+    setTempTarget(targetCWA !== null ? targetCWA.toString() : "");
+
     CWARef.current?.present();
-  }, []);
+  }, [currentCWA, targetCWA]);
 
   /**
    * closeCWAModal
@@ -567,6 +596,25 @@ export default function SemesterCalculator() {
     }
   }
 
+  function getClass(currentCWA) {
+    const score = Number(currentCWA);
+
+    if (isNaN(score)) return "-";
+
+    switch (true) {
+      case score >= 70:
+      return "First Class";
+      case score >= 60:
+        return "Second Class Upper";
+      case score >= 50:
+        return "Second Class Lower";
+      default:
+        return "Third Class";
+    }
+  }
+
+  const currentClass = getClass(currentCWA);
+
   /**
    * getCwaProgress
    *
@@ -797,7 +845,9 @@ export default function SemesterCalculator() {
                 <View style={styles.statRow}>
                   <Text style={styles.statText}>
                     Current CWA:{" "}
-                    <Text style={styles.statValue}>{currentCWA}% (First Class)</Text>
+                    <Text style={styles.statValue}>
+                      {currentCWA}% ({currentClass})
+                    </Text>
                   </Text>
                   <Text style={styles.statText}>
                     Cumulative Credit Hours:{" "}
@@ -1020,10 +1070,10 @@ export default function SemesterCalculator() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Target CWA</Text>
+                <Text style={styles.inputLabel}>Cumulative Credit Hours</Text>
                 <TextInput
                   style={styles.inputField}
-                  placeholder="e.g. 72.00"
+                  placeholder="e.g. 120"
                   placeholderTextColor="#B9A7A7"
                   keyboardType="numeric"
                   value={tempTarget || ""}
