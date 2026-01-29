@@ -27,7 +27,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { saveData, getData } from "../store/storage";
 import { StatusBar } from "expo-status-bar";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 /**
  * SemesterCalculator Component
@@ -47,6 +47,8 @@ import { useFocusEffect } from "@react-navigation/native";
  * @returns {JSX.Element} The rendered Semester Calculator screen component
  */
 export default function SemesterCalculator() {
+  const navigation = useNavigation();
+
   const [courses, setCourses] = useState([]);
   const isCalculateDisabled = courses.length <= 3;
 
@@ -91,6 +93,7 @@ export default function SemesterCalculator() {
         // Load courses
         const savedCourses = await getData("semester_courses");
         if (savedCourses) {
+          console.log("courses loaded from storage:", savedCourses);
           setCourses(savedCourses);
         } else {
           console.log("courses not available");
@@ -603,7 +606,7 @@ export default function SemesterCalculator() {
 
     switch (true) {
       case score >= 70:
-      return "First Class";
+        return "First Class";
       case score >= 60:
         return "Second Class Upper";
       case score >= 50:
@@ -912,6 +915,7 @@ export default function SemesterCalculator() {
               styles.calculateButton,
               isCalculateDisabled && styles.calculateButtonDisabled,
             ]}
+            onPress={() => navigation.navigate("CWAResults", { courses })}
           >
             <Text
               style={[
