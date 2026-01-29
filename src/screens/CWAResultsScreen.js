@@ -11,7 +11,31 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 
-export default function CWAResultsScreen({ navigation }) {
+export default function CWAResultsScreen({ navigation , route }) {
+  const { courses } = route.params;
+  console.log("courses passed from SemesterCalculator:", courses);
+
+  const semesterCourses = courses;
+
+  const totalSemesterCredits = semesterCourses.reduce(
+  (sum, course) => sum + course.creditHours,
+  0
+);
+
+  const totalWeightedScore = semesterCourses.reduce(
+  (sum, course) =>
+    sum + course.creditHours * course.targetScore,
+  0
+  );
+  
+  const semesterWeightedAverage =
+  totalWeightedScore / totalSemesterCredits || 0;
+
+
+console.log("semesterWeightedAverage:", semesterWeightedAverage);
+console.log("totalSemesterCredits:", totalSemesterCredits);
+console.log("totalWeightedScore:", totalWeightedScore);
+
   // Mock data - will be replaced with actual calculations later
   const mockData = {
     predictedCWA: 88.42,
@@ -21,8 +45,8 @@ export default function CWAResultsScreen({ navigation }) {
     targetCWA: 75.0,
     targetAchieved: true,
     gap: 6.58,
-    semesterWeightedAverage: 67.4,
-    totalSemesterCredits: 18,
+    semesterWeightedAverage: semesterWeightedAverage,
+    totalSemesterCredits: totalSemesterCredits,
     highestGrade: { course: "STAT 201", grade: "A", credits: 3 },
     lowestGrade: { course: "PHYS 203", grade: "C+", credits: 4 },
     contributionPercentage: 21,
@@ -135,7 +159,7 @@ export default function CWAResultsScreen({ navigation }) {
             </View>
 
             <View style={styles.cwaDisplay}>
-              <Text style={styles.cwaValue}>{predictedCWA.toFixed(2)}</Text>
+              <Text style={styles.cwaValue}>{predictedCWA.toFixed(2)}</Text>``
               <View
                 style={[
                   styles.changeIndicator,
