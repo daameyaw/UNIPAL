@@ -81,6 +81,7 @@ export default function SemesterCalculator() {
       if (savedCWA) {
         setCurrentCWA(savedCWA.currentCWA);
         setTargetCWA(savedCWA.targetCWA);
+        setCumulativeCreditHours(savedCWA.cumulativeCreditHours);
       }
     } catch (error) {
       console.error("Error loading CWA data:", error);
@@ -132,19 +133,20 @@ export default function SemesterCalculator() {
     persistCourses();
   }, [courses, isLoaded]);
 
-  //SAVE CWA TO ASYNC STORAGE (targetCWA represents cumulative credit hours)
+  //SAVE CWA TO ASYNC STORAGE
   useEffect(() => {
     if (!isLoaded) return;
     const persistCWA = async () => {
       await saveData("cwa", {
         currentCWA,
         targetCWA,
+        cumulativeCreditHours,
       });
-      console.log("saved cwa to storage:", { currentCWA, targetCWA });
+      console.log("saved cwa to storage:", { currentCWA, targetCWA, cumulativeCreditHours });
     };
 
     persistCWA();
-  }, [currentCWA, targetCWA, isLoaded]);
+  }, [currentCWA, targetCWA, cumulativeCreditHours, isLoaded]);
 
   /**
    * handleCurrentCWAChange
@@ -197,7 +199,7 @@ export default function SemesterCalculator() {
    *
    * @returns {void}
    */
-  const handleTargetCWAChange = (text) => {
+  const handleTargetCreditHoursChange = (text) => {
     // Allow empty string
     if (text === "") {
       setTempTarget("");
@@ -211,9 +213,9 @@ export default function SemesterCalculator() {
     }
 
     // Check if value is <= 100
-    if (numValue <= 100) {
+    // if (numValue <= 100) {
       setTempTarget(text);
-    }
+    // }
   };
 
   /**
@@ -310,11 +312,11 @@ export default function SemesterCalculator() {
     console.log("openSheet called");
 
     // Populate temp values with existing state values
-    setTempCurrent(currentCWA !== null ? currentCWA.toString() : "");
-    setTempTarget(targetCWA !== null ? targetCWA.toString() : "");
+    setTempCurrent(currentCWA !== null && currentCWA !== undefined ? currentCWA.toString() : "");
+    setTempTarget(cumulativeCreditHours !== null && cumulativeCreditHours !== undefined ? cumulativeCreditHours.toString() : "");
 
     CWARef.current?.present();
-  }, [currentCWA, targetCWA]);
+  }, [currentCWA, cumulativeCreditHours]);
 
   /**
    * closeCWAModal
@@ -401,7 +403,6 @@ export default function SemesterCalculator() {
   const handleResetGoals = useCallback(() => {
     setTempCurrent("");
     setTempTarget("");
-    setTargetCWA("");
   }, []);
 
   /**
@@ -434,7 +435,7 @@ export default function SemesterCalculator() {
     if (isSaveDisabled) return;
 
     setCurrentCWA(Number(tempCurrent));
-    setTargetCWA(Number(tempTarget));
+    setCumulativeCreditHours(Number(tempTarget));
 
     CWARef.current?.dismiss();
   }, [isSaveDisabled, tempCurrent, tempTarget]);
@@ -651,7 +652,7 @@ export default function SemesterCalculator() {
     return (C / T) * 100;
   };
 
-  const hasCWA = currentCWA && targetCWA;
+  const hasCWA = currentCWA && cumulativeCreditHours;
 
   const progress = getCwaProgress();
 
@@ -854,7 +855,7 @@ export default function SemesterCalculator() {
                   </Text>
                   <Text style={styles.statText}>
                     Cumulative Credit Hours:{" "}
-                    <Text style={styles.statValue}>{targetCWA}</Text>
+                    <Text style={styles.statValue}>{cumulativeCreditHours}</Text>
                   </Text>
                 </View>
 
@@ -915,7 +916,7 @@ export default function SemesterCalculator() {
               styles.calculateButton,
               isCalculateDisabled && styles.calculateButtonDisabled,
             ]}
-            onPress={() => navigation.navigate("CWAResults", { courses })}
+            onPress={() => navigation.navigate("CWAResults", { courses , currentCWA, cumulativeCreditHours })}
           >
             <Text
               style={[
@@ -1081,7 +1082,7 @@ export default function SemesterCalculator() {
                   placeholderTextColor="#B9A7A7"
                   keyboardType="numeric"
                   value={tempTarget || ""}
-                  onChangeText={handleTargetCWAChange}
+                  onChangeText={handleTargetCreditHoursChange}
                 />
               </View>
 
