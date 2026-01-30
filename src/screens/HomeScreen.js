@@ -324,7 +324,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.topBarContent}>
           <TouchableOpacity onPress={() => console.log("clicked")}>
             <Image
-              source={{ uri: "https://i.pravatar.cc/100" }}
+              source={require("../../assets/images/hero.jpg")}
               style={styles.avatar}
             />
           </TouchableOpacity>
