@@ -12,33 +12,35 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 
 export default function CWAResultsScreen({ navigation , route }) {
-  const { courses } = route.params;
+  const { courses , currentCWA, cumulativeCreditHours } = route.params;
   console.log("courses passed from SemesterCalculator:", courses);
+
+
 
   const semesterCourses = courses;
 
-  const totalSemesterCredits = semesterCourses.reduce(
-  (sum, course) => sum + course.creditHours,
-  0
-);
+  const totalSemesterCredits = semesterCourses.reduce( (sum, course) => sum + course.creditHours, 0);
 
-  const totalWeightedScore = semesterCourses.reduce(
-  (sum, course) =>
-    sum + course.creditHours * course.targetScore,
-  0
-  );
+  const totalWeightedScore = semesterCourses.reduce((sum, course) =>  sum + course.creditHours * course.targetScore,0 );
   
-  const semesterWeightedAverage =
-  totalWeightedScore / totalSemesterCredits || 0;
+  const semesterWeightedAverage = (totalWeightedScore / totalSemesterCredits || 0).toFixed(2);
+
+  const predictedCWACalculation =
+  (currentCWA * cumulativeCreditHours +
+    semesterWeightedAverage * totalSemesterCredits) /
+  (cumulativeCreditHours + totalSemesterCredits);
 
 
-console.log("semesterWeightedAverage:", semesterWeightedAverage);
-console.log("totalSemesterCredits:", totalSemesterCredits);
-console.log("totalWeightedScore:", totalWeightedScore);
+  console.log("semesterWeightedAverage:", semesterWeightedAverage); 
+  console.log("totalSemesterCredits:", totalSemesterCredits);
+  console.log("totalWeightedScore:", totalWeightedScore);
+
+
+
 
   // Mock data - will be replaced with actual calculations later
   const mockData = {
-    predictedCWA: 88.42,
+    predictedCWA: predictedCWACalculation,
     currentCWA: 67.0,
     change: 1.42,
     isPositive: true,
