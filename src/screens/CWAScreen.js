@@ -74,7 +74,7 @@ export default function CWAScreen({ navigation }) {
 
     // Populate temp values with existing state values
     setTempCurrent(currentCWA !== null ? currentCWA.toString() : "");
-    setTempTarget(targetCWA !== null ? targetCWA.toString() : "");
+    setTempTarget(targetCWA !== null ? targetCWA : "");
 
     CWARef.current?.present();
   }, [currentCWA, targetCWA]);
