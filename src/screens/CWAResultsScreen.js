@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 
 export default function CWAResultsScreen({ navigation , route }) {
-  const { courses , currentCWA, cumulativeCreditHours } = route.params;
+  const { courses , currentCWA, cumulativeCreditHours , targetCWA } = route.params;
   console.log("courses passed from SemesterCalculator:", courses);
 
 
@@ -30,28 +30,93 @@ export default function CWAResultsScreen({ navigation , route }) {
     semesterWeightedAverage * totalSemesterCredits) /
   (cumulativeCreditHours + totalSemesterCredits);
 
+  // Calculate progress bar positions (CWA is on 0-100 scale)
+  const currentCWAPosition = Math.min(Math.max((Number(currentCWA) || 0) / 100 * 100, 0), 100);
+  const predictedCWAPosition = Math.min(Math.max((Number(predictedCWACalculation) || 0) / 100 * 100, 0), 100);
+  const targetCWAPosition = Math.min(Math.max((Number(targetCWA) || 0) / 100 * 100, 0), 100);
 
   console.log("semesterWeightedAverage:", semesterWeightedAverage); 
   console.log("totalSemesterCredits:", totalSemesterCredits);
   console.log("totalWeightedScore:", totalWeightedScore);
 
+  // Function to convert targetScore to letter grade
+  const getGrade = (targetScore) => {
+    const score = Number(targetScore);
+    if (isNaN(score)) return "-";
+    
+    switch (true) {
+      case score >= 70:
+        return "A";
+      case score >= 60:
+        return "B";
+      case score >= 50:
+        return "C";
+      case score >= 40:
+        return "D";
+      default:
+        return "F";
+    }
+  };
 
+  // Function to find highest grade course
+  const getHighestGrade = () => {
+    if (!semesterCourses || semesterCourses.length === 0) {
+      return { course: "--", grade: "--", credits: 0 };
+    }
+    
+    const highest = semesterCourses.reduce((max, course) => {
+      return Number(course.targetScore) > Number(max.targetScore) ? course : max;
+    }, semesterCourses[0]);
+    
+    return {
+      course: highest.courseCode || "--",
+      grade: getGrade(highest.targetScore),
+      credits: highest.creditHours || 0,
+    };
+  };
 
+  // Function to find lowest grade course
+  const getLowestGrade = () => {
+    if (!semesterCourses || semesterCourses.length === 0) {
+      return { course: "--", grade: "--", credits: 0 };
+    }
+    
+    const lowest = semesterCourses.reduce((min, course) => {
+      return Number(course.targetScore) < Number(min.targetScore) ? course : min;
+    }, semesterCourses[0]);
+    
+    return {
+      course: lowest.courseCode || "--",
+      grade: getGrade(lowest.targetScore),
+      credits: lowest.creditHours || 0,
+    };
+  };
+
+  // Function to calculate contribution percentage
+  const getContributionPercentage = () => {
+    const totalCredits = cumulativeCreditHours + totalSemesterCredits;
+    if (totalCredits === 0) return 0;
+    return Math.round((totalSemesterCredits / totalCredits) * 100);
+  };
+
+  const highestGrade = getHighestGrade();
+  const lowestGrade = getLowestGrade();
+  const contributionPercentage = getContributionPercentage();
 
   // Mock data - will be replaced with actual calculations later
   const mockData = {
     predictedCWA: predictedCWACalculation,
-    currentCWA: 67.0,
-    change: 1.42,
-    isPositive: true,
-    targetCWA: 75.0,
-    targetAchieved: true,
-    gap: 6.58,
+    currentCWA: currentCWA,
+    change: (predictedCWACalculation - currentCWA).toFixed(2),
+    isPositive: predictedCWACalculation > currentCWA,
+    targetCWA: targetCWA,
+    targetAchieved: predictedCWACalculation >= targetCWA ? true : false,
+    gap: targetCWA - predictedCWACalculation,
     semesterWeightedAverage: semesterWeightedAverage,
     totalSemesterCredits: totalSemesterCredits,
-    highestGrade: { course: "STAT 201", grade: "A", credits: 3 },
-    lowestGrade: { course: "PHYS 203", grade: "C+", credits: 4 },
-    contributionPercentage: 21,
+    highestGrade: highestGrade,
+    lowestGrade: lowestGrade,
+    contributionPercentage: contributionPercentage,
     contributionExplanation:
       "High previous credit hours limited the impact of this semester.",
     courseContributions: [
@@ -135,7 +200,7 @@ export default function CWAResultsScreen({ navigation , route }) {
     ],
   };
 
-  const { predictedCWA, change, isPositive, targetCWA, targetAchieved, gap } =
+  const { predictedCWA, change, isPositive, targetAchieved, gap } =
     mockData;
 
   return (
@@ -229,18 +294,36 @@ export default function CWAResultsScreen({ navigation , route }) {
           {/* Progress bar visualization */}
           <View style={styles.progressContainer}>
             <View style={styles.progressLabels}>
-              <Text style={styles.progressLabel}>Current</Text>
-              <Text style={styles.progressLabel}>Predicted</Text>
-              <Text style={styles.progressLabel}>Target</Text>
+              <View style={styles.progressLabelContainer}>
+                <View style={[styles.progressLabelDot, { backgroundColor: "#9B0E10" }]} />
+                <Text style={[styles.progressLabel, { color: "#9B0E10" }]}>Current</Text>
+                <Text style={[styles.progressLabelValue, { color: "#9B0E10" }]}>
+                  {currentCWA ? Number(currentCWA).toFixed(2) : "--"}
+                </Text>
+              </View>
+              <View style={styles.progressLabelContainer}>
+                <View style={[styles.progressLabelDot, { backgroundColor: "#3B82F6" }]} />
+                <Text style={[styles.progressLabel, { color: "#3B82F6" }]}>Predicted</Text>
+                <Text style={[styles.progressLabelValue, { color: "#3B82F6" }]}>
+                  {predictedCWACalculation ? Number(predictedCWACalculation).toFixed(2) : "--"}
+                </Text>
+              </View>
+              <View style={styles.progressLabelContainer}>
+                <View style={[styles.progressLabelDot, { backgroundColor: "#10B981" }]} />
+                <Text style={[styles.progressLabel, { color: "#10B981" }]}>Target</Text>
+                <Text style={[styles.progressLabelValue, { color: "#10B981" }]}>
+                  {targetCWA ? Number(targetCWA).toFixed(2) : "--"}
+                </Text>
+              </View>
             </View>
             <View style={styles.progressTrack}>
-              <View style={[styles.progressMarker, { left: "45%" }]} />
-              <View style={[styles.progressMarker, { left: "50%" }]} />
+              <View style={[styles.progressMarker, { left: `${currentCWAPosition}%` }]} />
+              <View style={[styles.progressMarker, styles.progressMarkerPredicted, { left: `${predictedCWAPosition}%` }]} />
               <View
                 style={[
                   styles.progressMarker,
                   styles.progressMarkerTarget,
-                  { left: "75%" },
+                  { left: `${targetCWAPosition}%` },
                 ]}
               />
             </View>
@@ -652,10 +735,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
+  progressLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  progressLabelDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
   progressLabel: {
     fontSize: 11,
-    color: "#8B7A7A",
     fontWeight: "500",
+  },
+  progressLabelValue: {
+    fontSize: 11,
+    fontWeight: "700",
+    marginLeft: 4,
   },
   progressTrack: {
     height: 8,
@@ -672,6 +769,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#9B0E10",
     borderWidth: 2,
     borderColor: "#FFFFFF",
+  },
+  progressMarkerPredicted: {
+    backgroundColor: "#3B82F6",
   },
   progressMarkerTarget: {
     backgroundColor: "#10B981",
