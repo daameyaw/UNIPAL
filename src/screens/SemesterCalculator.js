@@ -79,14 +79,23 @@ export default function SemesterCalculator() {
     try {
       const savedCWA = await getData("cwa");
       if (savedCWA) {
+        console.log("loaded CWA data:", savedCWA);
         setCurrentCWA(savedCWA.currentCWA);
         setTargetCWA(savedCWA.targetCWA);
-        setCumulativeCreditHours(savedCWA.cumulativeCreditHours);
+      }
+      
+      // Load cumulative credit hours from separate key
+      const savedCreditHours = await getData("cumulative_credit_hours");
+      if (savedCreditHours !== null && savedCreditHours !== undefined) {
+        console.log("loaded cumulative credit hours:", savedCreditHours);
+        setCumulativeCreditHours(savedCreditHours);
       }
     } catch (error) {
       console.error("Error loading CWA data:", error);
     }
   }, []);
+
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -140,13 +149,25 @@ export default function SemesterCalculator() {
       await saveData("cwa", {
         currentCWA,
         targetCWA,
-        cumulativeCreditHours,
       });
-      console.log("saved cwa to storage:", { currentCWA, targetCWA, cumulativeCreditHours });
+      console.log("saved cwa to storage:", { currentCWA, targetCWA });
     };
 
     persistCWA();
-  }, [currentCWA, targetCWA, cumulativeCreditHours, isLoaded]);
+  }, [currentCWA, targetCWA, isLoaded]);
+
+  //SAVE CUMULATIVE CREDIT HOURS TO ASYNC STORAGE
+  useEffect(() => {
+    if (!isLoaded) return;
+    const persistCreditHours = async () => {
+      if (cumulativeCreditHours !== null && cumulativeCreditHours !== undefined) {
+        await saveData("cumulative_credit_hours", cumulativeCreditHours);
+        console.log("saved cumulative credit hours to storage:", cumulativeCreditHours);
+      }
+    };
+
+    persistCreditHours();
+  }, [cumulativeCreditHours, isLoaded]);
 
   /**
    * handleCurrentCWAChange
@@ -486,7 +507,8 @@ export default function SemesterCalculator() {
                 courseCode,
                 courseName,
                 creditHours: Number(creditHours),
-                targetScore: Number(targetScore),
+              targetScore: Number(targetScore),
+              grade: getGrade(targetScore),
               }
             : course
         )
@@ -499,6 +521,7 @@ export default function SemesterCalculator() {
         courseName,
         creditHours: Number(creditHours),
         targetScore: Number(targetScore),
+        grade: getGrade(targetScore),
       };
       setCourses((prev) => [...prev, newCourse]);
     }
@@ -652,7 +675,7 @@ export default function SemesterCalculator() {
     return (C / T) * 100;
   };
 
-  const hasCWA = currentCWA && cumulativeCreditHours;
+  const hasCWA = currentCWA && targetCWA;
 
   const progress = getCwaProgress();
 
@@ -916,7 +939,7 @@ export default function SemesterCalculator() {
               styles.calculateButton,
               isCalculateDisabled && styles.calculateButtonDisabled,
             ]}
-            onPress={() => navigation.navigate("CWAResults", { courses , currentCWA, cumulativeCreditHours })}
+            onPress={() => navigation.navigate("CWAResults", { courses , currentCWA, cumulativeCreditHours , targetCWA })}
           >
             <Text
               style={[
