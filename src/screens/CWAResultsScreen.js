@@ -99,9 +99,127 @@ export default function CWAResultsScreen({ navigation , route }) {
     return Math.round((totalSemesterCredits / totalCredits) * 100);
   };
 
+  // Function to calculate course contributions
+  // Impact is based on weighted scores (creditHours × targetScore) to show
+  // which courses actually boosted CWA more, not just which have more credits
+  const calculateCourseContributions = () => {
+    if (!semesterCourses || semesterCourses.length === 0) {
+      return [];
+    }
+
+    // Step 1: Compute total weighted score (total CWA influence this semester)
+    const totalWeightedScore = semesterCourses.reduce((sum, course) => {
+      const credits = Number(course.creditHours) || 0;
+      const score = Number(course.targetScore) || 0;
+      return sum + credits * score;
+    }, 0);
+
+    if (totalWeightedScore === 0) {
+      return [];
+    }
+
+    // Step 2: Compute per-course impact based on weighted contribution
+    const contributions = semesterCourses.map((course) => {
+      const credits = Number(course.creditHours) || 0;
+      const score = Number(course.targetScore) || 0;
+      const weightedScore = credits * score;
+
+      // Impact percentage = this course's weighted score / total weighted score
+      const impactPercentage = (weightedScore / totalWeightedScore) * 100;
+
+      return {
+        course: course.courseCode || course.course || "--",
+        // TRUE impact on CWA (based on both credits and performance)
+        impactPercentage: Math.round(impactPercentage * 10) / 10,
+        // Bar width uses same percentage (no need to fake it)
+        visualPercentage: Math.round(impactPercentage * 10) / 10,
+        expectedScore: score,
+        credits: credits,
+        isAnchor: false, // Will be set after sorting
+      };
+    });
+
+    // Step 3: Sort by impact percentage and mark the highest as anchor
+    const sorted = contributions.sort((a, b) => b.impactPercentage - a.impactPercentage);
+    if (sorted.length > 0) {
+      sorted[0].isAnchor = true;
+    }
+
+    return sorted;
+  };
+
+  // Function to calculate high impact courses
+  // Impact value represents CWA change per 1 percentage point grade improvement
+  const calculateHighImpactCourses = () => {
+    if (!semesterCourses || semesterCourses.length === 0) {
+      return [];
+    }
+
+    const totalCredits = cumulativeCreditHours + totalSemesterCredits;
+    if (totalCredits === 0) {
+      return [];
+    }
+
+    // Calculate impact value for each course (CWA change per 1% improvement)
+    const coursesWithImpact = semesterCourses.map((course) => {
+      const credits = Number(course.creditHours) || 0;
+      // Impact value = how much CWA changes per 1 percentage point improvement
+      const impactValue = credits / totalCredits;
+
+      return {
+        course: course.courseCode || course.course || "--",
+        credits: credits,
+        impactValue: impactValue,
+        impact: "", // Will be categorized below
+      };
+    });
+
+    // Sort by impact value (highest first)
+    const sorted = coursesWithImpact.sort((a, b) => b.impactValue - a.impactValue);
+
+    // Categorize as High/Medium/Low based on distribution
+    // Divide courses into thirds: top third = High, middle third = Medium, bottom third = Low
+    if (sorted.length > 0) {
+      const third = Math.ceil(sorted.length / 3);
+      
+      sorted.forEach((course, index) => {
+        if (index < third) {
+          course.impact = "High";
+        } else if (index < third * 2) {
+          course.impact = "Medium";
+        } else {
+          course.impact = "Low";
+        }
+      });
+    }
+
+    // Return top 3 courses (or all if less than 3)
+    return sorted.slice(0, 3);
+  };
+
   const highestGrade = getHighestGrade();
   const lowestGrade = getLowestGrade();
   const contributionPercentage = getContributionPercentage();
+  const courseContributions = calculateCourseContributions();
+  const highImpactCourses = calculateHighImpactCourses();
+
+  // Generate anchor course explanation
+  const generateAnchorCourseExplanation = () => {
+    if (courseContributions.length === 0) {
+      return "No courses available for analysis.";
+    }
+
+    const anchorCourse = courseContributions.find((c) => c.isAnchor);
+    if (!anchorCourse) {
+      return "Analyze your course contributions to understand their impact on your CWA.";
+    }
+
+    const changeValue = (predictedCWACalculation - currentCWA).toFixed(2);
+    const changeDirection = predictedCWACalculation > currentCWA ? "rising" : "falling";
+    const changeText = Math.abs(changeValue) > 0.01 ? `by ${Math.abs(changeValue)}` : "slightly";
+
+    return `Your CWA is ${changeDirection} ${changeText} mainly because ${anchorCourse.course}, which accounts for ${anchorCourse.impactPercentage}% of this semester's impact, is expected at ${anchorCourse.expectedScore}%. If ${anchorCourse.course} drops significantly, your predicted CWA will be affected more than other courses.`;
+  };
 
   // Mock data - will be replaced with actual calculations later
   const mockData = {
@@ -118,51 +236,12 @@ export default function CWAResultsScreen({ navigation , route }) {
     lowestGrade: lowestGrade,
     contributionPercentage: contributionPercentage,
     contributionExplanation:
-      "High previous credit hours limited the impact of this semester.",
-    courseContributions: [
-      {
-        course: "MATH 203",
-        impactPercentage: 20,
-        expectedScore: 85,
-        credits: 4,
-        isAnchor: true,
-      },
-      {
-        course: "PHYS 201",
-        impactPercentage: 15,
-        expectedScore: 78,
-        credits: 3,
-        isAnchor: false,
-      },
-      {
-        course: "STAT 201",
-        impactPercentage: 12,
-        expectedScore: 90,
-        credits: 3,
-        isAnchor: false,
-      },
-      {
-        course: "PHYS 203",
-        impactPercentage: 18,
-        expectedScore: 72,
-        credits: 4,
-        isAnchor: false,
-      },
-      {
-        course: "HIST 101",
-        impactPercentage: 8,
-        expectedScore: 80,
-        credits: 2,
-        isAnchor: false,
-      },
-    ],
-    anchorCourseExplanation:
-      "Your CWA is rising by 0.3 mainly because Math, which accounts for 20% of this semester's impact, is expected at 85%. If Math drops to 70%, the predicted CWA falls by 0.2, even if other courses remain unchanged.",
-    highImpactCourses: [
-      { course: "MATH 203", credits: 4, impact: "High", impactValue: 0.38 },
-      { course: "PHYS 201", credits: 3, impact: "Medium", impactValue: 0.25 },
-      { course: "HIST 101", credits: 2, impact: "Low", impactValue: 0.12 },
-    ],
+      cumulativeCreditHours > totalSemesterCredits
+        ? "High previous credit hours limited the impact of this semester."
+        : "This semester has significant impact on your overall CWA.",
+    courseContributions: courseContributions,
+    anchorCourseExplanation: generateAnchorCourseExplanation(),
+    highImpactCourses: highImpactCourses,
     insight:
       "You are on a strong upward trend — consistency can push you into Second Class Upper.",
     whatIfInsights: {
@@ -392,10 +471,9 @@ export default function CWAResultsScreen({ navigation , route }) {
           <Text style={styles.sectionTitle}>Weighted Contribution Breakdown</Text>
           <View style={styles.chartCard}>
             <View style={styles.chartContainer}>
-              {mockData.courseContributions
-                .sort((a, b) => b.impactPercentage - a.impactPercentage)
-                .map((course, index) => (
-                  <View key={course.course} style={styles.chartBarWrapper}>
+              {courseContributions.length > 0 ? (
+                courseContributions.map((course, index) => (
+                  <View key={`${course.course}-${index}`} style={styles.chartBarWrapper}>
                     <View style={styles.chartBarHeader}>
                       <View style={styles.chartBarLabelContainer}>
                         <Text style={styles.chartBarCourseName}>
@@ -413,7 +491,7 @@ export default function CWAResultsScreen({ navigation , route }) {
                         )}
                       </View>
                       <Text style={styles.chartBarPercentage}>
-                        {course.impactPercentage}%
+                        {course.impactPercentage.toFixed(1)}%
                       </Text>
                     </View>
                     <View style={styles.chartBarTrack}>
@@ -421,7 +499,7 @@ export default function CWAResultsScreen({ navigation , route }) {
                         style={[
                           styles.chartBarFill,
                           {
-                            width: `${course.impactPercentage}%`,
+                            width: `${Math.min(course.visualPercentage, 100)}%`,
                             backgroundColor:
                               course.isAnchor ? "#9B0E10" : "#C80D10",
                           },
@@ -430,14 +508,17 @@ export default function CWAResultsScreen({ navigation , route }) {
                     </View>
                     <View style={styles.chartBarFooter}>
                       <Text style={styles.chartBarScore}>
-                        Expected: {course.expectedScore}%
+                        Expected: {course.expectedScore.toFixed(1)}%
                       </Text>
                       <Text style={styles.chartBarCredits}>
                         {course.credits} credits
                       </Text>
                     </View>
                   </View>
-                ))}
+                ))
+              ) : (
+                <Text style={styles.chartBarCourseName}>No courses available</Text>
+              )}
             </View>
             <View style={styles.chartExplanation}>
               <Ionicons name="information-circle-outline" size={20} color="#9B0E10" />
@@ -500,7 +581,8 @@ export default function CWAResultsScreen({ navigation , route }) {
         {/* Section 5: High Impact Courses */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Courses with Highest Impact</Text>
-          {mockData.highImpactCourses.map((course, index) => (
+          {mockData.highImpactCourses && mockData.highImpactCourses.length > 0 ? (
+            mockData.highImpactCourses.map((course, index) => (
             <View key={course.course} style={styles.courseCard}>
               <View style={styles.courseRank}>
                 <Text style={styles.courseRankNumber}>{index + 1}</Text>
@@ -531,7 +613,12 @@ export default function CWAResultsScreen({ navigation , route }) {
                 </Text>
               </View>
             </View>
-          ))}
+            ))
+          ) : (
+            <View style={styles.courseCard}>
+              <Text style={styles.courseName}>No courses available</Text>
+            </View>
+          )}
         </View>
 
 
