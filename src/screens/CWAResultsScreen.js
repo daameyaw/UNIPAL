@@ -203,6 +203,11 @@ export default function CWAResultsScreen({ navigation , route }) {
   const courseContributions = calculateCourseContributions();
   const highImpactCourses = calculateHighImpactCourses();
 
+  const [isWeightedBreakdownCollapsed, setIsWeightedBreakdownCollapsed] =
+    React.useState(true);
+  const [isCourseListCollapsed, setIsCourseListCollapsed] =
+    React.useState(true);
+
   // Generate anchor course explanation
   const generateAnchorCourseExplanation = () => {
     if (courseContributions.length === 0) {
@@ -219,6 +224,218 @@ export default function CWAResultsScreen({ navigation , route }) {
     const changeText = Math.abs(changeValue) > 0.01 ? `by ${Math.abs(changeValue)}` : "slightly";
 
     return `Your CWA is ${changeDirection} ${changeText} mainly because ${anchorCourse.course}, which accounts for ${anchorCourse.impactPercentage}% of this semester's impact, is expected at ${anchorCourse.expectedScore}%. If ${anchorCourse.course} drops significantly, your predicted CWA will be affected more than other courses.`;
+  };
+
+  // Helper to simulate predicted CWA with overridden course scores
+  const computePredictedCWAWithOverrides = (overrides = {}) => {
+    if (!semesterCourses || semesterCourses.length === 0)
+      return predictedCWACalculation;
+
+    const totalWeightedScoreSimulated = semesterCourses.reduce(
+      (sum, course) => {
+        const credits = Number(course.creditHours) || 0;
+        const baseScore = Number(course.targetScore) || 0;
+        const key = course.courseCode || course.course || "--";
+        const simulatedScore =
+          overrides[key] !== undefined ? Number(overrides[key]) || 0 : baseScore;
+
+        return sum + credits * simulatedScore;
+      },
+      0
+    );
+
+    const semesterAverageSimulated =
+      (totalWeightedScoreSimulated / totalSemesterCredits) || 0;
+
+    const totalCreditsAll = cumulativeCreditHours + totalSemesterCredits;
+    if (totalCreditsAll === 0) return predictedCWACalculation;
+
+    return (
+      (Number(currentCWA) || 0) * cumulativeCreditHours +
+      semesterAverageSimulated * totalSemesterCredits
+    ) / totalCreditsAll;
+  };
+
+  // Generate what-if scenarios based on real data
+  const generateWhatIfScenarios = () => {
+    if (!semesterCourses || semesterCourses.length === 0) return [];
+
+    const scenarios = [];
+    const baselinePredicted = predictedCWACalculation;
+
+    // 1) Recovery potential (hope) – 3-credit courses below semester average
+    const threeCreditCourses = semesterCourses.filter(
+      (course) => Number(course.creditHours) === 3
+    );
+
+    if (threeCreditCourses.length > 0) {
+      const recoveryCandidates = threeCreditCourses
+        .map((course) => {
+          const currentScore = Number(course.targetScore) || 0;
+          const avg = Number(semesterWeightedAverage) || 0;
+          if (currentScore >= avg) return null;
+
+          const key = course.courseCode || course.course || "--";
+          const simulatedScore = Math.max(currentScore, 85);
+
+          const newPredicted = computePredictedCWAWithOverrides({
+            [key]: simulatedScore,
+          });
+
+          const delta = newPredicted - baselinePredicted;
+          if (delta <= 0.01) return null;
+
+          return {
+            courseName: key,
+            currentScore,
+            simulatedScore,
+            cwaDelta: delta,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.cwaDelta - a.cwaDelta);
+
+      const bestRecovery = recoveryCandidates[0];
+
+      if (bestRecovery) {
+        const roundedDelta = Math.abs(bestRecovery.cwaDelta).toFixed(2);
+        scenarios.push({
+          type: "recovery_potential",
+          course: bestRecovery.courseName,
+          currentScore: bestRecovery.currentScore,
+          simulatedScore: bestRecovery.simulatedScore,
+          cwaDelta: Number(bestRecovery.cwaDelta.toFixed(2)),
+          isPositive: true,
+          message: `Recovering **${bestRecovery.courseName}** to **${bestRecovery.simulatedScore.toFixed(
+            0
+          )}%** boosts your CWA by **+${roundedDelta}**.`,
+        });
+      }
+    }
+
+    // 2) Risk exposure (caution) – 3-credit courses with downside
+    if (threeCreditCourses.length > 0) {
+      const riskCandidates = threeCreditCourses
+        .map((course) => {
+          const currentScore = Number(course.targetScore) || 0;
+          const key = course.courseCode || course.course || "--";
+          const simulatedScore = Math.max(currentScore - 5, 40);
+          if (simulatedScore >= currentScore) return null;
+
+          const newPredicted = computePredictedCWAWithOverrides({
+            [key]: simulatedScore,
+          });
+
+          const delta = newPredicted - baselinePredicted;
+          if (delta >= -0.01) return null;
+
+          return {
+            courseName: key,
+            currentScore,
+            simulatedScore,
+            cwaDelta: delta,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.cwaDelta - b.cwaDelta); // most negative first
+
+      const biggestRisk = riskCandidates[0];
+
+      if (biggestRisk) {
+        const roundedDelta = Math.abs(biggestRisk.cwaDelta).toFixed(2);
+        scenarios.push({
+          type: "risk_exposure",
+          course: biggestRisk.courseName,
+          currentScore: biggestRisk.currentScore,
+          simulatedScore: biggestRisk.simulatedScore,
+          cwaDelta: Number(biggestRisk.cwaDelta.toFixed(2)),
+          isPositive: false,
+          message: `Letting **${biggestRisk.courseName}** slip by **5 marks** costs **-${roundedDelta} CWA**.`,
+        });
+      }
+    }
+
+    // 3) Anchor dominance (motivation) – highest impact course
+    const anchorContribution =
+      courseContributions && courseContributions.find((c) => c.isAnchor);
+
+    if (anchorContribution) {
+      const anchorCourseRaw = semesterCourses.find(
+        (course) =>
+          (course.courseCode || course.course || "--") ===
+          anchorContribution.course
+      );
+
+      if (anchorCourseRaw) {
+        const currentScore = Number(anchorCourseRaw.targetScore) || 0;
+        const key =
+          anchorCourseRaw.courseCode || anchorCourseRaw.course || "--";
+        const simulatedScore = Math.min(currentScore + 10, 100);
+
+        const newPredicted = computePredictedCWAWithOverrides({
+          [key]: simulatedScore,
+        });
+
+        const delta = newPredicted - baselinePredicted;
+        if (delta > 0.01) {
+          const roundedDelta = Math.abs(delta).toFixed(2);
+          scenarios.push({
+            type: "anchor_dominance",
+            course: key,
+            currentScore,
+            simulatedScore,
+            cwaDelta: Number(delta.toFixed(2)),
+            isPositive: true,
+            message: `Pushing **${key}** to **${simulatedScore.toFixed(
+              0
+            )}%** alone boosts your CWA by **+${roundedDelta}**.`,
+          });
+        }
+      }
+    }
+
+    // 4) Target feasibility (honesty) – best realistic CWA vs target
+    if (courseContributions && courseContributions.length > 0) {
+      const topImpactCourses = courseContributions.slice(0, 3);
+      const overrides = {};
+
+      topImpactCourses.forEach((c) => {
+        const originalCourse = semesterCourses.find(
+          (course) =>
+            (course.courseCode || course.course || "--") === c.course
+        );
+        if (originalCourse) {
+          const currentScore = Number(originalCourse.targetScore) || 0;
+          overrides[c.course] = Math.max(currentScore, 90);
+        }
+      });
+
+      const bestPredicted = computePredictedCWAWithOverrides(overrides);
+      const simulatedBestCWA = Number(bestPredicted.toFixed(2));
+      const numericTarget = Number(targetCWA) || 0;
+
+      if (numericTarget > 0) {
+        const isAchievable = simulatedBestCWA + 0.01 >= numericTarget;
+
+        scenarios.push({
+          type: isAchievable ? "target_feasibility" : "target_blocked",
+          simulatedBestCWA,
+          targetCWA: numericTarget,
+          isPositive: isAchievable,
+          message: isAchievable
+            ? `If your top courses perform strongly, your **${numericTarget.toFixed(
+                2
+              )} target CWA is achievable** (best realistic CWA: **${simulatedBestCWA.toFixed(
+                2
+              )}**).`
+            : `Even if everything goes well, your max realistic CWA is **${simulatedBestCWA.toFixed(
+                2
+              )}**, below your **${numericTarget.toFixed(2)}** target.`,
+        });
+      }
+    }
+
+    return scenarios;
   };
 
   // Mock data - will be replaced with actual calculations later
@@ -248,35 +465,7 @@ export default function CWAResultsScreen({ navigation , route }) {
       allAsCWA: 71.2,
       requiredSemesterAverage: 68.0,
     },
-    whatIfScenarios: [
-      {
-        type: "anchor_sensitivity",
-        course: "MATH 203",
-        currentScore: 85,
-        simulatedScore: 70,
-        cwaDelta: -0.2,
-        isPositive: false,
-        message: "If **Math** drops to **70%**, your CWA falls by **0.2**.",
-      },
-      {
-        type: "effort_payoff",
-        course: "MATH 203",
-        currentScore: 85,
-        simulatedScore: 90,
-        cwaDelta: 0.08,
-        isPositive: true,
-        message: "Improving **Math** by **+5 marks** increases your CWA by **+0.08**.",
-      },
-      {
-        type: "low_impact_reality",
-        course: "HIST 101",
-        currentScore: 80,
-        simulatedScore: 90,
-        cwaDelta: 0.01,
-        isPositive: true,
-        message: "Raising **HIST 101** by **+10 marks** only increases your CWA by **+0.01**.",
-      },
-    ],
+    whatIfScenarios: generateWhatIfScenarios(),
   };
 
   const { predictedCWA, change, isPositive, targetAchieved, gap } =
@@ -447,7 +636,7 @@ export default function CWAResultsScreen({ navigation , route }) {
         </View>
 
         {/* Section 4: Contribution Insight */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Why Your CWA Moved</Text>
           <View style={styles.insightCard}>
             <Ionicons name="bulb-outline" size={24} color="#9B0E10" />
@@ -465,71 +654,154 @@ export default function CWAResultsScreen({ navigation , route }) {
             </View>
           </View>
         </View>
-
+ */}
         {/* Section 4.5: Weighted Contribution Breakdown (Bar Chart) */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Weighted Contribution Breakdown</Text>
-          <View style={styles.chartCard}>
-            <View style={styles.chartContainer}>
-              {courseContributions.length > 0 ? (
-                courseContributions.map((course, index) => (
-                  <View key={`${course.course}-${index}`} style={styles.chartBarWrapper}>
-                    <View style={styles.chartBarHeader}>
-                      <View style={styles.chartBarLabelContainer}>
-                        <Text style={styles.chartBarCourseName}>
-                          {course.course}
+          <TouchableOpacity
+            style={styles.sectionHeader}
+            onPress={() =>
+              setIsWeightedBreakdownCollapsed((prev) => !prev)
+            }
+          >
+            <Text style={styles.sectionTitle}>Weighted Contribution Breakdown</Text>
+            <Ionicons
+              name={
+                isWeightedBreakdownCollapsed ? "chevron-down" : "chevron-up"
+              }
+              size={18}
+              color="#4F3C3C"
+            />
+          </TouchableOpacity>
+
+          {!isWeightedBreakdownCollapsed && (
+            <View style={styles.chartCard}>
+              <View style={styles.chartContainer}>
+                {courseContributions.length > 0 ? (
+                  courseContributions.map((course, index) => (
+                    <View
+                      key={`${course.course}-${index}`}
+                      style={styles.chartBarWrapper}
+                    >
+                      <View style={styles.chartBarHeader}>
+                        <View style={styles.chartBarLabelContainer}>
+                          <Text style={styles.chartBarCourseName}>
+                            {course.course}
+                          </Text>
+                          {course.isAnchor && (
+                            <View style={styles.anchorBadge}>
+                              <Ionicons
+                                name="star"
+                                size={12}
+                                color="#9B0E10"
+                              />
+                              <Text style={styles.anchorBadgeText}>
+                                Anchor
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.chartBarPercentage}>
+                          {course.impactPercentage.toFixed(1)}%
                         </Text>
-                        {course.isAnchor && (
-                          <View style={styles.anchorBadge}>
-                            <Ionicons
-                              name="star"
-                              size={12}
-                              color="#9B0E10"
-                            />
-                            <Text style={styles.anchorBadgeText}>Anchor</Text>
-                          </View>
-                        )}
                       </View>
-                      <Text style={styles.chartBarPercentage}>
-                        {course.impactPercentage.toFixed(1)}%
+                      <View style={styles.chartBarTrack}>
+                        <View
+                          style={[
+                            styles.chartBarFill,
+                            {
+                              width: `${Math.min(
+                                course.visualPercentage,
+                                100
+                              )}%`,
+                              backgroundColor: course.isAnchor
+                                ? "#9B0E10"
+                                : "#C80D10",
+                            },
+                          ]}
+                        />
+                      </View>
+                      <View style={styles.chartBarFooter}>
+                        <Text style={styles.chartBarScore}>
+                          Expected: {course.expectedScore.toFixed(1)}%
+                        </Text>
+                        <Text style={styles.chartBarCredits}>
+                          {course.credits} credits
+                        </Text>
+                      </View>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.chartBarCourseName}>
+                    No courses available
+                  </Text>
+                )}
+              </View>
+              <View style={styles.chartExplanation}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color="#9B0E10"
+                />
+                <Text style={styles.chartExplanationText}>
+                  {mockData.anchorCourseExplanation}
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Section 4.6: Course Predictions */}
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.sectionHeader}
+            onPress={() =>
+              setIsCourseListCollapsed((prev) => !prev)
+            }
+          >
+            <Text style={styles.sectionTitle}>Courses & Predicted Scores</Text>
+            <Ionicons
+              name={isCourseListCollapsed ? "chevron-down" : "chevron-up"}
+              size={18}
+              color="#4F3C3C"
+            />
+          </TouchableOpacity>
+
+          {!isCourseListCollapsed && (
+            <View style={styles.courseListCard}>
+              {semesterCourses && semesterCourses.length > 0 ? (
+                semesterCourses.map((course, index) => (
+                  <View key={index} style={styles.courseListItem}>
+                    <View style={styles.courseListMain}>
+                      <Text style={styles.courseListName}>
+                        {course.courseCode || `Course ${index + 1}`}
+                      </Text>
+                      {course.courseName || course.course ? (
+                        <Text style={styles.courseListSubName}>
+                          {course.courseName || course.course}
+                        </Text>
+                      ) : null}
+                      <Text style={styles.courseListCredits}>
+                        {course.creditHours} credits
                       </Text>
                     </View>
-                    <View style={styles.chartBarTrack}>
-                      <View
-                        style={[
-                          styles.chartBarFill,
-                          {
-                            width: `${Math.min(course.visualPercentage, 100)}%`,
-                            backgroundColor:
-                              course.isAnchor ? "#9B0E10" : "#C80D10",
-                          },
-                        ]}
-                      />
-                    </View>
-                    <View style={styles.chartBarFooter}>
-                      <Text style={styles.chartBarScore}>
-                        Expected: {course.expectedScore.toFixed(1)}%
-                      </Text>
-                      <Text style={styles.chartBarCredits}>
-                        {course.credits} credits
+                    <View style={styles.courseListScoreWrapper}>
+                      <Text style={styles.courseListScoreLabel}>Predicted</Text>
+                      <Text style={styles.courseListScoreValue}>
+                        {(Number(course.targetScore) || 0).toFixed(1)}%
                       </Text>
                     </View>
                   </View>
                 ))
               ) : (
-                <Text style={styles.chartBarCourseName}>No courses available</Text>
+                <Text style={styles.courseListEmpty}>
+                  No courses available for this semester.
+                </Text>
               )}
             </View>
-            <View style={styles.chartExplanation}>
-              <Ionicons name="information-circle-outline" size={20} color="#9B0E10" />
-              <Text style={styles.chartExplanationText}>
-                {mockData.anchorCourseExplanation}
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
 
-        {/* Section 4.6: What-If Insights */}
+        {/* Section 4.7: What-If Insights */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>What-If Insights</Text>
           <View style={styles.whatIfInsightsCard}>
@@ -545,16 +817,19 @@ export default function CWAResultsScreen({ navigation , route }) {
                 >
                   <Ionicons
                     name={
-                      scenario.type === "anchor_sensitivity"
+                      scenario.type === "anchor_sensitivity" ||
+                      scenario.type === "risk_exposure" ||
+                      scenario.type === "target_blocked"
                         ? "warning-outline"
-                        : scenario.type === "effort_payoff"
+                        : scenario.type === "effort_payoff" ||
+                          scenario.type === "recovery_potential" ||
+                          scenario.type === "anchor_dominance" ||
+                          scenario.type === "target_feasibility"
                         ? "trending-up-outline"
                         : "information-circle-outline"
                     }
                     size={18}
-                    color={
-                      scenario.isPositive ? "#10B981" : "#EF4444"
-                    }
+                    color={scenario.isPositive ? "#10B981" : "#EF4444"}
                   />
                 </View>
                 <View style={styles.whatIfInsightContent}>
@@ -681,7 +956,6 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     gap: 24,
   },
-  // Hero Section Styles
   heroWrapper: {
     shadowColor: "#9B0E10",
     shadowOpacity: 0.1,
@@ -871,6 +1145,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#2D0A0A",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   // Breakdown Card Styles
   breakdownCard: {
@@ -1065,6 +1344,62 @@ const styles = StyleSheet.create({
   whatIfInsightHighlight: {
     fontWeight: "700",
     color: "#9B0E10",
+  },
+  // Course List (Predicted Scores) Styles
+  courseListCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    gap: 12,
+  },
+  courseListItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3E0E0",
+  },
+  courseListMain: {
+    flex: 1,
+    gap: 4,
+  },
+  courseListName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2D0A0A",
+  },
+  courseListSubName: {
+    fontSize: 12,
+    color: "#6B4D4D",
+  },
+  courseListCredits: {
+    fontSize: 12,
+    color: "#6B4D4D",
+  },
+  courseListScoreWrapper: {
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  courseListScoreLabel: {
+    fontSize: 11,
+    color: "#8B7A7A",
+  },
+  courseListScoreValue: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#9B0E10",
+  },
+  courseListEmpty: {
+    fontSize: 13,
+    color: "#8B7A7A",
+    textAlign: "center",
+    paddingVertical: 4,
   },
   // Course Card Styles
   courseCard: {
