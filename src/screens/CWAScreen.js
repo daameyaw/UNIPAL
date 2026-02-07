@@ -25,7 +25,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { getData, saveData } from "../store/storage";
 import { StatusBar } from "expo-status-bar";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 
 const quickActions = [
   {
@@ -57,6 +57,7 @@ const guideCards = [
 ];
 
 export default function CWAScreen({ navigation }) {
+  const route = useRoute();
   const [currentCWA, setCurrentCWA] = useState(null);
   const [targetCWA, setTargetCWA] = useState(null);
 
@@ -117,6 +118,17 @@ export default function CWAScreen({ navigation }) {
 
     loadData();
   }, [loadCWAData]);
+
+  // If navigated here with a flag, open the CWA bottom sheet once data is loaded
+  useEffect(() => {
+    if (!isLoaded) return;
+    const shouldOpen = route?.params?.openCWASheet;
+    if (shouldOpen) {
+      openCWAModal();
+      // Clear the flag so it doesn't reopen on future focuses
+      navigation.setParams({ ...route.params, openCWASheet: false });
+    }
+  }, [route?.params?.openCWASheet, isLoaded, openCWAModal, navigation]);
 
   // Reload CWA data when screen comes into focus
   useFocusEffect(
