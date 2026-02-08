@@ -326,9 +326,18 @@ export default function CWAScreen({ navigation }) {
             <TouchableOpacity
               key={action.id}
               style={styles.quickActionCard}
-              onPress={() => navigation.navigate("SemCalc")}
+              activeOpacity={0.7}
+              onPress={() => {
+                if (action.id === "semester-calculator") {
+                  navigation.navigate("SemCalc");
+                } else if (action.id === "goal-scenarios") {
+                  navigation.navigate("SavedScenarios");
+                }
+              }}
             >
-              <Ionicons name={action.icon} size={22} color="#9B0E10" />
+              <View style={styles.quickActionIconContainer}>
+                <Ionicons name={action.icon} size={24} color="#9B0E10" />
+              </View>
               <Text style={styles.quickActionLabel}>{action.label}</Text>
             </TouchableOpacity>
           ))}
@@ -508,23 +517,40 @@ const styles = StyleSheet.create({
   },
   quickActionsContainer: {
     flexDirection: "row",
-    gap: 16,
+    gap: 12,
   },
   quickActionCard: {
     flex: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 14,
-    backgroundColor: "#FFF8F8",
-    borderRadius: 18,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 12,
+    shadowColor: "#9B0E10",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: "#F2E6E6",
+  },
+  quickActionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFF1F1",
+    alignItems: "center",
+    justifyContent: "center",
   },
   quickActionLabel: {
-    fontSize: 12,
+    fontSize: 11,
     textAlign: "center",
-    color: "#4F3C3C",
-    fontWeight: "600",
+    color: "#2D0A0A",
+    fontWeight: "700",
+    letterSpacing: 0.3,
+    lineHeight: 14,
   },
   section: {
     gap: 14,
