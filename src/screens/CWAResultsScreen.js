@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,29 +6,54 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { saveData } from "../store/storage";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../../firebase";
 
 export default function CWAResultsScreen({ navigation , route }) {
-  const { courses , currentCWA, cumulativeCreditHours , targetCWA } = route.params;
-  console.log("courses passed from SemesterCalculator:", courses);
+  // Check if this is a saved scenario or a new calculation
+  const isSavedScenario = route.params?.isSavedScenario || false;
+  const savedScenario = route.params?.savedScenario;
+  
+  // If it's a saved scenario, use the saved data; otherwise use route params
+  const semesterCourses = isSavedScenario 
+    ? (savedScenario?.courses || savedScenario?.mockData?.courses || [])
+    : route.params?.courses || [];
+  
+  const currentCWA = isSavedScenario
+    ? (savedScenario?.currentCWA || savedScenario?.mockData?.currentCWA)
+    : route.params?.currentCWA;
+  
+  const targetCWA = isSavedScenario
+    ? (savedScenario?.targetCWA || savedScenario?.mockData?.targetCWA)
+    : route.params?.targetCWA;
+  
+  const cumulativeCreditHours = isSavedScenario
+    ? savedScenario?.cumulativeCreditHours
+    : route.params?.cumulativeCreditHours;
 
-
-
-  const semesterCourses = courses;
-
-  const totalSemesterCredits = semesterCourses.reduce( (sum, course) => sum + course.creditHours, 0);
+  // Use saved values if available, otherwise calculate
+  const totalSemesterCredits = isSavedScenario && savedScenario?.mockData?.totalSemesterCredits
+    ? savedScenario.mockData.totalSemesterCredits
+    : semesterCourses.reduce( (sum, course) => sum + course.creditHours, 0);
 
   const totalWeightedScore = semesterCourses.reduce((sum, course) =>  sum + course.creditHours * course.targetScore,0 );
   
-  const semesterWeightedAverage = (totalWeightedScore / totalSemesterCredits || 0).toFixed(2);
+  const semesterWeightedAverage = isSavedScenario && savedScenario?.mockData?.semesterWeightedAverage
+    ? savedScenario.mockData.semesterWeightedAverage
+    : (totalWeightedScore / totalSemesterCredits || 0).toFixed(2);
 
-  const predictedCWACalculation =
-  (currentCWA * cumulativeCreditHours +
-    semesterWeightedAverage * totalSemesterCredits) /
-  (cumulativeCreditHours + totalSemesterCredits);
+  const predictedCWACalculation = isSavedScenario && savedScenario?.mockData?.predictedCWA
+    ? savedScenario.mockData.predictedCWA
+    : (currentCWA * cumulativeCreditHours +
+        semesterWeightedAverage * totalSemesterCredits) /
+      (cumulativeCreditHours + totalSemesterCredits);
 
   // Calculate progress bar positions (CWA is on 0-100 scale)
   const currentCWAPosition = Math.min(Math.max((Number(currentCWA) || 0) / 100 * 100, 0), 100);
@@ -197,11 +222,26 @@ export default function CWAResultsScreen({ navigation , route }) {
     return sorted.slice(0, 3);
   };
 
-  const highestGrade = getHighestGrade();
-  const lowestGrade = getLowestGrade();
-  const contributionPercentage = getContributionPercentage();
-  const courseContributions = calculateCourseContributions();
-  const highImpactCourses = calculateHighImpactCourses();
+  // Use saved data if available, otherwise calculate
+  const highestGrade = isSavedScenario && savedScenario?.mockData?.highestGrade
+    ? savedScenario.mockData.highestGrade
+    : getHighestGrade();
+  
+  const lowestGrade = isSavedScenario && savedScenario?.mockData?.lowestGrade
+    ? savedScenario.mockData.lowestGrade
+    : getLowestGrade();
+  
+  const contributionPercentage = isSavedScenario && savedScenario?.mockData?.contributionPercentage !== undefined
+    ? savedScenario.mockData.contributionPercentage
+    : getContributionPercentage();
+  
+  const courseContributions = isSavedScenario && savedScenario?.mockData?.courseContributions
+    ? savedScenario.mockData.courseContributions
+    : calculateCourseContributions();
+  
+  const highImpactCourses = isSavedScenario && savedScenario?.mockData?.highImpactCourses
+    ? savedScenario.mockData.highImpactCourses
+    : calculateHighImpactCourses();
 
   const [isWeightedBreakdownCollapsed, setIsWeightedBreakdownCollapsed] =
     React.useState(true);
@@ -438,38 +478,156 @@ export default function CWAResultsScreen({ navigation , route }) {
     return scenarios;
   };
 
-  // Mock data - will be replaced with actual calculations later
-  const mockData = {
-    predictedCWA: predictedCWACalculation,
-    currentCWA: currentCWA,
-    change: (predictedCWACalculation - currentCWA).toFixed(2),
-    isPositive: predictedCWACalculation > currentCWA,
-    targetCWA: targetCWA,
-    targetAchieved: predictedCWACalculation >= targetCWA ? true : false,
-    gap: targetCWA - predictedCWACalculation,
-    semesterWeightedAverage: semesterWeightedAverage,
-    totalSemesterCredits: totalSemesterCredits,
-    highestGrade: highestGrade,
-    lowestGrade: lowestGrade,
-    contributionPercentage: contributionPercentage,
-    contributionExplanation:
-      cumulativeCreditHours > totalSemesterCredits
-        ? "High previous credit hours limited the impact of this semester."
-        : "This semester has significant impact on your overall CWA.",
-    courseContributions: courseContributions,
-    anchorCourseExplanation: generateAnchorCourseExplanation(),
-    highImpactCourses: highImpactCourses,
-    insight:
-      "You are on a strong upward trend — consistency can push you into Second Class Upper.",
-    whatIfInsights: {
-      allAsCWA: 71.2,
-      requiredSemesterAverage: 68.0,
-    },
-    whatIfScenarios: generateWhatIfScenarios(),
-  };
+  // If it's a saved scenario, use the saved mockData; otherwise calculate new data
+  const mockData = isSavedScenario && savedScenario?.mockData
+    ? savedScenario.mockData
+    : {
+        predictedCWA: predictedCWACalculation,
+        currentCWA: currentCWA,
+        change: (predictedCWACalculation - currentCWA).toFixed(2),
+        isPositive: predictedCWACalculation > currentCWA,
+        targetCWA: targetCWA,
+        targetAchieved: predictedCWACalculation >= targetCWA ? true : false,
+        gap: targetCWA - predictedCWACalculation,
+        semesterWeightedAverage: semesterWeightedAverage,
+        totalSemesterCredits: totalSemesterCredits,
+        highestGrade: highestGrade,
+        lowestGrade: lowestGrade,
+        contributionPercentage: contributionPercentage,
+        contributionExplanation:
+          cumulativeCreditHours > totalSemesterCredits
+            ? "High previous credit hours limited the impact of this semester."
+            : "This semester has significant impact on your overall CWA.",
+        courseContributions: courseContributions,
+        anchorCourseExplanation: generateAnchorCourseExplanation(),
+        highImpactCourses: highImpactCourses,
+        insight:
+          "You are on a strong upward trend — consistency can push you into Second Class Upper.",
+        whatIfInsights: {
+          allAsCWA: 71.2,
+          requiredSemesterAverage: 68.0,
+        },
+        whatIfScenarios: generateWhatIfScenarios(),
+      };
+
+
 
   const { predictedCWA, change, isPositive, targetAchieved, gap } =
     mockData;
+
+  // Function to save scenario to Firebase
+const saveScenarioToFirebase = async () => {
+  try {
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      Alert.alert("Error", "You must be logged in to save scenarios.");
+      return;
+    }
+
+    const scenarioData = {
+      userId: currentUser.uid,
+      mockData: mockData,
+      courses: semesterCourses,
+      currentCWA: currentCWA,
+      targetCWA: targetCWA,
+      cumulativeCreditHours: cumulativeCreditHours,
+      createdAt: serverTimestamp(),
+    };
+
+    // Save to users/{userId}/cwaScenarios subcollection
+    const docRef = await addDoc(
+      collection(db, "users", currentUser.uid, "cwaScenarios"), 
+      scenarioData
+    );
+    console.log("✅ Scenario saved with ID:", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error saving scenario to Firebase:", error);
+    throw error;
+  }
+};
+  // Function to handle save scenario
+  const handleSaveScenario = async () => {
+    try {
+      // Save scenario to Firebase
+      await saveScenarioToFirebase();
+      
+      // Save courses to AsyncStorage so they're available when navigating back
+      await saveData("semester_courses", semesterCourses);
+      
+      Alert.alert("Success", "Scenario saved successfully!");
+    } catch (error) {
+      console.error("Error in handleSaveScenario:", error);
+      Alert.alert(
+        "Error",
+        "Failed to save scenario. Please try again."
+      );
+    }
+  };
+
+  // Function to handle discard
+  const handleDiscard = () => {
+    Alert.alert(
+      "Discard Scenario",
+      "Are you sure you want to discard this scenario?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: () => {
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  };
+
+  // Function to handle simulate another scenario
+  const handleSimulateAnotherScenario = async () => {
+    Alert.alert(
+      "Save Scenario",
+      "This scenario will be saved so you can revisit it later. Continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Save & Continue",
+          onPress: async () => {
+            try {
+              // Save scenario to Firebase
+              await saveScenarioToFirebase();
+              
+              // Save courses to AsyncStorage so they're available when navigating back
+              await saveData("semester_courses", semesterCourses);
+              
+              Alert.alert("Success", "Scenario saved successfully!", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    // Navigate back to SemesterCalculator
+                    navigation.goBack();
+                  },
+                },
+              ]);
+            } catch (error) {
+              console.error("Error in handleSimulateAnotherScenario:", error);
+              Alert.alert(
+                "Error",
+                "Failed to save scenario. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -494,7 +652,7 @@ export default function CWAResultsScreen({ navigation , route }) {
             </View>
 
             <View style={styles.cwaDisplay}>
-              <Text style={styles.cwaValue}>{predictedCWA.toFixed(2)}</Text>``
+              <Text style={styles.cwaValue}>{predictedCWA.toFixed(2)}</Text>
               <View
                 style={[
                   styles.changeIndicator,
@@ -909,7 +1067,30 @@ export default function CWAResultsScreen({ navigation , route }) {
           </View>
         </View>
 
-        {/* Section 8: Actions */}
+        {/* Section 8: Primary Actions (Save/Discard) */}
+        {!isSavedScenario && (
+          <View style={styles.primaryActionsContainer}>
+            <TouchableOpacity
+              style={[styles.primaryActionButton, styles.discardButton]}
+              onPress={handleDiscard}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="close-outline" size={20} color="#EF4444" />
+              <Text style={styles.discardButtonText}>Discard</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.primaryActionButton, styles.saveButton]}
+              onPress={handleSaveScenario}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="checkmark-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.saveButtonText}>Save Scenario</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Section 9: Secondary Actions */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.actionButton}
@@ -922,25 +1103,31 @@ export default function CWAResultsScreen({ navigation , route }) {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => {
-              // Navigate to target adjustment
+              // Navigate to the CWA tab and open the CWA goals sheet
+              navigation.navigate("MainTabs", {
+                screen: "CWA ",
+                params: { openCWASheet: true },
+              });
             }}
           >
             <Ionicons name="flag-outline" size={20} color="#9B0E10" />
             <Text style={styles.actionButtonText}>Adjust Target CWA</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.actionButton, styles.actionButtonSecondary]}
-            onPress={() => {
-              // Future: Simulate another scenario
-            }}
-          >
-            <Ionicons name="calculator-outline" size={20} color="#9B0E10" />
-            <Text style={styles.actionButtonText}>
-              Simulate Another Scenario
-            </Text>
-          </TouchableOpacity>
+          {!isSavedScenario && (
+            <TouchableOpacity
+              style={[styles.actionButton, styles.actionButtonSecondary]}
+              onPress={handleSimulateAnotherScenario}
+            >
+              <Ionicons name="calculator-outline" size={20} color="#9B0E10" />
+              <Text style={styles.actionButtonText}>
+                Simulate Another Scenario
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
+
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -1516,6 +1703,45 @@ const styles = StyleSheet.create({
     color: "#4F3C3C",
     lineHeight: 22,
     fontStyle: "italic",
+  },
+  // Primary Actions Styles (Save/Discard)
+  primaryActionsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    paddingBottom: 8,
+  },
+  primaryActionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveButton: {
+    backgroundColor: "#9B0E10",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  discardButton: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#EF4444",
+  },
+  discardButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#EF4444",
   },
   // Actions Styles
   actionsContainer: {
