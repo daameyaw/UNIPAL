@@ -42,6 +42,7 @@ import SearchScreen from "./src/screens/SearchScreen";
 import SemesterCalculatorScreen from "./src/screens/SemesterCalculatorScreen";
 import SemesterCalculator from "./src/screens/SemesterCalculator";
 import CWAResultsScreen from "./src/screens/CWAResultsScreen";
+import SavedScenariosScreen from "./src/screens/SavedScenariosScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 // Keep the splash screen visible while we fetch resources
@@ -170,6 +171,7 @@ function AuthenticatedStack() {
       <Stack.Screen name="CWACalculator" component={SemesterCalculatorScreen} />
       <Stack.Screen name="SemCalc" component={SemesterCalculator} />
       <Stack.Screen name="CWAResults" component={CWAResultsScreen} />
+      <Stack.Screen name="SavedScenarios" component={SavedScenariosScreen} />
 
       <Stack.Screen
         name="AboutApplication"
