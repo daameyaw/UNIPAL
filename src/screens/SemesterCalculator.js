@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   ImageBackground,
@@ -69,6 +70,7 @@ export default function SemesterCalculator() {
   const [editingCourseId, setEditingCourseId] = useState(null);
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const isSaveDisabled = !tempCurrent || !tempTarget;
   const isSaveCourseDisabled =
@@ -934,21 +936,31 @@ export default function SemesterCalculator() {
         </ScrollView>
         <View style={styles.footer}>
           <TouchableOpacity
-            disabled={isCalculateDisabled}
+            disabled={isCalculateDisabled || isCalculating}
             style={[
               styles.calculateButton,
-              isCalculateDisabled && styles.calculateButtonDisabled,
+              (isCalculateDisabled || isCalculating) && styles.calculateButtonDisabled,
             ]}
-            onPress={() => navigation.navigate("CWAResults", { courses , currentCWA, cumulativeCreditHours , targetCWA })}
+            onPress={() => {
+              setIsCalculating(true);
+              setTimeout(() => {
+                navigation.navigate("CWAResults", { courses , currentCWA, cumulativeCreditHours , targetCWA });
+                setIsCalculating(false);
+              }, 2500);
+            }}
           >
-            <Text
-              style={[
-                styles.calculateText,
-                isCalculateDisabled && styles.calculateTextDisabled,
-              ]}
-            >
-              Calculate CWA
-            </Text>
+            {isCalculating ? (
+              <ActivityIndicator size="small" color="#9B0E10" />
+            ) : (
+              <Text
+                style={[
+                  styles.calculateText,
+                  isCalculateDisabled && styles.calculateTextDisabled,
+                ]}
+              >
+                Calculate CWA
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
 
