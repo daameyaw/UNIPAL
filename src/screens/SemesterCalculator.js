@@ -880,7 +880,9 @@ export default function SemesterCalculator() {
                   </Text>
                   <Text style={styles.statText}>
                     Cumulative Credit Hours:{" "}
-                    <Text style={styles.statValue}>{cumulativeCreditHours}</Text>
+                    <Text style={styles.statValue}>
+                      {cumulativeCreditHours}
+                    </Text>
                   </Text>
                 </View>
 
@@ -918,33 +920,63 @@ export default function SemesterCalculator() {
               }
             />
           </View>
-          <TouchableOpacity
-            style={styles.addCourseButton}
-            onPress={() => {
-              // Reset form and editing state for new course
-              setCourseCode("");
-              setCourseName("");
-              setCreditHours("");
-              setTargetScore("");
-              setEditingCourseId(null);
-              openCourseModal();
-            }}
-          >
-            <Ionicons name="add" size={18} color="#9B0E10" />
-            <Text style={styles.addCourseText}>Add Course</Text>
-          </TouchableOpacity>
+          <View style={styles.addCourseRow}>
+            {courses.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearAllButton}
+                onPress={() => {
+                  Alert.alert(
+                    "Clear All Courses",
+                    "Are you sure you want to remove all courses?",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Clear All",
+                        style: "destructive",
+                        onPress: () => setCourses([]),
+                      },
+                    ],
+                  );
+                }}
+              >
+                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                <Text style={styles.clearAllText}>Clear All</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.addCourseButton}
+              onPress={() => {
+                // Reset form and editing state for new course
+                setCourseCode("");
+                setCourseName("");
+                setCreditHours("");
+                setTargetScore("");
+                setEditingCourseId(null);
+                openCourseModal();
+              }}
+            >
+              <Ionicons name="add" size={18} color="#EF4444" />
+              <Text style={styles.addCourseText}>Add Course</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
         <View style={styles.footer}>
           <TouchableOpacity
             disabled={isCalculateDisabled || isCalculating}
             style={[
               styles.calculateButton,
-              (isCalculateDisabled || isCalculating) && styles.calculateButtonDisabled,
+              (isCalculateDisabled || isCalculating) &&
+                styles.calculateButtonDisabled,
             ]}
             onPress={() => {
               setIsCalculating(true);
               setTimeout(() => {
-                navigation.navigate("CWAResults", { courses , currentCWA, cumulativeCreditHours , targetCWA });
+                navigation.navigate("CWAResults", {
+                  courses,
+                  currentCWA,
+                  cumulativeCreditHours,
+                  targetCWA,
+                });
                 setIsCalculating(false);
               }, 2500);
             }}
@@ -1365,8 +1397,12 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: "#E8D7D7",
   },
+  addCourseRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   addCourseButton: {
-    alignSelf: "flex-end",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -1377,10 +1413,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F2C8C8",
   },
-  addCourseText: {
-    color: "#9B0E10",
+  clearAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#F2C8C8",
+  },
+  clearAllText: {
+    color: "#EF4444",
     fontWeight: "600",
   },
+  // addCourseText: {
+  //   color: "#9B0E10",
+  //   fontWeight: "600",
+  // },
+  addCourseText: {
+    color: "#EF4444",
+    fontWeight: "600",
+  },
+
   footer: {
     paddingHorizontal: 20,
     paddingBottom: 44,
