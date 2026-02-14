@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -247,6 +248,7 @@ export default function CWAResultsScreen({ navigation , route }) {
     React.useState(true);
   const [isCourseListCollapsed, setIsCourseListCollapsed] =
     React.useState(true);
+  const [isSavingScenario, setIsSavingScenario] = React.useState(false);
 
   // Generate anchor course explanation
   const generateAnchorCourseExplanation = () => {
@@ -550,6 +552,7 @@ const saveScenarioToFirebase = async () => {
   // Function to handle save scenario
   const handleSaveScenario = async () => {
     try {
+      setIsSavingScenario(true);
       // Save scenario to Firebase
       await saveScenarioToFirebase();
       
@@ -563,6 +566,8 @@ const saveScenarioToFirebase = async () => {
         "Error",
         "Failed to save scenario. Please try again."
       );
+    } finally {
+      setIsSavingScenario(false);
     }
   };
 
@@ -601,6 +606,7 @@ const saveScenarioToFirebase = async () => {
           text: "Save & Continue",
           onPress: async () => {
             try {
+              setIsSavingScenario(true);
               // Save scenario to Firebase
               await saveScenarioToFirebase();
               
@@ -622,6 +628,8 @@ const saveScenarioToFirebase = async () => {
                 "Error",
                 "Failed to save scenario. Please try again."
               );
+            } finally {
+              setIsSavingScenario(false);
             }
           },
         },
@@ -1083,6 +1091,7 @@ const saveScenarioToFirebase = async () => {
               style={[styles.primaryActionButton, styles.saveButton]}
               onPress={handleSaveScenario}
               activeOpacity={0.7}
+              disabled={isSavingScenario}
             >
               <Ionicons name="checkmark-outline" size={20} color="#FFFFFF" />
               <Text style={styles.saveButtonText}>Save Scenario</Text>
@@ -1091,30 +1100,30 @@ const saveScenarioToFirebase = async () => {
         )}
 
         {/* Section 9: Secondary Actions */}
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="create-outline" size={20} color="#9B0E10" />
-            <Text style={styles.actionButtonText}>Edit Courses</Text>
-          </TouchableOpacity>
+        {!isSavedScenario && (
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="create-outline" size={20} color="#9B0E10" />
+              <Text style={styles.actionButtonText}>Edit Courses</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => {
-              // Navigate to the CWA tab and open the CWA goals sheet
-              navigation.navigate("MainTabs", {
-                screen: "CWA ",
-                params: { openCWASheet: true },
-              });
-            }}
-          >
-            <Ionicons name="flag-outline" size={20} color="#9B0E10" />
-            <Text style={styles.actionButtonText}>Adjust Target CWA</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => {
+                // Navigate to the CWA tab and open the CWA goals sheet
+                navigation.navigate("MainTabs", {
+                  screen: "CWA ",
+                  params: { openCWASheet: true },
+                });
+              }}
+            >
+              <Ionicons name="flag-outline" size={20} color="#9B0E10" />
+              <Text style={styles.actionButtonText}>Adjust Target CWA</Text>
+            </TouchableOpacity>
 
-          {!isSavedScenario && (
             <TouchableOpacity
               style={[styles.actionButton, styles.actionButtonSecondary]}
               onPress={handleSimulateAnotherScenario}
@@ -1124,11 +1133,18 @@ const saveScenarioToFirebase = async () => {
                 Simulate Another Scenario
               </Text>
             </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        )}
 
 
       </ScrollView>
+
+      {isSavingScenario && (
+        <View style={styles.savingOverlay}>
+          <ActivityIndicator size="large" color="#9B0E10" />
+          <Text style={styles.savingOverlayText}>Saving scenario...</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -1137,6 +1153,19 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#F5F5F5",
+  },
+  savingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+  savingOverlayText: {
+    marginTop: 12,
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "500",
   },
   scrollContent: {
     paddingHorizontal: 20,
