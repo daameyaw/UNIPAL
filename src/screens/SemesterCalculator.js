@@ -871,7 +871,16 @@ export default function SemesterCalculator() {
             ) : (
               /* ================= DATA STATE (IMAGE DESIGN) ================= */
               <>
-                <View style={styles.statRow}>
+                <TouchableOpacity
+                  style={styles.statRow}
+                  onPress={() =>
+                    Alert.alert(
+                      "What do these numbers mean?",
+                      "• Current CWA is your overall average so far.\n• Cumulative Credit Hours is the total credit hours already completed and counted into that CWA.\n\nThese values are used together with this semester's courses to project your new CWA."
+                    )
+                  }
+                  activeOpacity={0.8}
+                >
                   <Text style={styles.statText}>
                     Current CWA:{" "}
                     <Text style={styles.statValue}>
@@ -884,7 +893,7 @@ export default function SemesterCalculator() {
                       {cumulativeCreditHours}
                     </Text>
                   </Text>
-                </View>
+                </TouchableOpacity>
 
                 {/* Progress bar */}
                 <View style={styles.progressTrack}>
@@ -900,6 +909,24 @@ export default function SemesterCalculator() {
                   </Text>{" "}
                   of the way to your goal.
                 </Text>
+
+                <TouchableOpacity
+                  style={styles.tooltipIcon}
+                  onPress={() =>
+                    Alert.alert(
+                      "What do these numbers mean?",
+                      "• Current CWA is your overall average so far.\n• Cumulative Credit Hours is the total credit hours already completed and counted into that CWA.\n\nThese values are used together with this semester's courses to project your new CWA."
+                    )
+                  }
+                  activeOpacity={0.8}
+                >
+                  <Ionicons
+                    name="help-circle-outline"
+                    size={16}
+                    color="#9B0E10"
+                  />
+                  <Text style={styles.tooltipIconText}>What do these mean?</Text>
+                </TouchableOpacity>
               </>
             )}
           </ImageBackground>
@@ -1567,6 +1594,18 @@ const styles = StyleSheet.create({
     color: "#6B4D4D",
     lineHeight: 16,
     marginTop: 10,
+  },
+
+  tooltipIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+
+  tooltipIconText: {
+    marginLeft: 4,
+    fontSize: 12,
+    color: "#6B4D4D",
   },
 
   emphasis: {
