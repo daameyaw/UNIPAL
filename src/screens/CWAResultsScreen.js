@@ -249,6 +249,7 @@ export default function CWAResultsScreen({ navigation , route }) {
   const [isCourseListCollapsed, setIsCourseListCollapsed] =
     React.useState(true);
   const [isSavingScenario, setIsSavingScenario] = React.useState(false);
+  const [hasSavedScenario, setHasSavedScenario] = React.useState(isSavedScenario);
 
   // Generate anchor course explanation
   const generateAnchorCourseExplanation = () => {
@@ -560,6 +561,7 @@ const saveScenarioToFirebase = async () => {
       await saveData("semester_courses", semesterCourses);
       
       Alert.alert("Success", "Scenario saved successfully!");
+      setHasSavedScenario(true);
     } catch (error) {
       console.error("Error in handleSaveScenario:", error);
       Alert.alert(
@@ -593,48 +595,94 @@ const saveScenarioToFirebase = async () => {
   };
 
   // Function to handle simulate another scenario
-  const handleSimulateAnotherScenario = async () => {
-    Alert.alert(
-      "Save Scenario",
-      "This scenario will be saved so you can revisit it later. Continue?",
-      [
+  // This should only navigate – no saving logic here.
+  const handleSimulateAnotherScenario = () => {
+    navigation.navigate("SemCalc");
+  };
+
+  // Guarded simulate handler: recommend saving first, but allow override
+  const handleSimulateAnotherScenarioWithGuard = () => {
+    if (!hasSavedScenario) {
+      Alert.alert(
+        "Save Scenario",
+        "We recommend saving this scenario so you can revisit it later. If you've already saved it, you can continue."
+      , [
         {
-          text: "Cancel",
+          text: "Go back to save",
           style: "cancel",
         },
         {
-          text: "Save & Continue",
-          onPress: async () => {
-            try {
-              setIsSavingScenario(true);
-              // Save scenario to Firebase
-              await saveScenarioToFirebase();
-              
-              // Save courses to AsyncStorage so they're available when navigating back
-              await saveData("semester_courses", semesterCourses);
-              
-              Alert.alert("Success", "Scenario saved successfully!", [
-                {
-                  text: "OK",
-                  onPress: () => {
-                    // Navigate back to SemesterCalculator
-                    navigation.goBack();
-                  },
-                },
-              ]);
-            } catch (error) {
-              console.error("Error in handleSimulateAnotherScenario:", error);
-              Alert.alert(
-                "Error",
-                "Failed to save scenario. Please try again."
-              );
-            } finally {
-              setIsSavingScenario(false);
-            }
+          text: "Proceed",
+          onPress: () => {
+            handleSimulateAnotherScenario();
           },
         },
       ]
-    );
+      );
+      return;
+    }
+
+    handleSimulateAnotherScenario();
+  };
+
+  // Function to use the saved scenario as a fresh simulation in SemesterCalculator
+  const handleSimulateFromSavedScenario = async () => {
+    // Only meaningful when we're viewing a saved scenario
+    if (!isSavedScenario || !savedScenario) {
+      return;
+    }
+
+    try {
+      setIsSavingScenario(true);
+
+      // Get courses from the saved scenario (including their scores)
+      const coursesFromSaved =
+        savedScenario.courses || savedScenario.mockData?.courses || semesterCourses || [];
+
+      // Clear and then overwrite the courses in AsyncStorage
+      await saveData("semester_courses", []);
+      await saveData("semester_courses", coursesFromSaved);
+
+      // Also persist CWA and cumulative credit hours from this saved scenario
+      const savedCurrentCWA =
+        savedScenario.currentCWA ?? savedScenario.mockData?.currentCWA ?? currentCWA;
+      const savedTargetCWA =
+        savedScenario.targetCWA ?? savedScenario.mockData?.targetCWA ?? targetCWA;
+      const savedCumulativeCreditHours =
+        savedScenario.cumulativeCreditHours ??
+        savedScenario.mockData?.cumulativeCreditHours ??
+        cumulativeCreditHours;
+
+      if (
+        savedCurrentCWA !== undefined &&
+        savedCurrentCWA !== null &&
+        savedTargetCWA !== undefined &&
+        savedTargetCWA !== null
+      ) {
+        await saveData("cwa", {
+          currentCWA: savedCurrentCWA,
+          targetCWA: savedTargetCWA,
+        });
+      }
+
+      if (
+        savedCumulativeCreditHours !== undefined &&
+        savedCumulativeCreditHours !== null
+      ) {
+        await saveData("cumulative_credit_hours", savedCumulativeCreditHours);
+      }
+
+      // Open SemesterCalculator with this scenario pre-filled
+      navigation.navigate("SemCalc");
+    } catch (error) {
+      console.error("Error in handleSimulateFromSavedScenario:", error);
+      Alert.alert(
+        "Error",
+        "Failed to load this saved scenario into the calculator. Please try again."
+      );
+    } finally {
+      setIsSavingScenario(false);
+    }
   };
 
   return (
@@ -1088,6 +1136,15 @@ const saveScenarioToFirebase = async () => {
             </TouchableOpacity>
 
             <TouchableOpacity
+              style={[styles.primaryActionButton, styles.actionButtonSecondary]}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="create-outline" size={20} color="#9B0E10" />
+              <Text style={styles.actionButtonText}>Edit Courses</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={[styles.primaryActionButton, styles.saveButton]}
               onPress={handleSaveScenario}
               activeOpacity={0.7}
@@ -1100,41 +1157,29 @@ const saveScenarioToFirebase = async () => {
         )}
 
         {/* Section 9: Secondary Actions */}
-        {!isSavedScenario && (
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons name="create-outline" size={20} color="#9B0E10" />
-              <Text style={styles.actionButtonText}>Edit Courses</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => {
-                // Navigate to the CWA tab and open the CWA goals sheet
-                navigation.navigate("MainTabs", {
-                  screen: "CWA ",
-                  params: { openCWASheet: true },
-                });
-              }}
-            >
-              <Ionicons name="flag-outline" size={20} color="#9B0E10" />
-              <Text style={styles.actionButtonText}>Adjust Target CWA</Text>
-            </TouchableOpacity>
-
+        <View style={styles.actionsContainer}>
+          {isSavedScenario && (
             <TouchableOpacity
               style={[styles.actionButton, styles.actionButtonSecondary]}
-              onPress={handleSimulateAnotherScenario}
+              onPress={handleSimulateFromSavedScenario}
             >
-              <Ionicons name="calculator-outline" size={20} color="#9B0E10" />
+              <Ionicons name="refresh-outline" size={20} color="#9B0E10" />
               <Text style={styles.actionButtonText}>
-                Simulate Another Scenario
+                Simulate With Saved Inputs
               </Text>
             </TouchableOpacity>
-          </View>
-        )}
+          )}
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.actionButtonSecondary]}
+            onPress={handleSimulateAnotherScenarioWithGuard}
+          >
+            <Ionicons name="calculator-outline" size={20} color="#9B0E10" />
+            <Text style={styles.actionButtonText}>
+              Simulate Another Scenario
+            </Text>
+          </TouchableOpacity>
+        </View>
 
 
       </ScrollView>
