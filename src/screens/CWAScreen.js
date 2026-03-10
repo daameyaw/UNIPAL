@@ -26,6 +26,7 @@ import {
 import { getData, saveData } from "../store/storage";
 import { StatusBar } from "expo-status-bar";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
+import { useGuides } from "../hooks/useGuides";
 
 const quickActions = [
   {
@@ -57,7 +58,16 @@ const guideCards = [
 ];
 
 export default function CWAScreen({ navigation }) {
+
   const route = useRoute();
+
+
+
+
+  const { code, title } = route.params || {};
+  const { isLoading, data: guides , error } = useGuides("cwa");
+
+
   const [currentCWA, setCurrentCWA] = useState(null);
   const [targetCWA, setTargetCWA] = useState(null);
 
@@ -136,7 +146,7 @@ export default function CWAScreen({ navigation }) {
       if (isLoaded) {
         loadCWAData();
       }
-    }, [isLoaded, loadCWAData])
+    }, [isLoaded, loadCWAData]),
   );
 
   //SAVE CWA TARGETS ASYNC STORAGE
@@ -198,25 +208,24 @@ export default function CWAScreen({ navigation }) {
     }
   };
 
-    function getClass(currentCWA) {
-      const score = Number(currentCWA);
+  function getClass(currentCWA) {
+    const score = Number(currentCWA);
 
-      if (isNaN(score)) return "-";
+    if (isNaN(score)) return "-";
 
-      switch (true) {
-        case score >= 70:
-          return "First Class";
-        case score >= 60:
-          return "Second Class Upper";
-        case score >= 50:
-          return "Second Class Lower";
-        default:
-          return "Third Class";
-      }
+    switch (true) {
+      case score >= 70:
+        return "First Class";
+      case score >= 60:
+        return "Second Class Upper";
+      case score >= 50:
+        return "Second Class Lower";
+      default:
+        return "Third Class";
     }
+  }
 
-    const currentClass = getClass(currentCWA);
-
+  const currentClass = getClass(currentCWA);
 
   const getCwaProgress = () => {
     if (!currentCWA || !targetCWA) return null;
@@ -355,18 +364,34 @@ export default function CWAScreen({ navigation }) {
           ))}
         </View>
 
-        <View style={styles.section}>
+        {guides?.length > 0 && (
+          <View style={styles.section}>
           <Text style={styles.sectionTitle}>CWA Guides</Text>
-          {guideCards.map((guide) => (
-            <TouchableOpacity key={guide.id} style={styles.guideCard}>
-              <View style={styles.guideTextBlock}>
-                <Text style={styles.guideTitle}>{guide.title}</Text>
-                <Text style={styles.guideSubtitle}>{guide.subtitle}</Text>
+          {guides.map((guide) => (
+            <TouchableOpacity
+              key={guide._id || guide.id}
+              onPress={() => {
+                navigation.navigate("Article", {
+                  id: guide._id || guide.id,
+                });
+              }}
+              activeOpacity={0.9}
+              style={styles.guideCard}
+            >
+              <View style={styles.guideCardRow}>
+                <View style={styles.guideLeftIconWrap}>
+                  <Ionicons name={guide.icon} size={22} color="#9B0E10" />
+                </View>
+                <View style={styles.guideTextWrap}>
+                  <Text style={styles.guideCardTitle}>{guide.title}</Text>
+                  <Text style={styles.guideCardSubtitle}>{guide.subtitle}</Text>
+                </View>
+                <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
               </View>
-              <Ionicons name="arrow-forward" size={20} color="#9B0E10" />
             </TouchableOpacity>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
         <BottomSheetModal
           ref={CWARef}
           snapPoints={snapPoints}
@@ -588,32 +613,47 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   guideCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  guideCardRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-    gap: 12,
+    paddingVertical: 15,
+    paddingHorizontal: 16,
   },
-  guideTextBlock: {
+  guideLeftIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    backgroundColor: "#fff0f0",
+  },
+  guideTextWrap: {
     flex: 1,
-    gap: 6,
   },
-  guideTitle: {
-    fontSize: 15,
+  guideCardTitle: {
+    fontSize: 18,
     fontWeight: "700",
+    letterSpacing: 0.2,
+    marginBottom: 6,
     color: "#2D0A0A",
   },
-  guideSubtitle: {
-    fontSize: 13,
-    color: "#5C4A4A",
-    lineHeight: 18,
+  guideCardSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    letterSpacing: 0.1,
+    width: "95%",
+    fontStyle: "italic",
   },
   editButton: {
     padding: 4,
