@@ -28,7 +28,9 @@ export default {
           {title: 'Campus Life', value: 'life'},
           {title: 'Accommodation & Residence Life', value: 'accommodation-residence-life'},
           {title: 'Program Requirements & Cut-off Points', value: 'programs'},
-          {title: 'Arrival & Settling-In', value: 'arrival-settling'},
+          { title: 'Arrival & Settling-In', value: 'arrival-settling' },
+          { title: 'Cumulative Weighted Average(CWA)', value: 'cwa' },
+          
         ],
       },
       validation: (Rule) => Rule.required(),
