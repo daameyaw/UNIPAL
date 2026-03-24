@@ -81,7 +81,7 @@ const ArticlesScreen = ({ route, navigation }) => {
                 // console.log("Single - Item data:", item),
                 navigation.navigate("Article", {
                   guide: item,
-                })
+                });
               }}
               activeOpacity={0.9}
               style={styles.card}
